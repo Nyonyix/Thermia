@@ -1,0 +1,13 @@
+{
+  "itemGroup.humidity": "Example Mod Tab",
+  "block.humidity.example_block": "Example Block",
+  "item.humidity.example_item": "Example Item",
+
+  "humidity.configuration.title": "Humidity Configs",
+  "humidity.configuration.section.humidity.common.toml": "Humidity Configs",
+  "humidity.configuration.section.humidity.common.toml.title": "Humidity Configs",
+  "humidity.configuration.items": "Item List",
+  "humidity.configuration.logDirtBlock": "Log Dirt Block",
+  "humidity.configuration.magicNumberIntroduction": "Magic Number Text",
+  "humidity.configuration.magicNumber": "Magic Number"
+}
