@@ -1,5 +1,12 @@
 package com.nyonyix.thermia;
 
+import com.nyonyix.thermia.util.BlockSearch;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -50,6 +57,7 @@ public class Thermia {
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SERVER_CONFIG);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -62,5 +70,23 @@ public class Thermia {
     public void onServerStarting(ServerStartingEvent event) {
         // Do something when the server starts
         LOGGER.info("HELLO from server starting");
+    }
+
+    @SubscribeEvent
+    public void onPlayerTick(PlayerTickEvent.Post event)
+    {
+        Player player = event.getEntity();
+
+        if (!player.level().isClientSide)
+        {
+            if (player.tickCount % 20 == 0)
+            {
+                Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse("minecraft:lava"));
+                BlockSearch.BlockSearchResult result = BlockSearch.SearchForBlock.searchAll(player.level(), new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ()), ServerConfig.MAX_SEARCH_RANGE.getAsInt(), block);
+
+                LOGGER.info("Lava is {} blocks away", result.nearest());
+                LOGGER.info("There is {} lava blocks", result.getCount(block));
+            }
+        }
     }
 }

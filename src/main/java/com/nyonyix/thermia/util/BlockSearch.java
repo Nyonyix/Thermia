@@ -4,7 +4,10 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -27,7 +30,7 @@ public class BlockSearch
         public List<BlockPos> getPositions(ResourceLocation blockId) {return allPositions.getOrDefault(BuiltInRegistries.BLOCK.get(blockId), Collections.emptyList());}
     }
 
-    class BlockSearchBuilder
+    static class BlockSearchBuilder
     {
         private BlockPos nearest = null;
         private double nearestDistSq = Double.MAX_VALUE;
@@ -72,6 +75,70 @@ public class BlockSearch
             totalCount++;
         }
 
+    }
+
+    public class SearchForBlock
+    {
+        public static BlockSearchResult searchAll(Level level, BlockPos center, int radius, Set<Block> targetBlocks)
+        {
+            BlockSearchBuilder builder = new BlockSearchBuilder();
+
+            int chunkRadius = (radius / 16 ) + 1;
+            int radiusSq = radius * radius;
+            int centerChunkX = center.getX() / 16;
+            int centerChunkZ = center.getZ() / 16;
+
+            for (int cx = centerChunkX - chunkRadius; cx <= centerChunkX + chunkRadius; cx++)
+            {
+                for (int cz = centerChunkZ - chunkRadius; cz <= centerChunkZ + chunkRadius; cz++)
+                {
+                    LevelChunk chunk = level.getChunk(cx, cz);
+                    searchChunk(chunk, center, radiusSq, targetBlocks, builder);
+                }
+            }
+            return builder.build();
+        }
+
+        public static BlockSearchResult searchAll(Level level, BlockPos center, int radius, Block... targetBlocks)
+        {
+            return searchAll(level, center, radius, new HashSet<>(Arrays.asList(targetBlocks)));
+        }
+
+        private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, Set<Block> targetBlocks, BlockSearchBuilder builder)
+        {
+            LevelChunkSection[] sections = chunk.getSections();
+            BlockPos chunkPos = chunk.getPos().getWorldPosition();
+
+            for (int sectionIdX = 0; sectionIdX < sections.length; sectionIdX++)
+            {
+                LevelChunkSection section = sections[sectionIdX];
+                if (section == null || section.hasOnlyAir()) continue;
+
+                int sectionY = chunk.getMinBuildHeight() + (sectionIdX * 16);
+
+                for (int x = 0; x < 16; x++)
+                {
+                    for (int z = 0; z < 16; z++)
+                    {
+                        for (int y = 0; y < 16; y++)
+                        {
+                            BlockPos pos = new BlockPos(chunkPos.getX() + x, sectionY + y, chunkPos.getZ() + z);
+
+                            double distSq = center.distSqr(pos);
+                            if (distSq > radiusSq) continue;
+
+                            Block block = section.getBlockState(x, y, z).getBlock();
+
+                            if (targetBlocks.contains(block))
+                            {
+                                builder.setNearest(pos.immutable(), distSq);
+                                builder.addBlock(pos.immutable(), block);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }

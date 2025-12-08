@@ -103,6 +103,7 @@ dependencies {
 
     runtimeOnly "maven.modrinth:jei:${jei_version_id}"
     runtimeOnly "maven.modrinth:jade:${jade_version_id}"
+    runtimeOnly "maven.modrinth:spark:${spark_version_id}"
 
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
