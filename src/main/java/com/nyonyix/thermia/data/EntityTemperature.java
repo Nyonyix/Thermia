@@ -2,7 +2,9 @@ package com.nyonyix.thermia.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.nyonyix.thermia.util.ClosestSource;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public record EntityTemperature(
         float internalTemperature,
@@ -29,6 +31,33 @@ public record EntityTemperature(
        Codec.BOOL.fieldOf("is_underground").forGetter(EntityTemperature::isUnderground),
        ClosestSource.CODEC.fieldOf("closest_source").forGetter(EntityTemperature::closestSource)
     ).apply(entityTemperatureInstance, EntityTemperature::new));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, EntityTemperature> STREAM_CODEC = StreamCodec.of(
+            (buf, temp) ->
+            {
+                buf.writeFloat(temp.internalTemperature);
+                buf.writeFloat(temp.environmentTemperature);
+                buf.writeFloat(temp.environmentHumidity);
+                buf.writeFloat(temp.environmentWetBulb);
+                buf.writeFloat(temp.wetness);
+                buf.writeInt(temp.maxInternalTemperature);
+                buf.writeInt(temp.minInternalTemperature);
+                buf.writeBoolean(temp.isWet);
+                buf.writeBoolean(temp.isUnderground);
+                ClosestSource.STREAM_CODEC.encode(buf, temp.closestSource);
+            }, (buf) -> new EntityTemperature(
+                    buf.readFloat(),
+                    buf.readFloat(),
+                    buf.readFloat(),
+                    buf.readFloat(),
+                    buf.readFloat(),
+                    buf.readInt(),
+                    buf.readInt(),
+                    buf.readBoolean(),
+                    buf.readBoolean(),
+                    ClosestSource.STREAM_CODEC.decode(buf)
+            )
+    );
 
     public static EntityTemperature createDefault() {return new EntityTemperature(37f, 13f, 0.5f, 10f, 0f, 40, 0, false, false, ClosestSource.createDefault());}
 
