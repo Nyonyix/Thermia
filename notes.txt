@@ -1,0 +1,8 @@
+Underground Humidity:
+    - When player enters chunk
+    - perform vertical up search for #stone
+    - result / 25000
+    - undergroundHumidity = (surfaceHumidity * abs(resultDiv)) * nearby water
+
+Surface Humidity:
+    - Surface Humidity is based on Koppen climates

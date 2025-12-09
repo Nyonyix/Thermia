@@ -1,12 +1,21 @@
 package com.nyonyix.thermia;
 
 import com.nyonyix.thermia.util.BlockSearch;
+import io.netty.channel.DefaultFileRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -73,20 +82,28 @@ public class Thermia {
     }
 
     @SubscribeEvent
-    public void onPlayerTick(PlayerTickEvent.Post event)
+    public void onServerTick(ServerTickEvent.Post event)
     {
-        Player player = event.getEntity();
+        MinecraftServer server = event.getServer();
 
-        if (!player.level().isClientSide)
+        if (server.getTickCount() % 20 == 0)
         {
-            if (player.tickCount % 20 == 0)
+            for (ServerLevel level : server.getAllLevels())
             {
-                Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse("minecraft:lava"));
-                BlockSearch.BlockSearchResult result = BlockSearch.SearchForBlock.searchAll(player.level(), new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ()), ServerConfig.MAX_SEARCH_RANGE.getAsInt(), block);
-
-                LOGGER.info("Lava is {} blocks away", result.nearest());
-                LOGGER.info("There is {} lava blocks", result.getCount(block));
+                for (Chicken chicken : level.getEntities(EntityType.CHICKEN, chicken -> true))
+                {
+                    lavaScan(chicken);
+                }
             }
         }
+    }
+
+    private void lavaScan(Chicken chicken)
+    {
+        Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse("minecraft:lava"));
+        BlockSearch.BlockSearchResult result = BlockSearch.SearchForBlock.searchAll(chicken.level(), new BlockPos(chicken.getBlockX(), chicken.getBlockY(), chicken.getBlockZ()), ServerConfig.MAX_SEARCH_RANGE.getAsInt(), block);
+
+        LOGGER.info("Lava is {} blocks away", result.nearest());
+        LOGGER.info("There is {} lava blocks", result.getCount(block));
     }
 }
