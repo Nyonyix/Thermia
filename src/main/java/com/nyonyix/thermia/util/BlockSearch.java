@@ -10,25 +10,13 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import org.slf4j.Logger;
 
+import com.nyonyix.thermia.data.BlockSearchResult;
+
 import java.util.*;
 
 public class BlockSearch
 {
-
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    public record BlockSearchResult(BlockPos nearest, double nearestDistSq, Map<Block, Integer> counts, Map<Block, List<BlockPos>> allPositions)
-    {
-        public double nearestDistance() {return Math.sqrt(nearestDistSq);}
-
-        public int getCount(Block block) {return counts.getOrDefault(block, 0);}
-
-        public int getCount(ResourceLocation blockID) {return counts.getOrDefault(BuiltInRegistries.BLOCK.get(blockID), 0);}
-
-        public List<BlockPos> getPositions(Block block) {return allPositions.getOrDefault(block, Collections.emptyList());}
-
-        public List<BlockPos> getPositions(ResourceLocation blockId) {return allPositions.getOrDefault(BuiltInRegistries.BLOCK.get(blockId), Collections.emptyList());}
-    }
 
     static class BlockSearchBuilder
     {
