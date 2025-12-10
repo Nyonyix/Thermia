@@ -67,7 +67,7 @@ public class BlockSearch
 
     public class SearchForBlock
     {
-        public static BlockSearchResult searchAll(Level level, BlockPos center, int radius, Set<Block> targetBlocks)
+        public static BlockSearchResult searchAll(Level level, BlockPos center, int radius, int searchCap, Set<Block> targetBlocks)
         {
             BlockSearchBuilder builder = new BlockSearchBuilder();
 
@@ -81,18 +81,18 @@ public class BlockSearch
                 for (int cz = centerChunkZ - chunkRadius; cz <= centerChunkZ + chunkRadius; cz++)
                 {
                     LevelChunk chunk = level.getChunk(cx, cz);
-                    searchChunk(chunk, center, radiusSq, targetBlocks, builder);
+                    searchChunk(chunk, center, radiusSq, searchCap, targetBlocks, builder);
                 }
             }
             return builder.build();
         }
 
-        public static BlockSearchResult searchAll(Level level, BlockPos center, int radius, Block... targetBlocks)
+        public static BlockSearchResult searchAll(Level level, BlockPos center, int radius, int searchCap, Block... targetBlocks)
         {
-            return searchAll(level, center, radius, new HashSet<>(Arrays.asList(targetBlocks)));
+            return searchAll(level, center, radius, searchCap, new HashSet<>(Arrays.asList(targetBlocks)));
         }
 
-        private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, Set<Block> targetBlocks, BlockSearchBuilder builder)
+        private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, int searchCap, Set<Block> targetBlocks, BlockSearchBuilder builder)
         {
             LevelChunkSection[] sections = chunk.getSections();
             BlockPos chunkPos = chunk.getPos().getWorldPosition();
@@ -119,8 +119,11 @@ public class BlockSearch
 
                             if (targetBlocks.contains(block))
                             {
-                                builder.setNearest(pos.immutable(), distSq);
-                                builder.addBlock(pos.immutable(), block);
+                                if (builder.allPositions.get(block).size() <= searchCap)
+                                {
+                                    builder.setNearest(pos.immutable(), distSq);
+                                    builder.addBlock(pos.immutable(), block);
+                                }
                             }
                         }
                     }

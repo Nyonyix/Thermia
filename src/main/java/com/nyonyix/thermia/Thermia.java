@@ -1,5 +1,6 @@
 package com.nyonyix.thermia;
 
+import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.ThermiaAttachments;
 import com.nyonyix.thermia.util.BlockSearch;
 import net.minecraft.core.BlockPos;
@@ -97,7 +98,7 @@ public class Thermia {
     private void lavaScan(Chicken chicken)
     {
         Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse("minecraft:lava"));
-        BlockSearch.BlockSearchResult result = BlockSearch.SearchForBlock.searchAll(chicken.level(), new BlockPos(chicken.getBlockX(), chicken.getBlockY(), chicken.getBlockZ()), ServerConfig.MAX_SEARCH_RANGE.getAsInt(), block);
+        BlockSearchResult result = BlockSearch.SearchForBlock.searchAll(chicken.level(), new BlockPos(chicken.getBlockX(), chicken.getBlockY(), chicken.getBlockZ()), ServerConfig.MAX_SEARCH_RANGE.getAsInt(), 32,  block);
 
         LOGGER.info("Lava is {} blocks away", result.nearest());
         LOGGER.info("There is {} lava blocks", result.getCount(block));
