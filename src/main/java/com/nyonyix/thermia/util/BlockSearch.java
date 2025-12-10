@@ -119,11 +119,8 @@ public class BlockSearch
 
                             if (targetBlocks.contains(block))
                             {
-                                if (builder.allPositions.get(block).size() <= searchCap)
-                                {
-                                    builder.setNearest(pos.immutable(), distSq);
-                                    builder.addBlock(pos.immutable(), block);
-                                }
+                                builder.setNearest(pos.immutable(), distSq);
+                                builder.addBlock(pos.immutable(), block);
                             }
                         }
                     }
