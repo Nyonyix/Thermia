@@ -1,7 +1,6 @@
 package com.nyonyix.thermia;
 
-import com.nyonyix.thermia.data.BlockSearchResult;
-import com.nyonyix.thermia.data.ThermiaAttachments;
+import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.util.BlockSearch;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;

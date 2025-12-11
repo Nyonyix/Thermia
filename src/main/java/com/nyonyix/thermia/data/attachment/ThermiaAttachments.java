@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.data;
+package com.nyonyix.thermia.data.attachment;
 
 import com.nyonyix.thermia.Thermia;
 import net.neoforged.neoforge.attachment.AttachmentType;

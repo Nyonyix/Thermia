@@ -21,9 +21,9 @@ public record ClosestSource(BlockPos closestPos, ResourceLocation resourceLocati
             ResourceLocation.STREAM_CODEC, ClosestSource::resourceLocation,
             ClosestSource::new);
 
-    public ClosestSource(BlockPos closestPos, Block block) {this(closestPos, BuiltInRegistries.BLOCK.getKey(block));}
-
     public static ClosestSource createDefault() {return new ClosestSource(new BlockPos(0, 319, 0), ResourceLocation.parse("minecraft:air"));}
+
+    public ClosestSource(BlockPos closestPos, Block block) {this(closestPos, BuiltInRegistries.BLOCK.getKey(block));}
 
     public ClosestSource withClosestPos(BlockPos closestPos) {return new ClosestSource(closestPos, this.resourceLocation);}
 

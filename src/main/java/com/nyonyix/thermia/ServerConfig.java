@@ -8,11 +8,11 @@ public class ServerConfig
 
     public static final ModConfigSpec.DoubleValue MAX_ENTITY_TEMP = BUILDER
             .comment("Max entity temperature")
-            .defineInRange("maxEntityTemp", 38.0, 20.0, 45.0);
+            .defineInRange("maxEntityTemp", 40.0, 20.0, 45.0);
 
     public static final ModConfigSpec.DoubleValue MIN_ENTITY_TEMP = BUILDER
             .comment("Min entity temperature")
-            .defineInRange("minEntityTemp", 0, -10.0, 20.0);
+            .defineInRange("minEntityTemp", 10, 1.0, 20.0);
 
     public static final ModConfigSpec.IntValue MAX_SEARCH_RANGE = BUILDER
             .comment("Max range to search for blocks from player entities")
