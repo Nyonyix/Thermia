@@ -1,6 +1,7 @@
 package com.nyonyix.thermia.util;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import com.nyonyix.thermia.data.BlockSearchResult;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class BlockSearch
 {
@@ -80,6 +82,7 @@ public class BlockSearch
             {
                 for (int cz = centerChunkZ - chunkRadius; cz <= centerChunkZ + chunkRadius; cz++)
                 {
+                    if (!level.hasChunk(cx, cz)) continue;
                     LevelChunk chunk = level.getChunk(cx, cz);
                     searchChunk(chunk, center, radiusSq, searchCap, targetBlocks, builder);
                 }
@@ -87,9 +90,55 @@ public class BlockSearch
             return builder.build();
         }
 
+        public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, BlockPos center, int radius, int searchCap, Set<Block> targetBlocks)
+        {
+            final BlockPos searchCenter = center.immutable();
+            final int chunkRadius = (radius / 16 ) + 1;
+            final int radiusSq = radius * radius;
+            final int centerChunkX = center.getX() / 16;
+            final int centerChunkZ = center.getZ() / 16;
+
+            final List<LevelChunk> chunksToSearch = new ArrayList<>();
+            for (int cx = centerChunkX - chunkRadius; cx <= centerChunkX + chunkRadius; cx++)
+            {
+                for (int cz = centerChunkZ - chunkRadius; cz <= centerChunkZ + chunkRadius; cz++)
+                {
+                    if (level.hasChunk(cx, cz))
+                    {
+                        chunksToSearch.add(level.getChunk(cx, cz));
+                    }
+                }
+            }
+
+            return CompletableFuture.supplyAsync(() ->
+            {
+                try
+                {
+                    BlockSearchBuilder builder =  new BlockSearchBuilder();
+
+                    for (LevelChunk chunk : chunksToSearch)
+                    {
+                        searchChunk(chunk, searchCenter, radiusSq, searchCap, targetBlocks, builder);
+                    }
+
+                    return builder.build();
+                }catch (Exception e)
+                {
+                    LOGGER.error("Error in async block search:", e);
+                    return new BlockSearchResult(null, 0d, new HashMap<>(), new HashMap<>());
+                }
+
+            }, Util.backgroundExecutor());
+        }
+
         public static BlockSearchResult searchAll(Level level, BlockPos center, int radius, int searchCap, Block... targetBlocks)
         {
             return searchAll(level, center, radius, searchCap, new HashSet<>(Arrays.asList(targetBlocks)));
+        }
+
+        public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, BlockPos center, int radius, int searchCap, Block... targetBlocks)
+        {
+            return searchAllAsync(level, center, radius, searchCap, new HashSet<>(Arrays.asList(targetBlocks)));
         }
 
         private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, int searchCap, Set<Block> targetBlocks, BlockSearchBuilder builder)

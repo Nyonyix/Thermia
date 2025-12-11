@@ -98,9 +98,16 @@ public class Thermia {
     private void lavaScan(Chicken chicken)
     {
         Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse("minecraft:lava"));
-        BlockSearchResult result = BlockSearch.SearchForBlock.searchAll(chicken.level(), new BlockPos(chicken.getBlockX(), chicken.getBlockY(), chicken.getBlockZ()), ServerConfig.MAX_SEARCH_RANGE.getAsInt(), 32,  block);
 
-        LOGGER.info("Lava is {} blocks away", result.nearest());
-        LOGGER.info("There is {} lava blocks", result.getCount(block));
+        BlockSearch.SearchForBlock.searchAllAsync(chicken.level(), new BlockPos(chicken.getBlockX(), chicken.getBlockY(), chicken.getBlockZ()), ServerConfig.MAX_SEARCH_RANGE.getAsInt(), 32, block)
+                .thenAccept(blockSearchResult ->
+                {
+                    LOGGER.info("There is {} lava blocks", blockSearchResult.nearest());
+                    LOGGER.info("Closest is {} blocks away and is {}", blockSearchResult.nearestDistance(), chicken.level().getBlockState(blockSearchResult.nearest()).getBlock().getName());
+                });
+//        BlockSearchResult result = BlockSearch.SearchForBlock.searchAll(chicken.level(), new BlockPos(chicken.getBlockX(), chicken.getBlockY(), chicken.getBlockZ()), ServerConfig.MAX_SEARCH_RANGE.getAsInt(), block);
+//
+//        LOGGER.info("Lava is {} blocks away", result.nearest());
+//        LOGGER.info("There is {} lava blocks", result.getCount(block));
     }
 }
