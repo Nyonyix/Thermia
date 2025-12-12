@@ -117,7 +117,7 @@ public class ThermiaEvents
             {
                 for (Player player : level.getEntities(EntityType.PLAYER, player -> true))
                 {
-                    player.hurt(ThermiaDamageTypes.hyperDamageSource(level.registryAccess()), 0.1f);
+                    player.hurt(ThermiaDamageTypes.hyperDamageSource(level.registryAccess()), 1f);
                 }
             }
         }
