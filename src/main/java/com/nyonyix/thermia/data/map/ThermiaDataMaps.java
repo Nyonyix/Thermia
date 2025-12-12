@@ -11,9 +11,9 @@ import net.neoforged.neoforge.registries.datamaps.RegisterDataMapTypesEvent;
 
 public class ThermiaDataMaps
 {
-    public static final DataMapType<EntityType<?>, EntityTemperatureDataMap> ENTITY_TEMPERATURE_DATA_MAP = DataMapType.builder(ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "Entity_Temperatures"), Registries.ENTITY_TYPE, EntityTemperatureDataMap.CODEC).synced(EntityTemperatureDataMap.CODEC, true).build();
+    public static final DataMapType<EntityType<?>, EntityTemperatureDataMap> ENTITY_TEMPERATURE_DATA_MAP = DataMapType.builder(ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "entity_temperatures"), Registries.ENTITY_TYPE, EntityTemperatureDataMap.CODEC).synced(EntityTemperatureDataMap.CODEC, true).build();
 
-    public static final DataMapType<Block, BlockTemperatureDataMap> BLOCK_TEMPERATURE_DATA_MAP = DataMapType.builder(ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "Block_Temperature"), Registries.BLOCK, BlockTemperatureDataMap.CODEC).synced(BlockTemperatureDataMap.CODEC, true).build();
+    public static final DataMapType<Block, BlockTemperatureDataMap> BLOCK_TEMPERATURE_DATA_MAP = DataMapType.builder(ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "block_temperature"), Registries.BLOCK, BlockTemperatureDataMap.CODEC).synced(BlockTemperatureDataMap.CODEC, true).build();
 
     @SubscribeEvent
     public static void registerDataMapTypes(RegisterDataMapTypesEvent event)

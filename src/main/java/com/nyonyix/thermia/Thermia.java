@@ -1,6 +1,7 @@
 package com.nyonyix.thermia;
 
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
+import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import com.nyonyix.thermia.util.BlockSearch;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -44,14 +45,12 @@ public class Thermia {
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public Thermia(IEventBus modEventBus, ModContainer modContainer) {
-        // Register the commonSetup method for modloading
-        modEventBus.addListener(this::commonSetup);
 
-        // Register the Deferred Register to the mod event bus so blocks get registered
+        modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(ThermiaDataMaps::registerDataMapTypes);
+
         BLOCKS.register(modEventBus);
-        // Register the Deferred Register to the mod event bus so items get registered
         ITEMS.register(modEventBus);
-        // Register the Deferred Register to the mod event bus so tabs get registered
         CREATIVE_MODE_TABS.register(modEventBus);
         ThermiaAttachments.ATTACHMENTS.register(modEventBus);
 

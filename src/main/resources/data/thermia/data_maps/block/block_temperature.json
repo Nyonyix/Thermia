@@ -1,0 +1,79 @@
+{
+    "values": {
+        "minecraft:lava": {
+            "temperature": 1200,
+            "search_cap": 8,
+            "has_tfc_heat": false
+        },
+        "tfc:rock/magma/granite": {
+            "temperature": 800,
+            "search_cap": 8,
+            "has_tfc_heat": false
+        },
+        "tfc:rock/magma/diorite": {
+            "temperature": 800,
+            "search_cap": 8,
+            "has_tfc_heat": false
+        },
+        "tfc:rock/magma/gabbro": {
+            "temperature": 800,
+            "search_cap": 8,
+            "has_tfc_heat": false
+        },
+        "tfc:rock/magma/rhyolite": {
+            "temperature": 800,
+            "search_cap": 8,
+            "has_tfc_heat": false
+        },
+        "tfc:rock/magma/basalt": {
+            "temperature": 800,
+            "search_cap": 8,
+            "has_tfc_heat": false
+        },
+        "tfc:rock/magma/andesite": {
+            "temperature": 800,
+            "search_cap": 8,
+            "has_tfc_heat": false
+        },
+        "tfc:rock/magma/dacite": {
+            "temperature": 800,
+            "search_cap": 8,
+            "has_tfc_heat": false
+        },
+        "minecraft:magma_block": {
+            "temperature": 800,
+            "search_cap": 8,
+            "has_tfc_heat": false
+        },
+        "tfc:pit_kiln": {
+            "temperature": 1800,
+            "search_cap": 16,
+            "has_tfc_heat": false
+        },
+        "minecraft:fire": {
+            "temperature": 600,
+            "search_cap": 16,
+            "has_tfc_heat": false
+        },
+        "tfc:crucible": {
+            "temperature": 0,
+            "search_cap": 16,
+            "has_tfc_heat": true
+        },
+        "tfc:fire_pit": {
+            "temperature": 0,
+            "search_cap": 16,
+            "has_tfc_heat": true
+        },
+        "tfc:channel": {
+            "temperature": 0,
+            "search_cap": 16,
+            "has_tfc_heat": true
+        },
+        "tfc:mold_table": {
+            "temperature": 0,
+            "search_cap": 16,
+            "has_tfc_heat": true
+        }
+    }
+}
