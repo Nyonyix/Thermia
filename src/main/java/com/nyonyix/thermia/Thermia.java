@@ -1,6 +1,5 @@
 package com.nyonyix.thermia;
 
-import com.nyonyix.thermia.data.ThermiaDamageTypes;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import org.slf4j.Logger;

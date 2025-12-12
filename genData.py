@@ -1,8 +1,9 @@
 import json
-import string
 import os
 
 DATA_DIR = "src/main/resources/data/thermia"
+MINECRAFT_DATA_DIR = "src/main/resources/data/minecraft"
+TAG_DIR = "tags"
 
 ENTITY_DATA_MAP_DIR = "data_maps/entity_type"
 ENTITY_DATA_MAP_FILE = "entity_temperatures.json"
@@ -14,7 +15,13 @@ DAMAGE_DIR = "damage_type"
 HYPERTHERMIA_DAMAGE_FILE = "hyperthermia.json"
 HYPOTHERMIA_DAMAGE_FILE = "hypothermia.json"
 
-def mobTemp(baseDict: dict, resourceID: string, maxTemp: float, minTemp: float, isMob: bool, isTamed: bool) -> dict:
+def toTag(baseDict: dict[str, list[str]], resourceID: str) -> dict:
+
+    baseDict["values"].append(resourceID)
+
+    return baseDict
+
+def mobTemp(baseDict: dict[str, dict], resourceID: str, maxTemp: float, minTemp: float, isMob: bool, isTamed: bool) -> dict:
     
     baseDictValues = baseDict["values"]
 
@@ -26,7 +33,7 @@ def mobTemp(baseDict: dict, resourceID: string, maxTemp: float, minTemp: float, 
 
     return baseDict
 
-def blockTemp(baseDict: dict, resourceID: string, temp: float, searchCap: int, hasTFCHeat: bool) -> dict:
+def blockTemp(baseDict: dict[str, dict], resourceID: str, temp: float, searchCap: int, hasTFCHeat: bool) -> dict:
 
     baseDictValues = baseDict["values"]
     
@@ -37,7 +44,7 @@ def blockTemp(baseDict: dict, resourceID: string, temp: float, searchCap: int, h
 
     return baseDict
 
-def damage_type(baseDict: dict, messageId: string, scaling: string, exhaustion: float, effects: string = "hurt", deathMessageType: string = "default") -> dict:
+def damage_type(baseDict: dict[str, any], messageId: str, scaling: str, exhaustion: float, effects: str = "hurt", deathMessageType: str = "default") -> dict:
 
     baseDict["message_id"] = messageId
     baseDict["scaling"] = scaling
@@ -47,7 +54,7 @@ def damage_type(baseDict: dict, messageId: string, scaling: string, exhaustion: 
 
     return baseDict
 
-def writeJson(jsonDict: dict, dir: string, filename: string) -> None:
+def writeJson(jsonDict: dict, dir: str, filename: str) -> None:
 
     if (not os.path.exists(dir)):
         os.makedirs(dir)
@@ -115,6 +122,10 @@ def main():
 
     writeJson(damage_type({}, "hyperthermia", "never", 0), DATA_DIR + "/" + DAMAGE_DIR, HYPERTHERMIA_DAMAGE_FILE)
     writeJson(damage_type({}, "hypothermia", "never", 0), DATA_DIR + "/" + DAMAGE_DIR, HYPOTHERMIA_DAMAGE_FILE)
+
+    no_knockback_tag = toTag({"values": []}, "thermia:hyperthermia")
+    no_knockback_tag = toTag(no_knockback_tag, "thermia:hypothermia")
+    writeJson(no_knockback_tag, MINECRAFT_DATA_DIR + "/" + TAG_DIR + "/damage_type", "no_knockback.json")
 
 if __name__== "__main__":
     main()
