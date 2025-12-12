@@ -2,6 +2,6 @@
     "message_id": "hypothermia",
     "scaling": "never",
     "exhaustion": 0,
-    "effects": "freezing",
+    "effects": "hurt",
     "death_message_type": "default"
 }

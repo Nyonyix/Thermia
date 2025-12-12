@@ -119,8 +119,7 @@ public class ThermiaEvents
             {
                 for (Player player : level.getEntities(EntityType.PLAYER, player -> true))
                 {
-                    DamageSource damageSource = new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(ThermiaDamageTypes.HYPERTHERMIA));
-                    player.hurt(damageSource, 5);
+                    player.hurt(ThermiaDamageTypes.hyperDamageSource(level.registryAccess()), 5);
                 }
             }
         }

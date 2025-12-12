@@ -113,8 +113,8 @@ def main():
 
     writeJson(blockDict, DATA_DIR + "/" + BLOCK_DATA_MAP_DIR, BLOCK_DATA_MAP_FILE)
 
-    writeJson(damage_type({}, "hyperthermia", "never", 0, effects="burning"), DATA_DIR + "/" + DAMAGE_DIR, HYPERTHERMIA_DAMAGE_FILE)
-    writeJson(damage_type({}, "hypothermia", "never", 0, effects="freezing"), DATA_DIR + "/" + DAMAGE_DIR, HYPOTHERMIA_DAMAGE_FILE)
+    writeJson(damage_type({}, "hyperthermia", "never", 0), DATA_DIR + "/" + DAMAGE_DIR, HYPERTHERMIA_DAMAGE_FILE)
+    writeJson(damage_type({}, "hypothermia", "never", 0), DATA_DIR + "/" + DAMAGE_DIR, HYPOTHERMIA_DAMAGE_FILE)
 
 if __name__== "__main__":
     main()

@@ -2,6 +2,6 @@
     "message_id": "hyperthermia",
     "scaling": "never",
     "exhaustion": 0,
-    "effects": "burning",
+    "effects": "hurt",
     "death_message_type": "default"
 }
