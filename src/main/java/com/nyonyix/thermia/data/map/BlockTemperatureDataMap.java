@@ -25,11 +25,6 @@ public record BlockTemperatureDataMap(
             BlockTemperatureDataMap::new
     );
 
-    public BlockTemperatureDataMap
-    {
-        if (hasTFCHeat || temperature != 0) new IllegalArgumentException("Block data map provided temperature but is marked \"hasTFCHeat\"");
-    }
-
     public static BlockTemperatureDataMap createDefault() {return new BlockTemperatureDataMap(256f, 32, false);}
 
     public BlockTemperatureDataMap withTemperature(float temperature) {return new BlockTemperatureDataMap(temperature, this.searchCap, this.hasTFCHeat);}

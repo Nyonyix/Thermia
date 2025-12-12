@@ -1,17 +1,8 @@
 package com.nyonyix.thermia;
 
+import com.nyonyix.thermia.data.ThermiaDamageTypes;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
-import com.nyonyix.thermia.util.BlockSearch;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -19,13 +10,9 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
@@ -46,7 +33,6 @@ public class Thermia {
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public Thermia(IEventBus modEventBus, ModContainer modContainer) {
 
-        modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(ThermiaDataMaps::registerDataMapTypes);
 
         BLOCKS.register(modEventBus);
@@ -54,58 +40,7 @@ public class Thermia {
         CREATIVE_MODE_TABS.register(modEventBus);
         ThermiaAttachments.ATTACHMENTS.register(modEventBus);
 
-        // Register ourselves for server and other game events we are interested in.
-        // Note that this is necessary if and only if we want *this* class (Thermia) to respond directly to events.
-        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
-        NeoForge.EVENT_BUS.register(this);
-
-        // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SERVER_CONFIG);
-    }
-
-    private void commonSetup(FMLCommonSetupEvent event) {
-        // Some common setup code
-        LOGGER.info("HELLO FROM COMMON SETUP");
-    }
-
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-        // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
-    }
-
-    @SubscribeEvent
-    public void onServerTick(ServerTickEvent.Post event)
-    {
-        MinecraftServer server = event.getServer();
-
-        if (server.getTickCount() % 20 == 0)
-        {
-            for (ServerLevel level : server.getAllLevels())
-            {
-                for (Chicken chicken : level.getEntities(EntityType.CHICKEN, chicken -> true))
-                {
-                    lavaScan(chicken);
-                }
-            }
-        }
-    }
-
-    private void lavaScan(Chicken chicken)
-    {
-        Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse("minecraft:lava"));
-
-        BlockSearch.SearchForBlock.searchAllAsync(chicken.level(), new BlockPos(chicken.getBlockX(), chicken.getBlockY(), chicken.getBlockZ()), ServerConfig.MAX_SEARCH_RANGE.getAsInt(), 32, block)
-                .thenAccept(blockSearchResult ->
-                {
-                    LOGGER.info("There is {} lava blocks", blockSearchResult.nearest());
-                    LOGGER.info("Closest is {} blocks away and is {}", blockSearchResult.nearestDistance(), chicken.level().getBlockState(blockSearchResult.nearest()).getBlock().getName());
-                });
-//        BlockSearchResult result = BlockSearch.SearchForBlock.searchAll(chicken.level(), new BlockPos(chicken.getBlockX(), chicken.getBlockY(), chicken.getBlockZ()), ServerConfig.MAX_SEARCH_RANGE.getAsInt(), block);
-//
-//        LOGGER.info("Lava is {} blocks away", result.nearest());
-//        LOGGER.info("There is {} lava blocks", result.getCount(block));
     }
 }

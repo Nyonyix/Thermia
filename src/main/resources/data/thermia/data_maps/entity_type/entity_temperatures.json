@@ -80,7 +80,7 @@
         },
         "tfc:horse": {
             "max_entity_temperature": 40,
-            "min_entity_temperature": -13,
+            "min_entity_temperature": -15,
             "is_mob": true,
             "is_tamed": true
         },

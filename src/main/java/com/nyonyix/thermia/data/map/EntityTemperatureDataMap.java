@@ -28,11 +28,6 @@ public record EntityTemperatureDataMap(
             EntityTemperatureDataMap::new
     );
 
-    public EntityTemperatureDataMap
-    {
-        if (isTamed && !isMob) throw new IllegalArgumentException("\"isTamed\" is true while \"isMob\" is false");
-    }
-
     public EntityTemperatureDataMap createDefault() {return new EntityTemperatureDataMap(40, 10, false, false);}
 
 }

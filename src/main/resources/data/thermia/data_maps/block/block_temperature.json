@@ -55,12 +55,17 @@
             "search_cap": 16,
             "has_tfc_heat": false
         },
-        "tfc:crucible": {
-            "temperature": 0,
+        "tfc:spring_water": {
+            "temperature": 90,
             "search_cap": 16,
-            "has_tfc_heat": true
+            "has_tfc_heat": false
         },
-        "tfc:fire_pit": {
+        "tfc:bloomery": {
+            "temperature": 90,
+            "search_cap": 16,
+            "has_tfc_heat": false
+        },
+        "tfc:crucible": {
             "temperature": 0,
             "search_cap": 16,
             "has_tfc_heat": true
@@ -71,6 +76,31 @@
             "has_tfc_heat": true
         },
         "tfc:mold_table": {
+            "temperature": 0,
+            "search_cap": 16,
+            "has_tfc_heat": true
+        },
+        "tfc:firepit": {
+            "temperature": 0,
+            "search_cap": 16,
+            "has_tfc_heat": true
+        },
+        "tfc:pot": {
+            "temperature": 0,
+            "search_cap": 16,
+            "has_tfc_heat": true
+        },
+        "tfc:grill": {
+            "temperature": 0,
+            "search_cap": 16,
+            "has_tfc_heat": true
+        },
+        "tfc:blast_furnace": {
+            "temperature": 0,
+            "search_cap": 16,
+            "has_tfc_heat": true
+        },
+        "tfc:charcoal_forge": {
             "temperature": 0,
             "search_cap": 16,
             "has_tfc_heat": true
