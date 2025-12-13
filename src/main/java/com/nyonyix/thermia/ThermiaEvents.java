@@ -1,6 +1,7 @@
 package com.nyonyix.thermia;
 
 import com.mojang.logging.LogUtils;
+import com.nyonyix.thermia.data.ItemInsulation;
 import com.nyonyix.thermia.data.ThermiaDamageTypes;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
@@ -11,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.player.Player;
@@ -18,6 +20,7 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
@@ -30,7 +33,7 @@ public class ThermiaEvents
 
     private static void verifyDataMap()
     {
-        LOGGER.info("Verifying Entity Data Map");
+        LOGGER.info("Verify Entity Data Map");
 
         BuiltInRegistries.ENTITY_TYPE.holders().forEach(entityTypeReference ->
         {
@@ -39,18 +42,20 @@ public class ThermiaEvents
             if (entityTemp != null)
             {
                 ResourceLocation entityKey = entityTypeReference.key().location();
+                LOGGER.info("Entity: {}, maxTemp: {}, minTemp:  {}, isMob: {}, isTamed: {}", entityKey, entityTemp.maxEntityTemperature(), entityTemp.minEntityTemperature(), entityTemp.isMob(), entityTemp.isTamed());
+
                 if (!entityTemp.isMob() && entityTemp.isTamed())
                 {
-                    LOGGER.error("Entity: {}, maxTemp: {}, minTemp:  {}, isMob: {}, isTamed: {}", entityKey, entityTemp.maxEntityTemperature(), entityTemp.minEntityTemperature(), entityTemp.isMob(), entityTemp.isTamed());
+                    throw new IllegalStateException("isTamed = true while isMob = false");
                 }
-                else
+                if (entityTemp.minEntityTemperature() > entityTemp.maxEntityTemperature())
                 {
-                    LOGGER.info("Entity: {}, maxTemp: {}, minTemp:  {}, isMob: {}, isTamed: {}", entityKey, entityTemp.maxEntityTemperature(), entityTemp.minEntityTemperature(), entityTemp.isMob(), entityTemp.isTamed());
+                    throw new IllegalStateException("minEntityTemperature > maxEntityTemperature");
                 }
             }
         });
 
-        LOGGER.info("Verifying Block Data Map");
+        LOGGER.info("Verify Block Data Map");
 
         BuiltInRegistries.BLOCK.holders().forEach(blockReference ->
         {
@@ -59,14 +64,29 @@ public class ThermiaEvents
             if (blockTemp != null)
             {
                 ResourceLocation blockKey = blockReference.key().location();
+                LOGGER.info("Block: {}, Temp: {}, searchCap: {}, hasTFCHeat: {}", blockKey, blockTemp.temperature(), blockTemp.searchCap(), blockTemp.hasTFCHeat());
+
                 if (blockTemp.temperature() != 0.0f && blockTemp.hasTFCHeat())
                 {
-                    LOGGER.error("Block: {}, Temp: {}, searchCap: {}, hasTFCHeat: {}", blockKey, blockTemp.temperature(), blockTemp.searchCap(), blockTemp.hasTFCHeat());
+                    throw new IllegalStateException("Block temperature > 0 while hasTFCHeat = true");
                 }
-                else
+                if (blockTemp.searchCap() < 0)
                 {
-                    LOGGER.info("Block: {}, Temp: {}, searchCap: {}, hasTFCHeat: {}", blockKey, blockTemp.temperature(), blockTemp.searchCap(), blockTemp.hasTFCHeat());
+                    throw new IllegalStateException("Block searchCap is < 0");
                 }
+            }
+        });
+
+        LOGGER.info("Verify Item Insulation Data Map");
+
+        BuiltInRegistries.ITEM.holders().forEach(itemReference ->
+        {
+            ItemInsulation insulation = itemReference.getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
+
+            if (insulation != null)
+            {
+                ResourceLocation itemKey = itemReference.key().location();
+                LOGGER.info("Item: {}, insulationModifier: {}", itemKey, insulation.insulationModifier());
             }
         });
     }
@@ -121,5 +141,15 @@ public class ThermiaEvents
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoinLevel(EntityJoinLevelEvent event)
+    {
+        Entity entity = event.getEntity();
+
+        if (entity.level().isClientSide()) return;
+
+
     }
 }

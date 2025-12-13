@@ -28,6 +28,13 @@ public record EntityTemperatureDataMap(
             EntityTemperatureDataMap::new
     );
 
-    public EntityTemperatureDataMap createDefault() {return new EntityTemperatureDataMap(40, 10, false, false);}
+    public static EntityTemperatureDataMap createDefault() {return new EntityTemperatureDataMap(40, 10, false, false);}
 
+    public EntityTemperatureDataMap withMaxEntityTemperature(float maxEntityTemperature) {return new EntityTemperatureDataMap(maxEntityTemperature, this.minEntityTemperature, this.isMob, this.isTamed);}
+
+    public EntityTemperatureDataMap withMinEntityTemperature(float minEntityTemperature) {return new EntityTemperatureDataMap(this.maxEntityTemperature, minEntityTemperature, this.isMob, this.isTamed);}
+
+    public EntityTemperatureDataMap withIsMob(boolean isMob) {return new EntityTemperatureDataMap(this.maxEntityTemperature, this.minEntityTemperature, isMob, this.isTamed);}
+
+    public EntityTemperatureDataMap withIsTamed(boolean isTamed) {return new EntityTemperatureDataMap(this.maxEntityTemperature, this.minEntityTemperature, this.isMob, isTamed);}
 }

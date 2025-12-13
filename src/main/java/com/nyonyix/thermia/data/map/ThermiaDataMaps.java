@@ -1,9 +1,11 @@
 package com.nyonyix.thermia.data.map;
 
 import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.data.ItemInsulation;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.registries.datamaps.DataMapType;
@@ -15,10 +17,13 @@ public class ThermiaDataMaps
 
     public static final DataMapType<Block, BlockTemperatureDataMap> BLOCK_TEMPERATURE_DATA_MAP = DataMapType.builder(ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "block_temperature"), Registries.BLOCK, BlockTemperatureDataMap.CODEC).synced(BlockTemperatureDataMap.CODEC, true).build();
 
+    public static final DataMapType<Item, ItemInsulation> ITEM_INSULATION_DATA_MAP = DataMapType.builder(ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "item_insulation"), Registries.ITEM, ItemInsulation.CODEC).synced(ItemInsulation.CODEC, true).build();
+
     @SubscribeEvent
     public static void registerDataMapTypes(RegisterDataMapTypesEvent event)
     {
         event.register(ENTITY_TEMPERATURE_DATA_MAP);
         event.register(BLOCK_TEMPERATURE_DATA_MAP);
+        event.register(ITEM_INSULATION_DATA_MAP);
     }
 }

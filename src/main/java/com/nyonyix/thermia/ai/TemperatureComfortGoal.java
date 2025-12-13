@@ -78,10 +78,30 @@ public class TemperatureComfortGoal extends Goal
         if (tempData == null) return false;
 
         float currentInternalTemp = tempData.internalTemperature();
+        float maxInternalTemperature = tempData.maxInternalTemperature();
+        float minInternalTemperature = tempData.minInternalTemperature();
         ClosestSource source = tempData.closestSource();
 
-        float maxEntityTempBeforeHurt = tempData.maxInternalTemperature() * (1f - MIN_MAX_BUFFER);
-        float minEntityTempBeforeHurt = tempData.minInternalTemperature() * (1f + MIN_MAX_BUFFER);
+        float maxEntityTempBeforeHurt = 0.0f;
+        float minEntityTempBeforeHurt = 0.0f;
+
+        if (maxInternalTemperature < 0.0f)
+        {
+            maxEntityTempBeforeHurt = maxInternalTemperature * (1f + MIN_MAX_BUFFER);
+        }
+        else
+        {
+            maxEntityTempBeforeHurt = maxInternalTemperature * (1f - MIN_MAX_BUFFER);
+        }
+
+        if (minInternalTemperature < 0.0f)
+        {
+            minEntityTempBeforeHurt = minInternalTemperature * (1f - MIN_MAX_BUFFER);
+        }
+        else
+        {
+            minEntityTempBeforeHurt = minInternalTemperature * (1f + MIN_MAX_BUFFER);
+        }
 
         if (currentInternalTemp >= maxEntityTempBeforeHurt)
         {

@@ -11,6 +11,9 @@ ENTITY_DATA_MAP_FILE = "entity_temperatures.json"
 BLOCK_DATA_MAP_DIR = "data_maps/block"
 BLOCK_DATA_MAP_FILE = "block_temperature.json"
 
+ITEM_DATA_MAP_DIR = "data_maps/item"
+ITEM_INSULATION_DATA_MAP_FILE = "item_insulation.json"
+
 DAMAGE_DIR = "damage_type"
 HYPERTHERMIA_DAMAGE_FILE = "hyperthermia.json"
 HYPOTHERMIA_DAMAGE_FILE = "hypothermia.json"
@@ -44,6 +47,15 @@ def blockTemp(baseDict: dict[str, dict], resourceID: str, temp: float, searchCap
 
     return baseDict
 
+def itemInsulation(baseDict: dict[str, dict], resourceID: str, insulationModifier: float) -> dict:
+
+    baseDictValues = baseDict["values"]
+
+    baseDictValues[resourceID] = {}
+    baseDictValues[resourceID]["insulation_modifier"] = insulationModifier
+
+    return baseDict
+
 def damage_type(baseDict: dict[str, any], messageId: str, scaling: str, exhaustion: float, effects: str = "hurt", deathMessageType: str = "default") -> dict:
 
     baseDict["message_id"] = messageId
@@ -67,8 +79,7 @@ def writeJson(jsonDict: dict, dir: str, filename: str) -> None:
 
 def main():
 
-    entityDict = {"values": {}}
-    entityDict = mobTemp(entityDict, "tfc:pig", 35, -10, True, True)
+    entityDict = mobTemp({"values": {}}, "tfc:pig", 35, -10, True, True)
     entityDict = mobTemp(entityDict, "tfc:rabbit", 40, -16, True, True)
     entityDict = mobTemp(entityDict, "tfc:cow", 35, -10, True, True)
     entityDict = mobTemp(entityDict, "tfc:goat", 25, -12, True, True)
@@ -90,8 +101,7 @@ def main():
 
     writeJson(entityDict, DATA_DIR + "/" + ENTITY_DATA_MAP_DIR, ENTITY_DATA_MAP_FILE)
 
-    blockDict = {"values": {}}
-    blockDict = blockTemp(blockDict, "minecraft:lava", 1200, 8, False)
+    blockDict = blockTemp({"values": {}}, "minecraft:lava", 1200, 8, False)
     blockDict = blockTemp(blockDict, "tfc:rock/magma/granite", 800, 8, False)
     blockDict = blockTemp(blockDict, "tfc:rock/magma/diorite", 800, 8, False)
     blockDict = blockTemp(blockDict, "tfc:rock/magma/gabbro", 800, 8, False)
@@ -117,8 +127,16 @@ def main():
     for v in blockDict.values():
         for k, v2 in v.items():
             print(k, v2)
-
+    
     writeJson(blockDict, DATA_DIR + "/" + BLOCK_DATA_MAP_DIR, BLOCK_DATA_MAP_FILE)
+
+    itemInsulationDict = itemInsulation({"values": {}}, "tfc:straw", 0.6)
+
+    for v in itemInsulationDict.values():
+        for k, v2 in v.items():
+            print(k, v2)
+    
+    writeJson(itemInsulationDict, DATA_DIR + "/" + ITEM_DATA_MAP_DIR, ITEM_INSULATION_DATA_MAP_FILE)
 
     writeJson(damage_type({}, "hyperthermia", "never", 0, effects="burning"), DATA_DIR + "/" + DAMAGE_DIR, HYPERTHERMIA_DAMAGE_FILE)
     writeJson(damage_type({}, "hypothermia", "never", 0, effects="freezing"), DATA_DIR + "/" + DAMAGE_DIR, HYPOTHERMIA_DAMAGE_FILE)
