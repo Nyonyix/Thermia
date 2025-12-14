@@ -19,4 +19,6 @@ public class ThermiaAttachments
     public static final Supplier<AttachmentType<BlockTemperature>> BLOCK_TEMPERATURE = ATTACHMENTS.register("block_temperature", () -> AttachmentType.builder(BlockTemperature::createDefault).serialize(BlockTemperature.CODEC).sync(BlockTemperature.STREAM_CODEC).build());
 
     public static final Supplier<AttachmentType<ItemInsulation>> ITEM_INSULATION = ATTACHMENTS.register("item_insulation", () -> AttachmentType.builder(ItemInsulation::createDefault).serialize(ItemInsulation.CODEC).sync(ItemInsulation.STREAM_CODEC).build());
+
+    public static final Supplier<AttachmentType<ChunkClimate>> CHUNK_CLIMATE = ATTACHMENTS.register("chunk_climate", () -> AttachmentType.builder(ChunkClimate::createDefault).serialize(ChunkClimate.CODEC).sync(ChunkClimate.STREAM_CODEC).build());
 }

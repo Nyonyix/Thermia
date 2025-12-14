@@ -143,13 +143,12 @@ public class ThermiaEvents
         }
     }
 
-    @SubscribeEvent
-    public static void onEntityJoinLevel(EntityJoinLevelEvent event)
-    {
-        Entity entity = event.getEntity();
-
-        if (entity.level().isClientSide()) return;
-
-
-    }
+//    @SubscribeEvent
+//    public static void onEntityJoinLevel(EntityJoinLevelEvent event)
+//    {
+//        Entity entity = event.getEntity();
+//
+//        if (entity.level().isClientSide()) return;
+//
+//    }
 }
