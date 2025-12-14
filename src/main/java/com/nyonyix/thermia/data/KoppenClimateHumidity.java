@@ -6,7 +6,6 @@ import io.netty.buffer.ByteBuf;
 import net.dries007.tfc.util.climate.KoppenClimateClassification;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import org.lwjgl.openal.SOFTLoopPoints;
 
 import java.util.EnumMap;
 
@@ -82,7 +81,7 @@ public record KoppenClimateHumidity(
         KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.put(KoppenClimateClassification.EF, new KoppenClimateHumidity(0.50f, 0.75f, 0.05f));
     }
 
-    public KoppenClimateHumidity createDefault() {return new KoppenClimateHumidity(0.75f, 0.50f, 0.25f);}
+    public static KoppenClimateHumidity createDefault() {return new KoppenClimateHumidity(0.75f, 0.50f, 0.25f);}
 
     public KoppenClimateHumidity withMaxHumidity(float maxHumidity) {return new KoppenClimateHumidity(maxHumidity, this.minHumidity, this.seasonalVariation);}
 

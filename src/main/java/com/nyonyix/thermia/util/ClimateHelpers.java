@@ -1,14 +1,18 @@
 package com.nyonyix.thermia.util;
 
+import com.nyonyix.thermia.data.KoppenClimateHumidity;
 import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
 import net.dries007.tfc.util.calendar.Calendars;
+import net.dries007.tfc.util.calendar.Month;
 import net.dries007.tfc.util.climate.Climate;
 import net.dries007.tfc.util.climate.ClimateModel;
+import net.dries007.tfc.util.climate.KoppenClimateClassification;
 import net.dries007.tfc.util.climate.OverworldClimateModel;
 import net.dries007.tfc.util.tracker.WeatherHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 
@@ -101,6 +105,29 @@ public class ClimateHelpers
         return (b * alpha) / (a - alpha);
     }
 
+    public static float calcDailyHumidity(KoppenClimateHumidity koppenClimateHumidity, float previousHumidity, RandomSource random)
+    {
+        float dailyChange = (random.nextFloat() * 0.2f - 0.1f) * previousHumidity;
+        float newHumidity = previousHumidity + dailyChange;
+
+        return Math.max(koppenClimateHumidity.minHumidity(), Math.min(koppenClimateHumidity.maxHumidity(), newHumidity));
+    }
+
+    public static float calcSeasonalHumidity(Level level, BlockPos pos, RandomSource random, float previousHumidity)
+    {
+        KoppenClimateHumidity koppenClimateHumidity = getKoppenHumidity(level, pos);
+        Month month = getEffectiveMonthOfYear(level, pos);
+        float seasonalShift = getSeasonalHumidityShift(month, koppenClimateHumidity);
+
+        float seasonalMax = Math.max(1f, koppenClimateHumidity.maxHumidity() + seasonalShift);
+        float seasonalMin = Math.min(0f, koppenClimateHumidity.minHumidity() + seasonalShift);
+
+        float dailyChange = (random.nextFloat() * 0.2f - 0.1f) * previousHumidity;
+        float newHumidity = previousHumidity + dailyChange;
+
+        return Math.max(seasonalMin, Math.min(seasonalMax, newHumidity));
+    }
+
     public static float getWindSpeed(Level level, BlockPos pos)
     {
         ClimateModel model = Climate.get(level);
@@ -185,4 +212,79 @@ public class ClimateHelpers
         return Mth.clamp(baseRadiation, 0.0f, 1.0f);
     }
 
+    public static Month getEffectiveMonthOfYear(Level level, BlockPos pos)
+    {
+        Month month = Calendars.get(level).getAbsoluteCalendarMonthOfYear();
+        boolean isNorth = SolarCalculator.getInNorthernHemisphere(pos, level);
+
+        if (isNorth) return month;
+        else return month.opposite();
+    }
+
+    public static KoppenClimateHumidity getKoppenHumidity(Level level, BlockPos pos)
+    {
+        float avgTemperature = Climate.getAverageTemperature(level, pos);
+        float rainfall = Climate.getRainfall(level, pos);
+        float rainfallVariance = Climate.getRainfallVariance(level, pos);
+        boolean isNorth = SolarCalculator.getInNorthernHemisphere(pos, level);
+
+        KoppenClimateClassification climate = KoppenClimateClassification.classify(avgTemperature, rainfall, rainfallVariance, isNorth);
+
+        return KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.getOrDefault(climate, KoppenClimateHumidity.createDefault());
+    }
+
+    public static float getSeasonalHumidityShift(Month month, KoppenClimateHumidity koppenClimateHumidity)
+    {
+        float tempModifier = month.getTemperatureModifier();
+        return tempModifier * koppenClimateHumidity.seasonalVariation();
+    }
+
+    public static float getClimateSpecificHumidity(Level level, BlockPos pos, RandomSource random, float previousHumidity)
+    {
+        float avgTemperature = Climate.getAverageTemperature(level, pos);
+        float rainfall = Climate.getRainfall(level, pos);
+        float rainfallVariance = Climate.getRainfallVariance(level, pos);
+        boolean isNorth = SolarCalculator.getInNorthernHemisphere(pos, level);
+
+        KoppenClimateClassification climate = KoppenClimateClassification.classify(avgTemperature, rainfall, rainfallVariance, isNorth);
+        KoppenClimateHumidity koppenClimateHumidity = getKoppenHumidity(level, pos);
+        Month month = getEffectiveMonthOfYear(level, pos);
+
+        float humidity = calcSeasonalHumidity(level, pos, random, previousHumidity);
+
+        switch (climate)
+        {
+            case CSA, CSB, CSC, DSA, DSB, DSC, DSD ->
+            {
+                if (month == Month.JUNE || month == Month.JULY || month == Month.AUGUST)
+                {
+                    humidity = Mth.lerp(0.3f, humidity, koppenClimateHumidity.minHumidity());
+                }
+                else if (month == Month.DECEMBER || month == Month.JANUARY || month == Month.FEBRUARY)
+                {
+                    humidity = Mth.lerp(0.3f, humidity, koppenClimateHumidity.maxHumidity());
+                }
+            }
+            case AW, CWA, CWB, CWC, DWA, DWB, DWC, DWD ->
+            {
+                if (month == Month.JUNE || month == Month.JULY || month == Month.AUGUST)
+                {
+                    humidity = Mth.lerp(0.5f, humidity, koppenClimateHumidity.maxHumidity());
+                }
+                else if (month == Month.DECEMBER || month == Month.JANUARY || month == Month.FEBRUARY)
+                {
+                    humidity = Mth.lerp(0.5f, humidity, koppenClimateHumidity.minHumidity());
+                }
+            }
+            case AS ->
+            {
+                if (month == Month.DECEMBER || month == Month.JANUARY || month == Month.FEBRUARY)
+                {
+                    humidity = Mth.lerp(0.5f, humidity, koppenClimateHumidity.maxHumidity());
+                }
+            }
+        }
+
+        return Mth.clamp(humidity, 0.0f, 1.0f);
+    }
 }
