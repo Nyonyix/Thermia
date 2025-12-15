@@ -1,5 +1,6 @@
 package com.nyonyix.thermia.util;
 
+import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
 import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
@@ -28,7 +29,7 @@ public class ClimateHelpers
 
     public static float calcGlobeTemperature(float temperature, float solarRadiation, float windSpeed)
     {
-        float maxSolarHeating = 18f;
+        float maxSolarHeating = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
         float windChillFactor = calcWindChillFactor(windSpeed);
         float solarHeating = maxSolarHeating * solarRadiation * windChillFactor;
 
@@ -38,7 +39,7 @@ public class ClimateHelpers
     public static float calcWetBulbGlobeTemperature(Level level, BlockPos pos, float temp, float humidity)
     {
         float wetBulb = calcWetBulbTemperature(temp, humidity);
-        float solarRadiation = getSolarRadiation(level, pos);
+        float solarRadiation = getSolarRadiationWeather(level, pos);
         float windSpeed = getWindSpeed(level, pos);
         float globeTemp = calcGlobeTemperature(temp, solarRadiation, windSpeed);
 
@@ -47,43 +48,8 @@ public class ClimateHelpers
 
     public static float calcWindChillFactor(float windSpeed)
     {
-        float k = 0.15f;
+        float k = (float) ServerConfig.WIND_CHILL_FACTOR.getAsDouble();
         return 1.0f / (1.0f + k * windSpeed);
-    }
-
-    public  static float calcHeatIndex(float temp, float humidity)
-    {
-        float t = temp * 9f / 5f + 32f;
-        float rh = humidity * 100f;
-
-        float hi = -42.379f
-                + 2.04901523f * t
-                + 10.14333127f * rh
-                - 0.22475541f * t * rh
-                - 0.00683783f * t * t
-                - 0.05481717f * rh * rh
-                + 0.00122874f * t * t * rh
-                + 0.00085282f * t * rh * rh
-                - 0.00000199f * t * t * rh * rh;
-
-        return (hi - 32f) * 5f / 9f;
-    }
-
-    public static float calcApparentTemperature(Level level, BlockPos pos, float temp, float humidity)
-    {
-        float windSpeed = getWindSpeed(level, pos);
-        float heatIndex = calcHeatIndex(temp, humidity);
-
-        float windChill = temp;
-        if (temp < 10f && windSpeed > 1.3f) windChill = 13.12f + 0.6215f * temp - 11.37f * (float) Math.pow(windSpeed * 3.6, 0.16) + 0.3965f * temp * (float) Math.pow(windSpeed * 3.6, 0.16);
-
-        if (temp > 25f) return heatIndex;
-        else if (temp < 10f) return windChill;
-        else
-        {
-            float t = (temp - 10f) / 15f;
-            return Mth.lerp(t, windChill, heatIndex);
-        }
     }
 
     public static float calcEvaporativeCooling(float windSpeed, float humidity)
@@ -92,25 +58,6 @@ public class ClimateHelpers
         float humidityComponent = 1.0f - humidity;
 
         return (float) Math.sqrt(windComponent * humidityComponent);
-    }
-
-    public static float calcDewPoint(float temp, float humidity)
-    {
-        float rh = humidity * 100f;
-        float a = 17.27f;
-        float b =237.7f;
-
-        float alpha = ((a + temp) / (b + temp)) + (float) Math.log(humidity);
-
-        return (b * alpha) / (a - alpha);
-    }
-
-    public static float calcDailyHumidity(KoppenClimateHumidity koppenClimateHumidity, float previousHumidity, RandomSource random)
-    {
-        float dailyChange = (random.nextFloat() * 0.2f - 0.1f) * previousHumidity;
-        float newHumidity = previousHumidity + dailyChange;
-
-        return Math.max(koppenClimateHumidity.minHumidity(), Math.min(koppenClimateHumidity.maxHumidity(), newHumidity));
     }
 
     public static float calcSeasonalHumidity(Level level, BlockPos pos, RandomSource random, float previousHumidity)
@@ -190,7 +137,7 @@ public class ClimateHelpers
         float atmosphericTransmission = (float) Math.pow(0.7, airMass - 1);
         float radiation = directRadiation * atmosphericTransmission;
 
-        if (level.canSeeSky(pos)) return radiation *= 0.1f;
+        if (!level.canSeeSky(pos.above())) return radiation *= 0.1f;
 
         return Mth.clamp(radiation, 0.0f, 1.0f);
     }
@@ -241,18 +188,12 @@ public class ClimateHelpers
 
     public static float getClimateSpecificHumidity(Level level, BlockPos pos, RandomSource random, float previousHumidity)
     {
-        float avgTemperature = Climate.getAverageTemperature(level, pos);
-        float rainfall = Climate.getRainfall(level, pos);
-        float rainfallVariance = Climate.getRainfallVariance(level, pos);
-        boolean isNorth = SolarCalculator.getInNorthernHemisphere(pos, level);
-
-        KoppenClimateClassification climate = KoppenClimateClassification.classify(avgTemperature, rainfall, rainfallVariance, isNorth);
         KoppenClimateHumidity koppenClimateHumidity = getKoppenHumidity(level, pos);
         Month month = getEffectiveMonthOfYear(level, pos);
 
         float humidity = calcSeasonalHumidity(level, pos, random, previousHumidity);
 
-        switch (climate)
+        switch (koppenClimateHumidity.climateClass())
         {
             case CSA, CSB, CSC, DSA, DSB, DSC, DSD ->
             {
