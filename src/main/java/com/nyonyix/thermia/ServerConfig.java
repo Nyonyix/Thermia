@@ -21,5 +21,7 @@ public class ServerConfig
 
     public static final ModConfigSpec.DoubleValue WIND_CHILL_FACTOR = BUILDER.comment("Factor to adjust windchill effectiveness").defineInRange("windChillFactor", 0.15, 0.0, 1.0);
 
+    public static final ModConfigSpec.BooleanValue ENABLE_HIGHER_AVG_TEMP = BUILDER.comment("Increase default TFC average temperature from 30 to 40").define("enableTFCMaxTemp", true);
+
     static final ModConfigSpec SERVER_CONFIG = BUILDER.build();
 }

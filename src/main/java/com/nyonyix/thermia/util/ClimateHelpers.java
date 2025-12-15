@@ -17,8 +17,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 
-import java.util.prefs.PreferenceChangeListener;
-
 public class ClimateHelpers
 {
     public static float calcWetBulbTemperature(float temp, float humidity)
@@ -69,8 +67,8 @@ public class ClimateHelpers
         float seasonalMax = Math.max(1f, koppenClimateHumidity.maxHumidity() + seasonalShift);
         float seasonalMin = Math.min(0f, koppenClimateHumidity.minHumidity() + seasonalShift);
 
-        float dailyChange = (random.nextFloat() * 0.2f - 0.1f) * previousHumidity;
-        float newHumidity = previousHumidity + dailyChange;
+        float randomChange = (random.nextFloat() * 0.2f - 0.1f) * previousHumidity;
+        float newHumidity = previousHumidity + randomChange;
 
         return Math.max(seasonalMin, Math.min(seasonalMax, newHumidity));
     }
