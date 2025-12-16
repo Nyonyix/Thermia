@@ -1,6 +1,8 @@
 package com.nyonyix.thermia.client;
 
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
+import com.nyonyix.thermia.data.attachment.ChunkClimate;
+import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.util.ClimateHelpers;
 import net.dries007.tfc.client.ClientHelpers;
 import net.dries007.tfc.util.climate.Climate;
@@ -37,12 +39,13 @@ public class ThermiaClientRenderCache
             float temperature = model.getTemperature(level, pos);
 
             climate = ClimateHelpers.getKoppenHumidity(level, pos);
-            humidity = ClimateHelpers.getClimateSpecificHumidity(level, pos, level.random, humidity);
             humidity = ClimateHelpers.getHumidityWeather(level, pos);
             wetBulbTemperature = ClimateHelpers.calcWetBulbTemperature(temperature, humidity);
             wetBulbGlobeTemperature = ClimateHelpers.calcWetBulbGlobeTemperature(level, pos, temperature, humidity);
             solarRadiation = ClimateHelpers.getSolarRadiationWeather(level, pos);
             globeTemperature = ClimateHelpers.calcGlobeTemperature(temperature, solarRadiation, WeatherHelpers.windMS(model.getWind(level, pos)));
+
+            if (level.getChunk(pos.getX() / 16, pos.getZ() / 16).getData(ThermiaAttachments.CHUNK_CLIMATE) instanceof ChunkClimate chunkClimate) humidity = chunkClimate.humidity();
         }
     }
 
