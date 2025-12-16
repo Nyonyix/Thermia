@@ -17,7 +17,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 
-public class ClimateHelpers
+public class EnvironmentHelpers
 {
     public static float calcWetBulbTemperature(float temp, float humidity)
     {

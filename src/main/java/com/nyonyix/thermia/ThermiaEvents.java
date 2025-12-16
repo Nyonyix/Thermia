@@ -1,7 +1,7 @@
 //package com.nyonyix.thermia;
 //
 //import com.mojang.logging.LogUtils;
-//import com.nyonyix.thermia.data.ItemInsulation;
+//import com.nyonyix.thermia.data.map.ItemInsulation;
 //import com.nyonyix.thermia.data.ThermiaDamageTypes;
 //import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
 //import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;

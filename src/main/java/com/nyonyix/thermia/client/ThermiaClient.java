@@ -1,11 +1,6 @@
 package com.nyonyix.thermia.client;
 
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.data.KoppenClimateHumidity;
-import com.nyonyix.thermia.util.ClimateHelpers;
-import net.dries007.tfc.client.overworld.SolarCalculator;
-import net.dries007.tfc.util.climate.Climate;
-import net.dries007.tfc.util.climate.KoppenClimateClassification;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;

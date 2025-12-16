@@ -1,7 +1,6 @@
 package com.nyonyix.thermia.data.map;
 
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.data.ItemInsulation;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;

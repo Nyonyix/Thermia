@@ -2,8 +2,7 @@ package com.nyonyix.thermia.server;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.data.ItemInsulation;
-import com.nyonyix.thermia.data.manager.ChunkClimateManager;
+import com.nyonyix.thermia.data.map.ItemInsulation;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
@@ -20,7 +19,6 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import org.apache.logging.log4j.core.jmx.Server;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -98,48 +96,11 @@ public class ThermiaServer
         });
     }
 
-    private static void updateChunkPerBatch(ServerLevel level)
-    {
-        List<LevelChunk> chunks = new ArrayList<>();
-
-        for (ChunkHolder chunkHolder : level.getChunkSource().chunkMap.getChunks())
-        {
-            if (chunkHolder.getTickingChunk() instanceof LevelChunk chunk) chunks.add(chunk);
-        }
-
-        int totalChunks = chunks.size();
-
-        int endIndex = Math.min(chunkUpdateOffset + CHUNKS_PER_UPDATE, totalChunks);
-        for (int i = chunkUpdateOffset; i < endIndex; i++)
-        {
-            ChunkClimateManager.updateChunkClimate(level, chunks.get(i));
-        }
-        chunkUpdateOffset += CHUNKS_PER_UPDATE;
-
-        if (chunkUpdateOffset >= totalChunks)
-        {
-            chunkUpdateOffset = 0;
-        }
-    }
-
     @SubscribeEvent
     public static void onReload(AddReloadListenerEvent event) {event.addListener(((preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor) -> preparationBarrier.wait(null).thenRunAsync(ThermiaServer::verifyDataMap)));}
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {verifyDataMap();}
-
-    @SubscribeEvent
-    public static void onChunkLoad(ChunkEvent.Load event)
-    {
-        if (event.getLevel() instanceof ServerLevel level)
-        {
-            if (event.getChunk() instanceof LevelChunk chunk)
-            {
-                chunkUpdateHour.put(chunk,Calendars.get(level).getHourOfDay());
-                ChunkClimateManager.initChunkClimate(level, chunk);
-            }
-        }
-    }
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event)
@@ -148,13 +109,6 @@ public class ThermiaServer
 
         for (ServerLevel level : server.getAllLevels())
         {
-            if (lastTickedTFCHour != Calendars.get(level).getHourOfDay())
-            {
-                lastTickedTFCHour = Calendars.get(level).getHourOfDay();
-                chunkUpdateOffset = 0;
-            }
-
-            if (server.getTickCount() % TICKS_TO_STAGGER == 0) {updateChunkPerBatch(level);}
         }
     }
 }
