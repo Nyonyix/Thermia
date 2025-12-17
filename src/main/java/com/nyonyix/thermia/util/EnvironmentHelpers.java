@@ -58,6 +58,19 @@ public class EnvironmentHelpers
         return (float) Math.sqrt(windComponent * humidityComponent);
     }
 
+//    public static float calcSeasonalHumidity(Level level, BlockPos pos, RandomSource random, float previousHumidity)
+//    {
+//        KoppenClimateHumidity koppenClimateHumidity = getKoppenHumidity(level, pos);
+//        Month month = getEffectiveMonthOfYear(level, pos);
+//
+//        float koppenClimateRangeDelta = koppenClimateHumidity.maxHumidity() - koppenClimateHumidity.minHumidity();
+//        float seasonalShift = koppenClimateRangeDelta * getSeasonalHumidityShift(month, koppenClimateHumidity);
+//
+//        float newHumidity = random.nextBoolean() ? previousHumidity + seasonalShift : previousHumidity - seasonalShift;
+//
+//        return Mth.clamp(newHumidity, koppenClimateHumidity.minHumidity(), koppenClimateHumidity.maxHumidity());
+//    }
+
     public static float calcSeasonalHumidity(Level level, BlockPos pos, RandomSource random, float previousHumidity)
     {
         KoppenClimateHumidity koppenClimateHumidity = getKoppenHumidity(level, pos);
