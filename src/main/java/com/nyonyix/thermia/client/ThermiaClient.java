@@ -1,11 +1,14 @@
 package com.nyonyix.thermia.client;
 
 import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.data.attachment.EntityTemperature;
+import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -65,29 +68,23 @@ public class ThermiaClient {
     public static void onRenderGameOverlayText(CustomizeGuiOverlayEvent.DebugText event)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level != null)
+        Player clientPlayer = minecraft.player;
+
+        if (clientPlayer != null)
         {
-            Entity camera = minecraft.getCameraEntity();
-
-            assert camera != null;
-
-            BlockPos pos = BlockPos.containing(camera.getX(), camera.getY(), camera.getZ());
+            BlockPos pos = BlockPos.containing(clientPlayer.position());
             if (minecraft.level.hasChunk(pos.getX() / 16, pos.getZ() / 16))
             {
                 RandomSource random = minecraft.level.getRandom();
+                EntityTemperature playerData = clientPlayer.getData(ThermiaAttachments.ENTITY_TEMPERATURE) != null ? clientPlayer.getData(ThermiaAttachments.ENTITY_TEMPERATURE) : EntityTemperature.createDefault();
 
                 List<String> text = event.getLeft();
                 text.add("");
                 String colourDarkGreen = String.valueOf(ChatFormatting.DARK_GREEN);
-                String colourDarkBlue = String.valueOf(ChatFormatting.DARK_BLUE);
-                String colourWhite = String.valueOf(ChatFormatting.WHITE);
-                String bold = String.valueOf(ChatFormatting.BOLD);
 
                 text.add(colourDarkGreen + "Thermia");
-                text.add( "Humidity: Now: %.2f".formatted(ThermiaClientRenderCache.getHumidity()));
-                text.add("Temperatures: WetBulbGlobe: %.2f, WetBulb: %.2f, Globe: %.2f".formatted(ThermiaClientRenderCache.getWetBulbGlobeTemperature(), ThermiaClientRenderCache.getWetBulbTemperature(), ThermiaClientRenderCache.getGlobeTemperature()));
-                text.add("Solar Radiation: %.2f".formatted(ThermiaClientRenderCache.getSolarRadiation()));
-                text.add("Climate: %s".formatted(ThermiaClientRenderCache.getClimate().climateToString()));
+                text.add(String.format("Environment Temperature: %.2f", playerData.environmentTemperature()));
+                text.add(String.format("Environment Humidity: %.2f", playerData.environmentHumidity()));
             }
         }
     }
