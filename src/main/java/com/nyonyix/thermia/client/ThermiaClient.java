@@ -1,14 +1,22 @@
 package com.nyonyix.thermia.client;
 
 import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.data.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
+import com.nyonyix.thermia.util.EnvironmentHelpers;
+import net.dries007.tfc.client.overworld.SolarCalculator;
+import net.dries007.tfc.util.calendar.Calendars;
+import net.dries007.tfc.util.climate.Climate;
+import net.dries007.tfc.util.climate.ClimateModel;
+import net.dries007.tfc.util.climate.KoppenClimateClassification;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -20,6 +28,7 @@ import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
+import java.util.Calendar;
 import java.util.List;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
@@ -83,9 +92,16 @@ public class ThermiaClient {
                 String colourDarkGreen = String.valueOf(ChatFormatting.DARK_GREEN);
 
                 text.add(colourDarkGreen + "Thermia");
-                text.add(String.format("Environment Temperature: %.2f", playerData.environmentTemperature()));
-                text.add(String.format("Environment Humidity: %.2f", playerData.environmentHumidity()));
-                text.add(String.format("Player internal Temp: %.2f", playerData.internalTemperature()));
+                text.add("Entity:");
+                text.add(String.format("    Environment Temperature: %.2f", playerData.environmentTemperature()));
+                text.add(String.format("    Environment Humidity: %.2f", playerData.environmentHumidity()));
+                text.add(String.format("    Player internal Temp: %.2f", playerData.internalTemperature()));
+
+                Level level = clientPlayer.level();
+                ClimateModel model = Climate.get(level);
+                text.add("Chunk:");
+                text.add(String.format("    Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(model.getAverageTemperature(level, pos), model.getRainfall(level, pos), model.getRainfallVariance(level, pos), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
+                text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos)));
             }
         }
     }

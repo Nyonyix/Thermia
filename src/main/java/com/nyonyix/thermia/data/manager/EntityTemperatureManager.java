@@ -56,5 +56,7 @@ public class EntityTemperatureManager
         entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, Climate.getTemperature(level, pos), entityData.environmentHumidity()));
 
         entityData = entityData.withInternalTemperature(Mth.approach(entityData.internalTemperature(), entityData.environmentTemperature(), 0.1f));
+
+        entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
     }
 }
