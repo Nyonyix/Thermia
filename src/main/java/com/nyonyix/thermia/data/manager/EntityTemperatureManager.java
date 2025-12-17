@@ -1,5 +1,6 @@
 package com.nyonyix.thermia.data.manager;
 
+import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
@@ -15,9 +16,12 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.level.Level;
+import org.slf4j.Logger;
 
 public class EntityTemperatureManager
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private static boolean shouldGetSystem(Entity entity)
     {
         if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
@@ -28,8 +32,16 @@ public class EntityTemperatureManager
         if (!dataMap.isMob()) return true;
         if (!dataMap.isTamed()) return true;
 
-        if (entity instanceof TFCAnimalProperties tfcAnimalProperties) return tfcAnimalProperties.getFamiliarity() >= 0.18f;
-        if (entity instanceof OwnableEntity ownableEntity) return ownableEntity.getOwnerUUID() != null;
+        if (entity instanceof TFCAnimalProperties tfcAnimalProperties)
+        {
+            LOGGER.warn("TFC Animal Familiarity Check: {}", tfcAnimalProperties.getFamiliarity() >= 0.18f);
+            return tfcAnimalProperties.getFamiliarity() >= 0.18f;
+        }
+        else if (entity instanceof OwnableEntity ownableEntity)
+        {
+            LOGGER.warn("Vanilla Ownable Entity Check: {}", ownableEntity.getOwnerUUID() != null);
+            return ownableEntity.getOwnerUUID() != null;
+        }
 
         return false;
     }
