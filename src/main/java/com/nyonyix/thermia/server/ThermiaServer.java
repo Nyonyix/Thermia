@@ -2,8 +2,10 @@ package com.nyonyix.thermia.server;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.data.attachment.ChunkHumidity;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
+import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import com.nyonyix.thermia.data.map.ItemInsulation;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
@@ -19,6 +21,7 @@ import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -29,20 +32,12 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @EventBusSubscriber(modid = Thermia.MODID)
 public class ThermiaServer
 {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Map<LevelChunk, Integer> chunkUpdateHour = new HashMap<>();
-    private static final int TICKS_TO_STAGGER = 10;
-    private static final int CHUNKS_PER_UPDATE = 100;
-    private static int chunkUpdateOffset = 0;
-    private static int lastTickedTFCHour = -1;
 
     private static void verifyDataMap()
     {
@@ -125,6 +120,41 @@ public class ThermiaServer
                     EntityTemperatureManager.onTick(level, entity);
                 }
             }
+
+            if (ChunkHumidityManager.lastTickedTFCHour != Calendars.get(level).getHourOfDay())
+            {
+                ChunkHumidityManager.lastTickedTFCHour = Calendars.get(level).getHourOfDay();
+                ChunkHumidityManager.refreshWorkingCache(level);
+            }
+
+            ChunkHumidityManager.processChunkBatch(level, 100);
         }
+    }
+
+    @SubscribeEvent
+    public static void onChunkLoad(ChunkEvent.Load event)
+    {
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
+        if (!(event.getChunk() instanceof LevelChunk chunk)) return;
+
+        ChunkPos pos = chunk.getPos();
+
+        ChunkHumidityManager.loadedChunkCache.computeIfAbsent(level, k -> new HashSet<>()).add(pos);
+        ChunkHumidityManager.initChunk(chunk);
+    }
+
+    @SubscribeEvent
+    public static void onChunkUnload(ChunkEvent.Unload event)
+    {
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
+        if (!(event.getChunk() instanceof LevelChunk chunk)) return;
+
+        ChunkPos pos = chunk.getPos();
+
+        Set<ChunkPos> chunks = ChunkHumidityManager.loadedChunkCache.get(level);
+        if (chunks != null) chunks.remove(pos);
+
+        Set<ChunkPos> workingChunks = ChunkHumidityManager.workingChunkCache.get(level);
+        if (workingChunks != null) workingChunks.remove(pos);
     }
 }
