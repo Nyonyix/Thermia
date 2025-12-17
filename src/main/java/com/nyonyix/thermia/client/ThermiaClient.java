@@ -53,24 +53,6 @@ public class ThermiaClient {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event)
     {
-        Minecraft minecraft = Minecraft.getInstance();
-
-        if (minecraft.level == null || minecraft.isPaused()) return;
-
-        long currentTick = minecraft.level.getGameTime();
-
-        if (currentTick % 10 == 0)
-        {
-            Entity camera = minecraft.getCameraEntity();
-            if (camera != null)
-            {
-                BlockPos pos = camera.blockPosition();
-                if (minecraft.level.hasChunk(pos.getX() / 16, pos.getZ() / 16))
-                {
-                    ThermiaClientRenderCache.onClientTick();
-                }
-            }
-        }
     }
 
     @SubscribeEvent
