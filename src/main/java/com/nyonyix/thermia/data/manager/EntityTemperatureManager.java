@@ -32,16 +32,8 @@ public class EntityTemperatureManager
         if (!dataMap.isMob()) return true;
         if (!dataMap.isTamed()) return true;
 
-        if (entity instanceof TFCAnimalProperties tfcAnimalProperties)
-        {
-            LOGGER.warn("TFC Animal Familiarity Check: {}", tfcAnimalProperties.getFamiliarity() >= 0.18f);
-            return tfcAnimalProperties.getFamiliarity() >= 0.18f;
-        }
-        else if (entity instanceof OwnableEntity ownableEntity)
-        {
-            LOGGER.warn("Vanilla Ownable Entity Check: {}", ownableEntity.getOwnerUUID() != null);
-            return ownableEntity.getOwnerUUID() != null;
-        }
+        if (entity instanceof TFCAnimalProperties tfcAnimalProperties) {return tfcAnimalProperties.getFamiliarity() >= 0.18f;}
+        else if (entity instanceof OwnableEntity ownableEntity) {return ownableEntity.getOwnerUUID() != null;}
 
         return false;
     }
@@ -59,7 +51,7 @@ public class EntityTemperatureManager
 
     public static void onTick(Level level, Entity entity)
     {
-        if (entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE) != null)
+        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE))
         {
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
 

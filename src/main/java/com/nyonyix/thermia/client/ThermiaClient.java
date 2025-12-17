@@ -67,7 +67,7 @@ public class ThermiaClient {
             if (minecraft.level.hasChunk(pos.getX() / 16, pos.getZ() / 16))
             {
                 RandomSource random = minecraft.level.getRandom();
-                EntityTemperature playerData = clientPlayer.getData(ThermiaAttachments.ENTITY_TEMPERATURE) != null ? clientPlayer.getData(ThermiaAttachments.ENTITY_TEMPERATURE) : EntityTemperature.createDefault();
+                EntityTemperature playerData = clientPlayer.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
 
                 List<String> text = event.getLeft();
                 text.add("");

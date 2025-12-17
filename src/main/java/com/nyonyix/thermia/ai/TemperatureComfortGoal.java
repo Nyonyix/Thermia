@@ -74,8 +74,8 @@ public class TemperatureComfortGoal extends Goal
             return false;
         }
 
+        if (!mob.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
         EntityTemperature tempData = mob.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
-        if (tempData == null) return false;
 
         float currentInternalTemp = tempData.internalTemperature();
         float maxInternalTemperature = tempData.maxInternalTemperature();
@@ -137,16 +137,16 @@ public class TemperatureComfortGoal extends Goal
     {
         if (targetPos == null) return false;
         if (isAtPosition(targetPos)) return false;
+        if (!mob.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
 
         EntityTemperature tempData = mob.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
-        if (tempData != null)
-        {
-            float internalTemperature = tempData.internalTemperature();
-            float maxEntityTempBeforeHurt = tempData.maxInternalTemperature() * (1f - MIN_MAX_BUFFER);
-            float minEntityTempBeforeHurt = tempData.minInternalTemperature() * (1 + MIN_MAX_BUFFER);
 
-            if (internalTemperature > minEntityTempBeforeHurt && internalTemperature < maxEntityTempBeforeHurt) return false;
-        }
+        float internalTemperature = tempData.internalTemperature();
+        float maxEntityTempBeforeHurt = tempData.maxInternalTemperature() * (1f - MIN_MAX_BUFFER);
+        float minEntityTempBeforeHurt = tempData.minInternalTemperature() * (1 + MIN_MAX_BUFFER);
+
+        if (internalTemperature > minEntityTempBeforeHurt && internalTemperature < maxEntityTempBeforeHurt) return false;
+
         return !mob.getNavigation().isDone();
     }
 

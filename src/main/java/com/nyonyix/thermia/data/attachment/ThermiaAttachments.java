@@ -1,9 +1,11 @@
 package com.nyonyix.thermia.data.attachment;
 
 import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import org.slf4j.Logger;
 
 import java.util.function.Supplier;
 
