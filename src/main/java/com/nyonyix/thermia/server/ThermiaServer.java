@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
+import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import com.nyonyix.thermia.data.map.ItemInsulation;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
@@ -16,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -114,14 +116,12 @@ public class ThermiaServer
 
         for (ServerLevel level : server.getAllLevels())
         {
-            for (Player player : level.players())
+            for (Entity entity : level.getAllEntities())
             {
-                if (server.getTickCount() % 20 == player.getId() % 20)
+                if (server.getTickCount() % 20 == entity.getId() % 20)
                 {
-                    EntityTemperature entityTemp = player.getData(ThermiaAttachments.ENTITY_TEMPERATURE) != null ? player.getData(ThermiaAttachments.ENTITY_TEMPERATURE) : EntityTemperature.createDefault();
-                    entityTemp = entityTemp.withEnvironmentHumidity(EnvironmentHelpers.getClimateSpecificHumidity(level, player.blockPosition(), level.random,entityTemp.environmentHumidity()));
-                    entityTemp = entityTemp.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, player.blockPosition(), Climate.getTemperature(level, player.blockPosition()), entityTemp.environmentHumidity()));
-                    player.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityTemp);
+                    EntityTemperatureManager.init(entity);
+                    EntityTemperatureManager.onTick(level, entity);
                 }
             }
         }

@@ -85,6 +85,7 @@ public class ThermiaClient {
                 text.add(colourDarkGreen + "Thermia");
                 text.add(String.format("Environment Temperature: %.2f", playerData.environmentTemperature()));
                 text.add(String.format("Environment Humidity: %.2f", playerData.environmentHumidity()));
+                text.add(String.format("Player internal Temp: %.2f", playerData.internalTemperature()));
             }
         }
     }

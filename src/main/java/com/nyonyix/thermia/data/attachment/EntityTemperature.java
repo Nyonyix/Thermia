@@ -13,8 +13,8 @@ public record EntityTemperature(
         float environmentWetBulb,
         float wetness,
         float sunAngle,
-        int maxInternalTemperature,
-        int minInternalTemperature,
+        float maxInternalTemperature,
+        float minInternalTemperature,
         boolean isWet,
         boolean isUnderground,
         ClosestSource closestSource
@@ -27,8 +27,8 @@ public record EntityTemperature(
        Codec.FLOAT.fieldOf("environment_wet_bulb").forGetter(EntityTemperature::environmentWetBulb),
        Codec.FLOAT.fieldOf("wetness").forGetter(EntityTemperature::wetness),
        Codec.FLOAT.fieldOf("sun_angle").forGetter(EntityTemperature::sunAngle),
-       Codec.INT.fieldOf("max_internal_temperature").forGetter(EntityTemperature::maxInternalTemperature),
-       Codec.INT.fieldOf("min_internal_temperature").forGetter(EntityTemperature::minInternalTemperature),
+       Codec.FLOAT.fieldOf("max_internal_temperature").forGetter(EntityTemperature::maxInternalTemperature),
+       Codec.FLOAT.fieldOf("min_internal_temperature").forGetter(EntityTemperature::minInternalTemperature),
        Codec.BOOL.fieldOf("is_wet").forGetter(EntityTemperature::isWet),
        Codec.BOOL.fieldOf("is_underground").forGetter(EntityTemperature::isUnderground),
        ClosestSource.CODEC.fieldOf("closest_source").forGetter(EntityTemperature::closestSource)
@@ -43,8 +43,8 @@ public record EntityTemperature(
                 buf.writeFloat(temp.environmentWetBulb);
                 buf.writeFloat(temp.wetness);
                 buf.writeFloat(temp.sunAngle);
-                buf.writeInt(temp.maxInternalTemperature);
-                buf.writeInt(temp.minInternalTemperature);
+                buf.writeFloat(temp.maxInternalTemperature);
+                buf.writeFloat(temp.minInternalTemperature);
                 buf.writeBoolean(temp.isWet);
                 buf.writeBoolean(temp.isUnderground);
                 ClosestSource.STREAM_CODEC.encode(buf, temp.closestSource);
@@ -55,15 +55,15 @@ public record EntityTemperature(
                     buf.readFloat(),
                     buf.readFloat(),
                     buf.readFloat(),
-                    buf.readInt(),
-                    buf.readInt(),
+                    buf.readFloat(),
+                    buf.readFloat(),
                     buf.readBoolean(),
                     buf.readBoolean(),
                     ClosestSource.STREAM_CODEC.decode(buf)
             )
     );
 
-    public static EntityTemperature createDefault() {return new EntityTemperature(37f, 13f, 0.5f, 10f, 0f, 45f, 40, 0, false, false, ClosestSource.createDefault());}
+    public static EntityTemperature createDefault() {return new EntityTemperature(20f, 13f, 0.5f, 10f, 0f, 45f, 40, 0, false, false, ClosestSource.createDefault());}
 
     public EntityTemperature withInternalTemperature(float internalTemperature) { return new EntityTemperature(internalTemperature, this.environmentTemperature, this.environmentHumidity, this.environmentWetBulb, this.wetness, this.sunAngle, this.maxInternalTemperature, this.minInternalTemperature, this.isWet, this.isUnderground, this.closestSource);}
 
@@ -77,9 +77,9 @@ public record EntityTemperature(
 
     public EntityTemperature withSunAngle(float sunAngle) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.environmentWetBulb, this.wetness, sunAngle, this.maxInternalTemperature, this.minInternalTemperature, this.isWet, this.isUnderground, this.closestSource);}
 
-    public EntityTemperature withMaxInternalTemperature(int maxInternalTemperature) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.environmentWetBulb, this.wetness, this.sunAngle, maxInternalTemperature, this.minInternalTemperature, this.isWet, this.isUnderground, this.closestSource);}
+    public EntityTemperature withMaxInternalTemperature(float maxInternalTemperature) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.environmentWetBulb, this.wetness, this.sunAngle, maxInternalTemperature, this.minInternalTemperature, this.isWet, this.isUnderground, this.closestSource);}
 
-    public EntityTemperature withMinInternalTemperature(int minInternalTemperature) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.environmentWetBulb, this.wetness, this.sunAngle, this.maxInternalTemperature, minInternalTemperature, this.isWet, this.isUnderground, this.closestSource);}
+    public EntityTemperature withMinInternalTemperature(float minInternalTemperature) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.environmentWetBulb, this.wetness, this.sunAngle, this.maxInternalTemperature, minInternalTemperature, this.isWet, this.isUnderground, this.closestSource);}
 
     public EntityTemperature withIsWet(boolean isWet) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.environmentWetBulb, this.wetness, this.sunAngle, this.maxInternalTemperature, this.minInternalTemperature, isWet, this.isUnderground, this.closestSource);}
 
