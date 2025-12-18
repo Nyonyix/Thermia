@@ -2,6 +2,7 @@ package com.nyonyix.thermia.client;
 
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
+import com.nyonyix.thermia.data.attachment.ChunkHumidity;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
@@ -17,6 +18,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -79,11 +81,21 @@ public class ThermiaClient {
                 text.add(String.format("    Environment Humidity: %.2f", playerData.environmentHumidity()));
                 text.add(String.format("    Player internal Temp: %.2f", playerData.internalTemperature()));
 
-                Level level = clientPlayer.level();
-                ClimateModel model = Climate.get(level);
                 text.add("Chunk:");
-                text.add(String.format("    Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(model.getAverageTemperature(level, pos), model.getRainfall(level, pos), model.getRainfallVariance(level, pos), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
-                text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos)));
+                LevelChunk chunk = clientPlayer.level().getChunkAt(pos);
+                if(chunk.hasData(ThermiaAttachments.CHUNK_HUMIDITY))
+                {
+                    Level level = clientPlayer.level();
+                    ClimateModel model = Climate.get(level);
+                    ChunkHumidity chunkHumidity = chunk.getData(ThermiaAttachments.CHUNK_HUMIDITY);
+                    text.add(String.format("    Chunk Humidity: %.2f", chunkHumidity.humidity()));
+                    text.add(String.format("    Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(model.getAverageTemperature(level, pos), model.getRainfall(level, pos), model.getRainfallVariance(level, pos), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
+                    text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos)));
+                }
+                else
+                {
+                    text.add(String.format("Waiting for Chunk Data"));
+                }
             }
         }
     }

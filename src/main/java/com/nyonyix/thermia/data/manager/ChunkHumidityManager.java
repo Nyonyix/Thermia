@@ -37,7 +37,7 @@ public class ChunkHumidityManager
             Level level = chunk.getLevel();
             int chunkCenterX = chunk.getPos().getWorldPosition().getX() + 8;
             int chunkCenterZ = chunk.getPos().getWorldPosition().getZ() + 8;
-            BlockPos pos = new BlockPos(chunkCenterX, chunk.getHeight(Heightmap.Types.WORLD_SURFACE, chunkCenterX & 15, chunkCenterZ & 15), chunkCenterZ).above();
+            BlockPos pos = new BlockPos(chunkCenterX, chunk.getHeight(Heightmap.Types.WORLD_SURFACE, chunkCenterX, chunkCenterZ), chunkCenterZ).above();
 
             humidity = EnvironmentHelpers.getClimateSpecificHumidity(level, pos, level.random, humidity);
 
@@ -75,12 +75,14 @@ public class ChunkHumidityManager
         Iterator<ChunkPos> iterChunk = working.iterator();
         while (iterChunk.hasNext() && processed < batchSize)
         {
-            ChunkPos pos = working.iterator().next();
+            ChunkPos pos = iterChunk.next();
             iterChunk.remove();
 
             if (!level.hasChunk(pos.x, pos.z)) continue;
             LevelChunk chunk = level.getChunkSource().getChunkNow(pos.x, pos.z);
             if (chunk == null) continue;
+
+            if (level.getChunkSource().chunkMap.getVisibleChunkIfPresent(pos.toLong()) == null) return;
 
             updateChunk(chunk);
             processed++;
