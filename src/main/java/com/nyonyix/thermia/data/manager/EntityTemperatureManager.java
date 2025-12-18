@@ -58,7 +58,7 @@ public class EntityTemperatureManager
             BlockPos pos = entity.blockPosition();
             RandomSource random = level.random;
 
-            entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getClimateSpecificHumidity(level, pos, random, entityData.environmentHumidity()));
+            entityData = entityData.withEnvironmentHumidity(level.getChunkAt(entity.blockPosition()).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity());
             entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, Climate.getTemperature(level, pos), entityData.environmentHumidity()));
 
             entityData = entityData.withInternalTemperature(Mth.approach(entityData.internalTemperature(), entityData.environmentTemperature(), 0.1f));

@@ -19,6 +19,8 @@ import net.minecraft.world.phys.Vec2;
 
 public class EnvironmentHelpers
 {
+    // Temperature
+
     public static float calcWetBulbTemperature(float temp, float humidity)
     {
         humidity *= 100f;
@@ -58,33 +60,7 @@ public class EnvironmentHelpers
         return (float) Math.sqrt(windComponent * humidityComponent);
     }
 
-//    public static float calcSeasonalHumidity(Level level, BlockPos pos, RandomSource random, float previousHumidity)
-//    {
-//        KoppenClimateHumidity koppenClimateHumidity = getKoppenHumidity(level, pos);
-//        Month month = getEffectiveMonthOfYear(level, pos);
-//
-//        float koppenClimateRangeDelta = koppenClimateHumidity.maxHumidity() - koppenClimateHumidity.minHumidity();
-//        float seasonalShift = koppenClimateRangeDelta * getSeasonalHumidityShift(month, koppenClimateHumidity);
-//
-//        float newHumidity = random.nextBoolean() ? previousHumidity + seasonalShift : previousHumidity - seasonalShift;
-//
-//        return Mth.clamp(newHumidity, koppenClimateHumidity.minHumidity(), koppenClimateHumidity.maxHumidity());
-//    }
-
-    public static float calcSeasonalHumidity(Level level, BlockPos pos, RandomSource random, float previousHumidity)
-    {
-        KoppenClimateHumidity koppenClimateHumidity = getKoppenHumidity(level, pos);
-        Month month = getEffectiveMonthOfYear(level, pos);
-        float seasonalShift = getSeasonalHumidityShift(month, koppenClimateHumidity);
-
-        float seasonalMax = Math.max(1f, koppenClimateHumidity.maxHumidity() + seasonalShift);
-        float seasonalMin = Math.min(0f, koppenClimateHumidity.minHumidity() + seasonalShift);
-
-        float randomChange = (random.nextFloat() * 0.2f - 0.1f) * previousHumidity;
-        float newHumidity = previousHumidity + randomChange;
-
-        return Math.max(seasonalMin, Math.min(seasonalMax, newHumidity));
-    }
+    // Wind
 
     public static float getWindSpeed(Level level, BlockPos pos)
     {
@@ -100,35 +76,7 @@ public class EnvironmentHelpers
         return (float) Math.atan2(windVector.y, windVector.x);
     }
 
-    public static float getHumidityRainfall(Level level, BlockPos pos)
-    {
-        if (!(Climate.get(level) instanceof OverworldClimateModel overworldClimateModel)) return 0.5f;
-
-        float rainfall = overworldClimateModel.getAverageRainfall(level, pos);
-        float baseHumidity = Mth.clampedMap(rainfall, 0.0f, 500f, 0.2f, 0.9f);
-
-        float temperature = Climate.getTemperature(level, pos);
-        float tempAdjustment = Mth.clampedMap(temperature, -10f, 35f, 0.1f, -0.1f);
-
-        return Mth.clamp(baseHumidity + tempAdjustment, 0.0f, 1.0f);
-    }
-
-    public static float getHumidityWeather(Level level, BlockPos pos)
-    {
-        if (!(Climate.get(level) instanceof OverworldClimateModel overworldClimateModel)) return 0.5f;
-
-        float humidity = getHumidityRainfall(level, pos);
-
-        long calenderTick = Calendars.get(level).getTicks();
-        float rainIntensity = overworldClimateModel.getRain(calenderTick);
-        float rainfall = Climate.getRainfall(level, pos);
-
-        if (WeatherHelpers.isPrecipitating(rainIntensity, rainfall)) humidity = Mth.lerp(0.7f, humidity, 0.95f);
-
-        if (overworldClimateModel.getThunder(calenderTick)) humidity = Math.max(humidity, 0.90f);
-
-        return Mth.clamp(humidity, 0.0f, 1.0f);
-    }
+    // Solar Radiation
 
     public static float getSolarRadiation(Level level, BlockPos pos)
     {
@@ -170,6 +118,8 @@ public class EnvironmentHelpers
         return Mth.clamp(baseRadiation, 0.0f, 1.0f);
     }
 
+    // Util
+
     public static Month getEffectiveMonthOfYear(Level level, BlockPos pos)
     {
         Month month = Calendars.get(level).getAbsoluteCalendarMonthOfYear();
@@ -191,17 +141,42 @@ public class EnvironmentHelpers
         return KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.getOrDefault(climate, KoppenClimateHumidity.createDefault());
     }
 
+
+
+    // Humidity
+
+    public static float getKoppenClimateDefaultHumidity(KoppenClimateHumidity koppenClimateHumidity)
+    {
+        float delta = koppenClimateHumidity.maxHumidity() - koppenClimateHumidity.minHumidity();
+        return koppenClimateHumidity.minHumidity() + delta / 2;
+    }
+
     public static float getSeasonalHumidityShift(Month month, KoppenClimateHumidity koppenClimateHumidity)
     {
         float tempModifier = month.getTemperatureModifier();
         return tempModifier * koppenClimateHumidity.seasonalVariation();
     }
 
-    public static float getClimateSpecificHumidity(Level level, BlockPos pos, RandomSource random, float previousHumidity)
+    public static float calcSeasonalHumidity(Level level, BlockPos pos, RandomSource random, float previousHumidity)
     {
         KoppenClimateHumidity koppenClimateHumidity = getKoppenHumidity(level, pos);
         Month month = getEffectiveMonthOfYear(level, pos);
+        float seasonalShift = getSeasonalHumidityShift(month, koppenClimateHumidity);
 
+        float seasonalMax = Math.max(1f, koppenClimateHumidity.maxHumidity() + seasonalShift);
+        float seasonalMin = Math.min(0f, koppenClimateHumidity.minHumidity() + seasonalShift);
+
+        float randomChange = (random.nextFloat() * 0.2f - 0.1f) * previousHumidity;
+        float newHumidity = previousHumidity + randomChange;
+
+        return Math.max(seasonalMin, Math.min(seasonalMax, newHumidity));
+    }
+
+    public static float getClimateSpecificHumidity(Level level, BlockPos pos, RandomSource random)
+    {
+        KoppenClimateHumidity koppenClimateHumidity = getKoppenHumidity(level, pos);
+        Month month = getEffectiveMonthOfYear(level, pos);
+        float previousHumidity = getKoppenClimateDefaultHumidity(koppenClimateHumidity);
         float humidity = calcSeasonalHumidity(level, pos, random, previousHumidity);
 
         switch (koppenClimateHumidity.climateClass())
@@ -238,5 +213,35 @@ public class EnvironmentHelpers
         }
 
         return Mth.clamp(humidity, 0.0f, 1.0f);
+    }
+
+    public static float getHumidityWeather(Level level, BlockPos pos)
+    {
+        if (!(Climate.get(level) instanceof OverworldClimateModel overworldClimateModel)) return 0.5f;
+
+        float humidity = getHumidityRainfall(level, pos);
+
+        long calenderTick = Calendars.get(level).getTicks();
+        float rainIntensity = overworldClimateModel.getRain(calenderTick);
+        float rainfall = Climate.getRainfall(level, pos);
+
+        if (WeatherHelpers.isPrecipitating(rainIntensity, rainfall)) humidity = Mth.lerp(0.7f, humidity, 0.95f);
+
+        if (overworldClimateModel.getThunder(calenderTick)) humidity = Math.max(humidity, 0.90f);
+
+        return Mth.clamp(humidity, 0.0f, 1.0f);
+    }
+
+    public static float getHumidityRainfall(Level level, BlockPos pos)
+    {
+        if (!(Climate.get(level) instanceof OverworldClimateModel overworldClimateModel)) return 0.5f;
+
+        float rainfall = overworldClimateModel.getAverageRainfall(level, pos);
+        float baseHumidity = Mth.clampedMap(rainfall, 0.0f, 500f, 0.2f, 0.9f);
+
+        float temperature = Climate.getTemperature(level, pos);
+        float tempAdjustment = Mth.clampedMap(temperature, -10f, 35f, 0.1f, -0.1f);
+
+        return Mth.clamp(baseHumidity + tempAdjustment, 0.0f, 1.0f);
     }
 }

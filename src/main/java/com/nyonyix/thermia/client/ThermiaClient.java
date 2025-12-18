@@ -83,19 +83,10 @@ public class ThermiaClient {
 
                 text.add("Chunk:");
                 LevelChunk chunk = clientPlayer.level().getChunkAt(pos);
-                if(chunk.hasData(ThermiaAttachments.CHUNK_HUMIDITY))
-                {
-                    Level level = clientPlayer.level();
-                    ClimateModel model = Climate.get(level);
-                    ChunkHumidity chunkHumidity = chunk.getData(ThermiaAttachments.CHUNK_HUMIDITY);
-                    text.add(String.format("    Chunk Humidity: %.2f", chunkHumidity.humidity()));
-                    text.add(String.format("    Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(model.getAverageTemperature(level, pos), model.getRainfall(level, pos), model.getRainfallVariance(level, pos), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
-                    text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos)));
-                }
-                else
-                {
-                    text.add(String.format("Waiting for Chunk Data"));
-                }
+                Level level = clientPlayer.level();
+                ClimateModel model = Climate.get(level);
+                text.add(String.format("    Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(model.getAverageTemperature(level, pos), model.getRainfall(level, pos), model.getRainfallVariance(level, pos), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
+                text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos)));
             }
         }
     }
