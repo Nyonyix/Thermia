@@ -1,5 +1,7 @@
 package com.nyonyix.thermia.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.attachment.ChunkHumidity;
@@ -13,12 +15,15 @@ import net.dries007.tfc.util.climate.ClimateModel;
 import net.dries007.tfc.util.climate.KoppenClimateClassification;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -27,8 +32,11 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import org.codehaus.plexus.util.dag.Vertex;
+import org.joml.Matrix4f;
 
 import java.util.Calendar;
 import java.util.List;
@@ -89,5 +97,57 @@ public class ThermiaClient {
                 text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos, playerData.sunOcclusionPos().shade())));
             }
         }
+    }
+
+    public static void onRenderLevel(RenderLevelStageEvent event)
+    {
+        if (!Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) return;
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
+
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null) return;
+
+        PoseStack poseStack = event.getPoseStack();
+        MultiBufferSource.BufferSource bufferSource = minecraft.renderBuffers().bufferSource();
+        Vec3 cameraPos = event.getCamera().getPosition();
+
+        for (Entity entity : minecraft.level.entitiesForRendering())
+        {
+            if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
+
+            EntityTemperature tempData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
+            BlockPos occlusionPos = tempData.sunOcclusionPos().sunOcclusionPos();
+
+            if (occlusionPos.equals(BlockPos.ZERO)) continue;
+
+            renderSunOcclusionLine(poseStack, bufferSource, cameraPos, entity.position(), Vec3.atCenterOf(occlusionPos));
+        }
+    }
+
+    private static void renderSunOcclusionLine(PoseStack poseStack, MultiBufferSource bufferSource, Vec3 cameraPos, Vec3 entityPos, Vec3 occlusionPos)
+    {
+        poseStack.pushPose();
+        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
+        VertexConsumer buffer = bufferSource.getBuffer(RenderType.lines());
+        Matrix4f matrix = poseStack.last().pose();
+
+        float startX = (float) entityPos.x;
+        float startY = (float) entityPos.y + 0.5f;
+        float startZ = (float) entityPos.z;
+
+        float endX = (float) occlusionPos.x;
+        float endY = (float) occlusionPos.y;
+        float endZ = (float) occlusionPos.z;
+
+        float r = 1.0f;
+        float g = 1.0f;
+        float b = 0.0f;
+        float a = 0.8f;
+
+        buffer.addVertex(matrix, startX, startY, startZ).setColor(r, g, b, a).setNormal(0, 1, 0);
+        buffer.addVertex(matrix, endX, endY, endZ).setColor(r, g, b, a).setNormal(0, 1, 0);
+
+        poseStack.popPose();
     }
 }
