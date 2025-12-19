@@ -1,14 +1,22 @@
 package com.nyonyix.thermia.util;
 
 import com.mojang.logging.LogUtils;
+import com.nyonyix.thermia.data.SolarShadeResult;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import org.slf4j.Logger;
 
 import com.nyonyix.thermia.data.BlockSearchResult;
@@ -64,11 +72,46 @@ public class BlockSearch
             allPositions.computeIfAbsent(BuiltInRegistries.BLOCK.get(blockId), k -> new ArrayList<>()).add(pos);
             totalCount++;
         }
-
     }
 
-    public class SearchForBlock
+    public static class SearchForBlock
     {
+        private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, int searchCap, Set<Block> targetBlocks, BlockSearchBuilder builder)
+        {
+            LevelChunkSection[] sections = chunk.getSections();
+            BlockPos chunkPos = chunk.getPos().getWorldPosition();
+
+            for (int sectionIdX = 0; sectionIdX < sections.length; sectionIdX++)
+            {
+                LevelChunkSection section = sections[sectionIdX];
+                if (section == null || section.hasOnlyAir()) continue;
+
+                int sectionY = chunk.getMinBuildHeight() + (sectionIdX * 16);
+
+                for (int x = 0; x < 16; x++)
+                {
+                    for (int z = 0; z < 16; z++)
+                    {
+                        for (int y = 0; y < 16; y++)
+                        {
+                            BlockPos pos = new BlockPos(chunkPos.getX() + x, sectionY + y, chunkPos.getZ() + z);
+
+                            double distSq = center.distSqr(pos);
+                            if (distSq > radiusSq) continue;
+
+                            Block block = section.getBlockState(x, y, z).getBlock();
+
+                            if (targetBlocks.contains(block))
+                            {
+                                builder.setNearest(pos.immutable(), distSq);
+                                builder.addBlock(pos.immutable(), block);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public static BlockSearchResult searchAll(Level level, BlockPos center, int radius, int searchCap, Set<Block> targetBlocks)
         {
             BlockSearchBuilder builder = new BlockSearchBuilder();
@@ -141,40 +184,67 @@ public class BlockSearch
             return searchAllAsync(level, center, radius, searchCap, new HashSet<>(Arrays.asList(targetBlocks)));
         }
 
-        private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, int searchCap, Set<Block> targetBlocks, BlockSearchBuilder builder)
+        public static SolarShadeResult getSolarShade(Level level, BlockPos pos, float zenith, float azimuth)
         {
-            LevelChunkSection[] sections = chunk.getSections();
-            BlockPos chunkPos = chunk.getPos().getWorldPosition();
+            float sinZenith = (float) Math.sin(zenith);
+            float cosZenith = (float) Math.cos(zenith);
+            float sinAzimuth = (float) Math.sin(azimuth);
+            float cosAzimuth = (float) Math.cos(azimuth);
 
-            for (int sectionIdX = 0; sectionIdX < sections.length; sectionIdX++)
+            double sunDirX = sinZenith * sinAzimuth;
+            double sunDirY = cosZenith;
+            double sunDirZ = sinZenith * cosAzimuth;
+
+            if (sunDirY <=0) return new SolarShadeResult(0.1f, pos);
+
+            if (zenith < Math.PI && !level.canSeeSky(pos.above())) return new SolarShadeResult(0.1f, pos);
+
+            double shadowSoftness = Mth.lerp((float) (zenith / (Math.PI / 2.0)), 2.0, 6.0);
+            double horizMag = Math.sqrt(sunDirX * sunDirX + sunDirZ * sunDirZ);
+
+            if (horizMag > 1e-4)
             {
-                LevelChunkSection section = sections[sectionIdX];
-                if (section == null || section.hasOnlyAir()) continue;
+                int maxDistance = zenith > Math.PI / 3.0 ? 200 : 100;
+                int sampleInterval = zenith > Math.PI / 3.0 ? 12 : 20;
 
-                int sectionY = chunk.getMinBuildHeight() + (sectionIdX * 16);
-
-                for (int x = 0; x < 16; x++)
+                for (int distance = sampleInterval; distance <= maxDistance; distance += sampleInterval)
                 {
-                    for (int z = 0; z < 16; z++)
-                    {
-                        for (int y = 0; y < 16; y++)
-                        {
-                            BlockPos pos = new BlockPos(chunkPos.getX() + x, sectionY + y, chunkPos.getZ() + z);
+                    int sampleX = (int) (pos.getX() + sunDirX * distance);
+                    int sampleZ = (int) (pos.getZ() + sunDirX * distance);
 
-                            double distSq = center.distSqr(pos);
-                            if (distSq > radiusSq) continue;
+                    if (!level.getChunkSource().hasChunk(sampleX / 16, sampleZ / 16)) continue;
 
-                            Block block = section.getBlockState(x, y, z).getBlock();
+                    int terrainHeight = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sampleX, sampleZ);
 
-                            if (targetBlocks.contains(block))
-                            {
-                                builder.setNearest(pos.immutable(), distSq);
-                                builder.addBlock(pos.immutable(), block);
-                            }
-                        }
-                    }
+                    double t = distance / horizMag;
+                    double expectedHeight = pos.getY() + t * sunDirY;
+
+                    double delta = terrainHeight - expectedHeight;
+
+                    if (delta > shadowSoftness) return new SolarShadeResult(Mth.clamp((float) (1.0 - delta / 8.0), distance < 40 ? 0.15f : distance < 100 ? 0.30f : 0.50f, 0.9f), new BlockPos(sampleX, pos.getY(), sampleZ));
                 }
             }
+
+            double localRayDistance = zenith > Math.PI / 3.0 ? 32.0 : zenith > Math.PI / 6.0 ? 24.0 : 16.0;
+
+            Vec3 startVec = Vec3.atCenterOf(pos);
+            Vec3 endVec = startVec.add(sunDirX * localRayDistance, sunDirY * localRayDistance, sunDirZ * localRayDistance);
+            endVec = new Vec3(endVec.x, Math.min(endVec.y, level.getMaxBuildHeight()), endVec.z);
+
+            ClipContext context = new ClipContext(startVec, endVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+            BlockHitResult hit = level.clip(context);
+
+            if (hit.getType() != HitResult.Type.MISS)
+            {
+                double hitDist = startVec.distanceTo(hit.getLocation());
+
+                if (hitDist < 3.0) return new SolarShadeResult(0.15f, hit.getBlockPos());
+                if (hitDist < 6.0) return new SolarShadeResult(Mth.lerp((float) ((hitDist / 3.0) / 5.0), 0.15f, 0.4f), hit.getBlockPos());
+                if (hitDist < 16.0) return new SolarShadeResult(Mth.lerp((float) ((hitDist - 8.0) / 8.0), 0.4f, 0.7f), hit.getBlockPos());
+                return new SolarShadeResult(Mth.lerp((float) ((hitDist - 16) / (localRayDistance - 16)), 0.7f, 0.9f), hit.getBlockPos());
+            }
+
+            return SolarShadeResult.createDefault();
         }
     }
 

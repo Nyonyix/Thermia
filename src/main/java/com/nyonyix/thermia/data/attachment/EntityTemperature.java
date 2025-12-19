@@ -3,7 +3,7 @@ package com.nyonyix.thermia.data.attachment;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.nyonyix.thermia.data.ClosestSource;
-import net.minecraft.core.BlockPos;
+import com.nyonyix.thermia.data.SolarShadeResult;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -18,7 +18,7 @@ public record EntityTemperature(
         boolean isWet,
         boolean isUnderground,
         ClosestSource closestSource,
-        BlockPos sunOcclusionPos
+        SolarShadeResult sunOcclusionPos
 )
 {
     public static final Codec<EntityTemperature> CODEC = RecordCodecBuilder.create(entityTemperatureInstance -> entityTemperatureInstance.group(
@@ -32,7 +32,7 @@ public record EntityTemperature(
        Codec.BOOL.fieldOf("is_wet").forGetter(EntityTemperature::isWet),
        Codec.BOOL.fieldOf("is_underground").forGetter(EntityTemperature::isUnderground),
        ClosestSource.CODEC.fieldOf("closest_source").forGetter(EntityTemperature::closestSource),
-       BlockPos.CODEC.fieldOf("sun_occlusion_pos").forGetter(EntityTemperature::sunOcclusionPos)
+       SolarShadeResult.CODEC.fieldOf("sun_occlusion_pos").forGetter(EntityTemperature::sunOcclusionPos)
     ).apply(entityTemperatureInstance, EntityTemperature::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EntityTemperature> STREAM_CODEC = StreamCodec.of(
@@ -48,7 +48,7 @@ public record EntityTemperature(
                 buf.writeBoolean(temp.isWet);
                 buf.writeBoolean(temp.isUnderground);
                 ClosestSource.STREAM_CODEC.encode(buf, temp.closestSource);
-                BlockPos.STREAM_CODEC.encode(buf, temp.sunOcclusionPos);
+                SolarShadeResult.STREAM_CODEC.encode(buf, temp.sunOcclusionPos);
             }, (buf) -> new EntityTemperature(
                     buf.readFloat(),
                     buf.readFloat(),
@@ -60,11 +60,11 @@ public record EntityTemperature(
                     buf.readBoolean(),
                     buf.readBoolean(),
                     ClosestSource.STREAM_CODEC.decode(buf),
-                    BlockPos.STREAM_CODEC.decode(buf)
+                    SolarShadeResult.STREAM_CODEC.decode(buf)
             )
     );
 
-    public static EntityTemperature createDefault() {return new EntityTemperature(20f, 13f, 0.5f, 0f, 45f, 40, 0, false, false, ClosestSource.createDefault(), BlockPos.ZERO);}
+    public static EntityTemperature createDefault() {return new EntityTemperature(20f, 13f, 0.5f, 0f, 45f, 40, 0, false, false, ClosestSource.createDefault(), SolarShadeResult.createDefault());}
 
     public EntityTemperature withInternalTemperature(float internalTemperature) { return new EntityTemperature(internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.sunAngle, this.maxInternalTemperature, this.minInternalTemperature, this.isWet, this.isUnderground, this.closestSource, this.sunOcclusionPos);}
 
@@ -86,5 +86,5 @@ public record EntityTemperature(
 
     public EntityTemperature withClosestSource(ClosestSource closestSource) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.sunAngle, this.maxInternalTemperature, this.minInternalTemperature, this.isWet, this.isUnderground, closestSource, this.sunOcclusionPos);}
 
-    public EntityTemperature withSunOcclusionPos(BlockPos sunOcclusionPos) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.sunAngle, this.maxInternalTemperature, this.minInternalTemperature, this.isWet, this.isUnderground, closestSource, sunOcclusionPos);}
+    public EntityTemperature withSunOcclusionPos(SolarShadeResult sunOcclusionPos) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.sunAngle, this.maxInternalTemperature, this.minInternalTemperature, this.isWet, this.isUnderground, closestSource, sunOcclusionPos);}
 }

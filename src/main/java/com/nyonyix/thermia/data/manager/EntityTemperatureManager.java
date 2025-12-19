@@ -5,9 +5,13 @@ import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
+import com.nyonyix.thermia.util.BlockSearch;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
+import net.dries007.tfc.client.overworld.SkyPos;
+import net.dries007.tfc.client.overworld.SolarCalculator;
 import net.dries007.tfc.common.entities.livestock.TFCAnimal;
 import net.dries007.tfc.common.entities.livestock.TFCAnimalProperties;
+import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.climate.Climate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -55,9 +59,18 @@ public class EntityTemperatureManager
 
             BlockPos pos = entity.blockPosition();
             RandomSource random = level.random;
+            long calendarTick = Calendars.get(level).getTicks();
+            float fractionOfDay = Calendars.get(level).getCalendarFractionOfDay();
+            float fractionOfYear = Calendars.get(level).getCalendarFractionOfYear();
+            float fractionOfMonth = Calendars.get(level).getCalendarFractionOfMonth();
+            float hemisphereScale = Climate.get(level).hemisphereScale();
+
+            SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
 
             entityData = entityData.withEnvironmentHumidity(level.getChunkAt(entity.blockPosition()).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity());
-            entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, Climate.getTemperature(level, pos), entityData.environmentHumidity()));
+
+            entityData = entityData.withSunOcclusionPos(BlockSearch.SearchForBlock.getSolarShade(level, pos, sunPos.zenith(), sunPos.azimuth()));
+            entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, Climate.getTemperature(level, pos), entityData.environmentHumidity(), entityData.sunOcclusionPos().shade()));
 
             entityData = entityData.withInternalTemperature(Mth.approach(entityData.internalTemperature(), entityData.environmentTemperature(), 0.1f));
 

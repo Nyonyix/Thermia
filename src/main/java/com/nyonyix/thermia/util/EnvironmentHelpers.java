@@ -43,10 +43,10 @@ public class EnvironmentHelpers
         return temperature + solarHeating;
     }
 
-    public static float calcWetBulbGlobeTemperature(Level level, BlockPos pos, float temp, float humidity)
+    public static float calcWetBulbGlobeTemperature(Level level, BlockPos pos, float temp, float humidity, float shade)
     {
         float wetBulb = calcWetBulbTemperature(temp, humidity);
-        float solarRadiation = getSolarRadiationWeather(level, pos);
+        float solarRadiation = getSolarRadiationWeather(level, pos, shade);
         float windSpeed = getWindSpeed(level, pos);
         float globeTemp = calcGlobeTemperature(temp, solarRadiation, windSpeed);
 
@@ -85,70 +85,7 @@ public class EnvironmentHelpers
 
     // Solar Radiation
 
-    private static float getSolarShade(Level level, BlockPos pos, float zenith, float azimuth)
-    {
-        float sinZenith = (float) Math.sin(zenith);
-        float cosZenith = (float) Math.cos(zenith);
-        float sinAzimuth = (float) Math.sin(azimuth);
-        float cosAzimuth = (float) Math.cos(azimuth);
-
-        double sunDirX = sinZenith * sinAzimuth;
-        double sunDirY = cosZenith;
-        double sunDirZ = sinZenith * cosAzimuth;
-
-        if (sunDirY <=0) return 0.1f;
-
-        if (zenith < Math.PI && !level.canSeeSky(pos.above())) return 0.1f;
-
-        double shadowSoftness = Mth.lerp((float) (zenith / (Math.PI / 2.0)), 2.0, 6.0);
-        double horizMag = Math.sqrt(sunDirX * sunDirX + sunDirZ * sunDirZ);
-
-        if (horizMag > 1e-4)
-        {
-            int maxDistance = zenith > Math.PI / 3.0 ? 200 : 100;
-            int sampleInterval = zenith > Math.PI / 3.0 ? 12 : 20;
-
-            for (int distance = sampleInterval; distance <= maxDistance; distance += sampleInterval)
-            {
-                int sampleX = (int) (pos.getX() + sunDirX * distance);
-                int sampleZ = (int) (pos.getZ() + sunDirX * distance);
-
-                if (!level.getChunkSource().hasChunk(sampleX / 16, sampleZ / 16)) continue;
-
-                int terrainHeight = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sampleX, sampleZ);
-
-                double t = distance / horizMag;
-                double expectedHeight = pos.getY() + t * sunDirY;
-
-                double delta = terrainHeight - expectedHeight;
-
-                if (delta > shadowSoftness) return Mth.clamp((float) (1.0 - delta / 8.0), distance < 40 ? 0.15f : distance < 100 ? 0.30f : 0.50f, 0.9f);
-            }
-        }
-
-        double localRayDistance = zenith > Math.PI / 3.0 ? 32.0 : zenith > Math.PI / 6.0 ? 24.0 : 16.0;
-
-        Vec3 startVec = Vec3.atCenterOf(pos);
-        Vec3 endVec = startVec.add(sunDirX * localRayDistance, sunDirY * localRayDistance, sunDirZ * localRayDistance);
-        endVec = new Vec3(endVec.x, Math.min(endVec.y, level.getMaxBuildHeight()), endVec.z);
-
-        ClipContext context = new ClipContext(startVec, endVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
-        BlockHitResult hit = level.clip(context);
-
-        if (hit.getType() != HitResult.Type.MISS)
-        {
-            double hitDist = startVec.distanceTo(hit.getLocation());
-
-            if (hitDist < 3.0) return 0.15f;
-            if (hitDist < 6.0) return Mth.lerp((float) ((hitDist / 3.0) / 5.0), 0.15f, 0.4f);
-            if (hitDist < 16.0) return Mth.lerp((float) ((hitDist - 8.0) / 8.0), 0.4f, 0.7f);
-            return Mth.lerp((float) ((hitDist - 16) / (localRayDistance - 16)), 0.7f, 0.9f);
-        }
-
-        return 1.0f;
-    }
-
-    public static float getSolarRadiation(Level level, BlockPos pos)
+    public static float getSolarRadiation(Level level, BlockPos pos, float shade)
     {
         long calendarTick = Calendars.get(level).getTicks();
         float fractionOfDay = Calendars.get(level).getCalendarFractionOfDay();
@@ -158,7 +95,6 @@ public class EnvironmentHelpers
 
         SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
         float zenith = sunPos.zenith();
-        float azimuth = sunPos.azimuth();
 
         if (zenith >= Math.PI / 1.8f) return 0.0f;
 
@@ -169,17 +105,16 @@ public class EnvironmentHelpers
 
 //        if (!level.canSeeSky(pos.above())) return radiation *= 0.1f;
 
-        float shade = getSolarShade(level, pos, zenith, azimuth);
         radiation *= shade;
 
         return Mth.clamp(radiation, 0.0f, 1.0f);
     }
 
-    public static float getSolarRadiationWeather(Level level, BlockPos pos)
+    public static float getSolarRadiationWeather(Level level, BlockPos pos, float shade)
     {
         if (!(Climate.get(level) instanceof OverworldClimateModel overworldClimateModel)) return 0.5f;
 
-        float baseRadiation = getSolarRadiation(level, pos);
+        float baseRadiation = getSolarRadiation(level, pos, shade);
 
         long calendarTick = Calendars.get(level).getTicks();
         float rainIntensity = overworldClimateModel.getRain(calendarTick);
