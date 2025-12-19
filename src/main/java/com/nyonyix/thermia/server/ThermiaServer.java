@@ -141,6 +141,7 @@ public class ThermiaServer
 
         chunk.getData(ThermiaAttachments.CHUNK_HUMIDITY);
         ChunkHumidityManager.loadedChunkCache.computeIfAbsent(level, k -> new HashSet<>()).add(pos);
+        ChunkHumidityManager.workingChunkCache.computeIfAbsent(level, k -> new HashSet<>()).add(pos);
     }
 
     @SubscribeEvent

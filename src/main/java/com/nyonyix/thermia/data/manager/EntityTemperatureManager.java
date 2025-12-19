@@ -24,15 +24,13 @@ public class EntityTemperatureManager
 
     private static boolean shouldGetSystem(Entity entity)
     {
-        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
-
         EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
         if (dataMap == null) return false;
 
         if (!dataMap.isMob()) return true;
         if (!dataMap.isTamed()) return true;
 
-        if (entity instanceof TFCAnimalProperties tfcAnimalProperties) {return tfcAnimalProperties.getFamiliarity() >= 0.18f;}
+        if (entity instanceof TFCAnimalProperties tfcAnimalProperties) {return tfcAnimalProperties.getFamiliarity() >= 0.15f;}
         else if (entity instanceof OwnableEntity ownableEntity) {return ownableEntity.getOwnerUUID() != null;}
 
         return false;

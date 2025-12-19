@@ -14,8 +14,15 @@ import net.dries007.tfc.util.tracker.WeatherHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class EnvironmentHelpers
 {
@@ -78,6 +85,69 @@ public class EnvironmentHelpers
 
     // Solar Radiation
 
+    private static float getSolarShade(Level level, BlockPos pos, float zenith, float azimuth)
+    {
+        float sinZenith = (float) Math.sin(zenith);
+        float cosZenith = (float) Math.cos(zenith);
+        float sinAzimuth = (float) Math.sin(azimuth);
+        float cosAzimuth = (float) Math.cos(azimuth);
+
+        double sunDirX = sinZenith * sinAzimuth;
+        double sunDirY = cosZenith;
+        double sunDirZ = sinZenith * cosAzimuth;
+
+        if (sunDirY <=0) return 0.1f;
+
+        if (zenith < Math.PI && !level.canSeeSky(pos.above())) return 0.1f;
+
+        double shadowSoftness = Mth.lerp((float) (zenith / (Math.PI / 2.0)), 2.0, 6.0);
+        double horizMag = Math.sqrt(sunDirX * sunDirX + sunDirZ * sunDirZ);
+
+        if (horizMag > 1e-4)
+        {
+            int maxDistance = zenith > Math.PI / 3.0 ? 200 : 100;
+            int sampleInterval = zenith > Math.PI / 3.0 ? 12 : 20;
+
+            for (int distance = sampleInterval; distance <= maxDistance; distance += sampleInterval)
+            {
+                int sampleX = (int) (pos.getX() + sunDirX * distance);
+                int sampleZ = (int) (pos.getZ() + sunDirX * distance);
+
+                if (!level.getChunkSource().hasChunk(sampleX / 16, sampleZ / 16)) continue;
+
+                int terrainHeight = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sampleX, sampleZ);
+
+                double t = distance / horizMag;
+                double expectedHeight = pos.getY() + t * sunDirY;
+
+                double delta = terrainHeight - expectedHeight;
+
+                if (delta > shadowSoftness) return Mth.clamp((float) (1.0 - delta / 8.0), distance < 40 ? 0.15f : distance < 100 ? 0.30f : 0.50f, 0.9f);
+            }
+        }
+
+        double localRayDistance = zenith > Math.PI / 3.0 ? 32.0 : zenith > Math.PI / 6.0 ? 24.0 : 16.0;
+
+        Vec3 startVec = Vec3.atCenterOf(pos);
+        Vec3 endVec = startVec.add(sunDirX * localRayDistance, sunDirY * localRayDistance, sunDirZ * localRayDistance);
+        endVec = new Vec3(endVec.x, Math.min(endVec.y, level.getMaxBuildHeight()), endVec.z);
+
+        ClipContext context = new ClipContext(startVec, endVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+        BlockHitResult hit = level.clip(context);
+
+        if (hit.getType() != HitResult.Type.MISS)
+        {
+            double hitDist = startVec.distanceTo(hit.getLocation());
+
+            if (hitDist < 3.0) return 0.15f;
+            if (hitDist < 6.0) return Mth.lerp((float) ((hitDist / 3.0) / 5.0), 0.15f, 0.4f);
+            if (hitDist < 16.0) return Mth.lerp((float) ((hitDist - 8.0) / 8.0), 0.4f, 0.7f);
+            return Mth.lerp((float) ((hitDist - 16) / (localRayDistance - 16)), 0.7f, 0.9f);
+        }
+
+        return 1.0f;
+    }
+
     public static float getSolarRadiation(Level level, BlockPos pos)
     {
         long calendarTick = Calendars.get(level).getTicks();
@@ -88,15 +158,19 @@ public class EnvironmentHelpers
 
         SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
         float zenith = sunPos.zenith();
+        float azimuth = sunPos.azimuth();
 
-        if (zenith >= Math.PI / 2f) return 0.0f;
+        if (zenith >= Math.PI / 1.8f) return 0.0f;
 
         float directRadiation = (float) Math.cos(zenith);
         float airMass = 1.0f / Math.max(0.01f, (float) Math.cos(zenith));
         float atmosphericTransmission = (float) Math.pow(0.7, airMass - 1);
         float radiation = directRadiation * atmosphericTransmission;
 
-        if (!level.canSeeSky(pos.above())) return radiation *= 0.1f;
+//        if (!level.canSeeSky(pos.above())) return radiation *= 0.1f;
+
+        float shade = getSolarShade(level, pos, zenith, azimuth);
+        radiation *= shade;
 
         return Mth.clamp(radiation, 0.0f, 1.0f);
     }
@@ -141,8 +215,6 @@ public class EnvironmentHelpers
         return KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.getOrDefault(climate, KoppenClimateHumidity.createDefault());
     }
 
-
-
     // Humidity
 
     public static float getKoppenClimateDefaultHumidity(KoppenClimateHumidity koppenClimateHumidity)
@@ -185,11 +257,11 @@ public class EnvironmentHelpers
             {
                 if (month == Month.JUNE || month == Month.JULY || month == Month.AUGUST)
                 {
-                    humidity = Mth.lerp(0.3f, humidity, koppenClimateHumidity.minHumidity());
+                    humidity = Mth.lerp(0.5f, humidity, koppenClimateHumidity.minHumidity());
                 }
                 else if (month == Month.DECEMBER || month == Month.JANUARY || month == Month.FEBRUARY)
                 {
-                    humidity = Mth.lerp(0.3f, humidity, koppenClimateHumidity.maxHumidity());
+                    humidity = Mth.lerp(0.5f, humidity, koppenClimateHumidity.maxHumidity());
                 }
             }
             case AW, CWA, CWB, CWC, DWA, DWB, DWC, DWD ->

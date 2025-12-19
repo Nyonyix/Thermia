@@ -11,5 +11,5 @@ import org.spongepowered.asm.mixin.injection.At;
 public class OverworldClimateModelMixin
 {
     @ModifyReturnValue(method = "calculateDailyTemperature", at = @At("RETURN"), remap = false)
-    private float increaseDailyVariation(float original) {return ServerConfig.ENABLE_HIGHER_TFC_TEMP.getAsBoolean() ? original * 3.0f + 4 : original;}
+    private float increaseDailyVariation(float original) {return ServerConfig.ENABLE_HIGHER_TFC_TEMP.getAsBoolean() ? 0 : 1000;}
 }

@@ -2,9 +2,7 @@
   "required": true,
   "package": "com.nyonyix.thermia.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [
-    "OverworldClimateModelMixin"
-  ],
+  "mixins": [],
   "injectors": {
     "defaultRequire": 1
   },
