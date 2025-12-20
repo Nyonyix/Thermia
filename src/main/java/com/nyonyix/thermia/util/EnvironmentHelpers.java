@@ -103,8 +103,6 @@ public class EnvironmentHelpers
         float atmosphericTransmission = (float) Math.pow(0.7, airMass - 1);
         float radiation = directRadiation * atmosphericTransmission;
 
-//        if (!level.canSeeSky(pos.above())) return radiation *= 0.1f;
-
         radiation *= shade;
 
         return Mth.clamp(radiation, 0.0f, 1.0f);

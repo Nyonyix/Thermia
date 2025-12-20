@@ -2,8 +2,6 @@ package com.nyonyix.thermia.server;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.data.attachment.ChunkHumidity;
-import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
@@ -11,24 +9,21 @@ import com.nyonyix.thermia.data.map.ItemInsulation;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
-import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.dries007.tfc.util.calendar.Calendars;
-import net.dries007.tfc.util.climate.Climate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 
@@ -38,6 +33,9 @@ import java.util.*;
 public class ThermiaServer
 {
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final Set<Block> BLOCKS_WITH_TEMP = new HashSet<>();
+    public static final Set<Item> INSULATING_ITEMS = new HashSet<>();
 
     private static void verifyDataMap()
     {
@@ -68,6 +66,7 @@ public class ThermiaServer
         BuiltInRegistries.BLOCK.holders().forEach(blockReference ->
         {
             BlockTemperatureDataMap blockTemp = blockReference.getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+            BLOCKS_WITH_TEMP.clear();
 
             if (blockTemp != null)
             {
@@ -82,6 +81,8 @@ public class ThermiaServer
                 {
                     throw new IllegalStateException("Block searchCap is < 0");
                 }
+
+                BLOCKS_WITH_TEMP.add(blockReference.value());
             }
         });
 
@@ -90,11 +91,14 @@ public class ThermiaServer
         BuiltInRegistries.ITEM.holders().forEach(itemReference ->
         {
             ItemInsulation insulation = itemReference.getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
+            INSULATING_ITEMS.clear();
 
             if (insulation != null)
             {
                 ResourceLocation itemKey = itemReference.key().location();
                 LOGGER.info("Item: {}, insulationModifier: {}", itemKey, insulation.insulationModifier());
+
+                INSULATING_ITEMS.add(itemReference.value());
             }
         });
     }
