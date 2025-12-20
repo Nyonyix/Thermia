@@ -1,6 +1,7 @@
 package com.nyonyix.thermia.ai;
 
 import com.nyonyix.thermia.ServerConfig;
+import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.ClosestSource;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
@@ -80,7 +81,7 @@ public class TemperatureComfortGoal extends Goal
         float currentInternalTemp = tempData.internalTemperature();
         float maxInternalTemperature = tempData.maxInternalTemperature();
         float minInternalTemperature = tempData.minInternalTemperature();
-        ClosestSource source = tempData.closestSource();
+        BlockSearchResult source = tempData.blockSearchResult();
 
         float maxEntityTempBeforeHurt = 0.0f;
         float minEntityTempBeforeHurt = 0.0f;
@@ -118,7 +119,7 @@ public class TemperatureComfortGoal extends Goal
 
         if (currentInternalTemp <= minEntityTempBeforeHurt)
         {
-            targetPos = source.closestPos();
+            targetPos = source.nearest();
             if (targetPos != null)
             {
                 if (!isAtPosition(targetPos))

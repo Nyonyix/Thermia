@@ -12,11 +12,6 @@ public record ChunkHumidity(float humidity)
             Codec.FLOAT.fieldOf("chunk_humidity").forGetter(ChunkHumidity::humidity)
     ).apply(chunkHumidityInstance, ChunkHumidity::new));
 
-    public static final StreamCodec<ByteBuf, ChunkHumidity> STREAM_CODEC = StreamCodec.composite(
-        ByteBufCodecs.FLOAT, ChunkHumidity::humidity,
-        ChunkHumidity::new
-    );
-
     public static ChunkHumidity createDefault() {return new ChunkHumidity(0.5f);}
 
     public ChunkHumidity withHumidity(float humidity) {return new ChunkHumidity(humidity);}

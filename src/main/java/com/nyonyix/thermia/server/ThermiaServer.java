@@ -2,6 +2,7 @@ package com.nyonyix.thermia.server;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.data.attachment.BlockTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
@@ -17,7 +18,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -34,12 +34,12 @@ public class ThermiaServer
 {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final Set<Block> BLOCKS_WITH_TEMP = new HashSet<>();
+    public static final Set<BlockTemperature> BLOCKS_WITH_TEMP = new HashSet<>();
     public static final Set<Item> INSULATING_ITEMS = new HashSet<>();
 
-    private static void verifyDataMap()
+    private static void initDataMap()
     {
-        LOGGER.info("Verify Entity Data Map");
+        LOGGER.info("Init Entity Data Map");
 
         BuiltInRegistries.ENTITY_TYPE.holders().forEach(entityTypeReference ->
         {
@@ -61,7 +61,7 @@ public class ThermiaServer
             }
         });
 
-        LOGGER.info("Verify Block Data Map");
+        LOGGER.info("Init Block Data Map");
 
         BuiltInRegistries.BLOCK.holders().forEach(blockReference ->
         {
@@ -82,11 +82,19 @@ public class ThermiaServer
                     throw new IllegalStateException("Block searchCap is < 0");
                 }
 
-                BLOCKS_WITH_TEMP.add(blockReference.value());
+                float invSqrRange = 1;
+                float distantTemp = 0;
+                while (distantTemp <= 25)
+                {
+                    distantTemp = blockTemp.temperature() / (invSqrRange * invSqrRange);
+                    invSqrRange ++;
+                }
+
+                BLOCKS_WITH_TEMP.add(new BlockTemperature(blockTemp.temperature(), invSqrRange, blockTemp.searchCap(), blockTemp.hasTFCHeat(), blockReference.value()));
             }
         });
 
-        LOGGER.info("Verify Item Insulation Data Map");
+        LOGGER.info("Init Item Insulation Data Map");
 
         BuiltInRegistries.ITEM.holders().forEach(itemReference ->
         {
@@ -104,10 +112,10 @@ public class ThermiaServer
     }
 
     @SubscribeEvent
-    public static void onReload(AddReloadListenerEvent event) {event.addListener(((preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor) -> preparationBarrier.wait(null).thenRunAsync(ThermiaServer::verifyDataMap)));}
+    public static void onReload(AddReloadListenerEvent event) {event.addListener(((preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor) -> preparationBarrier.wait(null).thenRunAsync(ThermiaServer::initDataMap)));}
 
     @SubscribeEvent
-    public static void onServerStarted(ServerStartedEvent event) {verifyDataMap();}
+    public static void onServerStarted(ServerStartedEvent event) {initDataMap();}
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event)
