@@ -1,6 +1,7 @@
 package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
+import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
@@ -28,6 +29,8 @@ public class EntityTemperatureManager
 
     private static boolean shouldGetSystem(Entity entity)
     {
+        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
+
         EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
         if (dataMap == null) return false;
 
@@ -69,7 +72,7 @@ public class EntityTemperatureManager
 
             entityData = entityData.withEnvironmentHumidity(level.getChunkAt(entity.blockPosition()).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity());
 
-            entityData = entityData.withSunOcclusionPos(BlockSearch.SearchForBlock.getSolarShade(level, pos, sunPos.zenith(), sunPos.azimuth()));
+            entityData = entityData.withSunOcclusionPos(BlockSearch.SearchForBlock.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth()));
             entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, Climate.getTemperature(level, pos), entityData.environmentHumidity(), entityData.sunOcclusionPos().shade()));
 
             entityData = entityData.withInternalTemperature(Mth.approach(entityData.internalTemperature(), entityData.environmentTemperature(), 0.1f));

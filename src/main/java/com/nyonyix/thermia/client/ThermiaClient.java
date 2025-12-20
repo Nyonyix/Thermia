@@ -2,6 +2,7 @@ package com.nyonyix.thermia.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.attachment.ChunkHumidity;
@@ -37,15 +38,19 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.codehaus.plexus.util.dag.Vertex;
 import org.joml.Matrix4f;
+import org.slf4j.Logger;
+import oshi.hardware.LogicalVolumeGroup;
 
 import java.util.Calendar;
 import java.util.List;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = Thermia.MODID, dist = Dist.CLIENT)
-// You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
 @EventBusSubscriber(modid = Thermia.MODID, value = Dist.CLIENT)
 public class ThermiaClient {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public ThermiaClient(ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
@@ -99,6 +104,7 @@ public class ThermiaClient {
         }
     }
 
+    @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event)
     {
         if (!Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) return;
@@ -113,15 +119,18 @@ public class ThermiaClient {
 
         for (Entity entity : minecraft.level.entitiesForRendering())
         {
-            if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
+            if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) continue;
 
             EntityTemperature tempData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
             BlockPos occlusionPos = tempData.sunOcclusionPos().sunOcclusionPos();
 
             if (occlusionPos.equals(BlockPos.ZERO)) continue;
 
-            renderSunOcclusionLine(poseStack, bufferSource, cameraPos, entity.position(), Vec3.atCenterOf(occlusionPos));
+            Vec3 entityPos = new Vec3(entity.position().x, entity.position().y + 1.0, entity.position().z);
+            renderSunOcclusionLine(poseStack, bufferSource, cameraPos, entityPos, Vec3.atCenterOf(occlusionPos));
         }
+
+        bufferSource.endBatch();
     }
 
     private static void renderSunOcclusionLine(PoseStack poseStack, MultiBufferSource bufferSource, Vec3 cameraPos, Vec3 entityPos, Vec3 occlusionPos)

@@ -186,8 +186,8 @@ public class BlockSearch
 
         public static SolarShadeResult getSolarShade(Level level, BlockPos pos, float zenith, float azimuth)
         {
-            float sinZenith = (float) Math.sin(zenith);
-            float cosZenith = (float) Math.cos(zenith);
+            float sinZenith = (float) Math.sin(-zenith);
+            float cosZenith = (float) Math.cos(-zenith);
             float sinAzimuth = (float) Math.sin(azimuth);
             float cosAzimuth = (float) Math.cos(azimuth);
 
@@ -195,9 +195,9 @@ public class BlockSearch
             double sunDirY = cosZenith;
             double sunDirZ = sinZenith * cosAzimuth;
 
-            if (sunDirY <=0) return new SolarShadeResult(0.1f, pos);
+            if (sunDirY <=0) return new SolarShadeResult(0.1f, BlockPos.ZERO);
 
-            if (zenith < Math.PI && !level.canSeeSky(pos.above())) return new SolarShadeResult(0.1f, pos);
+            if (zenith < Math.PI && !level.canSeeSky(pos)) return new SolarShadeResult(0.1f, BlockPos.ZERO);
 
             double shadowSoftness = Mth.lerp((float) (zenith / (Math.PI / 2.0)), 2.0, 6.0);
             double horizMag = Math.sqrt(sunDirX * sunDirX + sunDirZ * sunDirZ);
@@ -210,18 +210,18 @@ public class BlockSearch
                 for (int distance = sampleInterval; distance <= maxDistance; distance += sampleInterval)
                 {
                     int sampleX = (int) (pos.getX() + sunDirX * distance);
-                    int sampleZ = (int) (pos.getZ() + sunDirX * distance);
+                    int sampleZ = (int) (pos.getZ() + sunDirZ * distance);
 
                     if (!level.getChunkSource().hasChunk(sampleX / 16, sampleZ / 16)) continue;
 
-                    int terrainHeight = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sampleX, sampleZ);
+                    int terrainHeight = level.getHeight(Heightmap.Types.MOTION_BLOCKING, sampleX, sampleZ);
 
                     double t = distance / horizMag;
                     double expectedHeight = pos.getY() + t * sunDirY;
 
                     double delta = terrainHeight - expectedHeight;
 
-                    if (delta > shadowSoftness) return new SolarShadeResult(Mth.clamp((float) (1.0 - delta / 8.0), distance < 40 ? 0.15f : distance < 100 ? 0.30f : 0.50f, 0.9f), new BlockPos(sampleX, pos.getY(), sampleZ));
+                    if (delta > shadowSoftness) return new SolarShadeResult(Mth.clamp((float) (1.0 - delta / 8.0), distance < 40 ? 0.15f : distance < 100 ? 0.30f : 0.50f, 0.9f), new BlockPos(sampleX, terrainHeight, sampleZ));
                 }
             }
 
