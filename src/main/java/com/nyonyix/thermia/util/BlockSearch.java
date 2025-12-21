@@ -7,6 +7,7 @@ import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ClipContext;
@@ -32,13 +33,15 @@ public class BlockSearch
 
     static class BlockSearchBuilder
     {
-        private BlockPos nearest = null;
+        private BlockPos nearest = BlockPos.ZERO;
         private double nearestDistSq = Double.MAX_VALUE;
+        private ResourceKey<Level> levelID;
+        private BlockPos origin = BlockPos.ZERO;
         private Map<Block, Integer> counts = new HashMap<>();
         private Map<Block, List<BlockPos>> allPositions = new HashMap<>();
         private int totalCount = 0;
 
-        BlockSearchResult build() {return new BlockSearchResult(nearest, nearestDistSq, counts, allPositions);}
+        BlockSearchResult build() {return new BlockSearchResult(nearest, origin, nearestDistSq, levelID, counts, allPositions);}
 
         void initialiseBlock(Block block)
         {
@@ -142,6 +145,8 @@ public class BlockSearch
                 try
                 {
                     BlockSearchBuilder builder =  new BlockSearchBuilder();
+                    builder.levelID = level.dimension();
+                    builder.origin = center.immutable();
 
                     for (LevelChunk chunk : chunksToSearch)
                     {
@@ -152,7 +157,7 @@ public class BlockSearch
                 }catch (Exception e)
                 {
                     LOGGER.error("Error in async block search:", e);
-                    return new BlockSearchResult(null, 0d, new HashMap<>(), new HashMap<>());
+                    return new BlockSearchResult(BlockPos.ZERO, BlockPos.ZERO, 0d, level.dimension(), new HashMap<>(), new HashMap<>());
                 }
 
             }, Util.backgroundExecutor());
