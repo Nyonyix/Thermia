@@ -1,17 +1,21 @@
 package com.nyonyix.thermia.server;
 
-import com.mojang.logging.LogUtils;
+import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.data.attachment.BlockTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
+import com.nyonyix.thermia.data.datagen.BlockTemperatureDataMapProvider;
+import com.nyonyix.thermia.data.datagen.EntityTemperatureDataMapProvider;
+import com.nyonyix.thermia.data.datagen.ThermiaDamageTypesDataGen;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
-import com.nyonyix.thermia.data.map.ItemInsulation;
-import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
-import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
-import com.nyonyix.thermia.data.map.ThermiaDataMaps;
+import com.nyonyix.thermia.data.map.*;
 import net.dries007.tfc.util.calendar.Calendars;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -21,6 +25,8 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -28,6 +34,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @EventBusSubscriber(modid = Thermia.MODID)
 public class ThermiaServer
@@ -97,6 +104,19 @@ public class ThermiaServer
                 INSULATING_ITEMS.add(itemReference.value());
             }
         });
+    }
+
+    @SubscribeEvent
+    static void gatherData(GatherDataEvent event)
+    {
+        DataGenerator gen = event.getGenerator();
+        PackOutput packOutput = gen.getPackOutput();
+        CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
+
+        gen.addProvider(event.includeServer(), new BlockTemperatureDataMapProvider(packOutput, lookupProvider));
+        gen.addProvider(event.includeServer(), new EntityTemperatureDataMapProvider(packOutput, lookupProvider));
+
+        gen.addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(packOutput, lookupProvider, new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, ThermiaDamageTypesDataGen::bootstrap), Set.of(Thermia.MODID)));
     }
 
     @SubscribeEvent
