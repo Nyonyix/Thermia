@@ -107,7 +107,7 @@ public class BlockSearch
 
                             if (dataMap != null)
                             {
-                                if (builder.counts.get(block) >= dataMap.searchCap()) continue;
+                                if (builder.counts.getOrDefault(block, 0) >= dataMap.searchCap()) continue;
                                 builder.setIfNearest(pos.immutable(), distSq);
                                 builder.addBlock(pos.immutable(), block);
                             }

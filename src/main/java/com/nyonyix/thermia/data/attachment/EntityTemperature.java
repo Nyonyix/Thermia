@@ -35,7 +35,7 @@ public record EntityTemperature(
        Codec.BOOL.fieldOf("is_wet").forGetter(EntityTemperature::isWet),
        Codec.BOOL.fieldOf("is_underground").forGetter(EntityTemperature::isUnderground),
        Codec.BOOL.fieldOf("to_remove").forGetter(EntityTemperature::toRemove),
-       BlockSearchResult.CODEC.fieldOf("closest_source").forGetter(EntityTemperature::blockSearchResult),
+       BlockSearchResult.CODEC.fieldOf("block_search_result").forGetter(EntityTemperature::blockSearchResult),
        SolarShadeResult.CODEC.fieldOf("sun_occlusion_pos").forGetter(EntityTemperature::sunOcclusionPos)
     ).apply(entityTemperatureInstance, EntityTemperature::new));
 
