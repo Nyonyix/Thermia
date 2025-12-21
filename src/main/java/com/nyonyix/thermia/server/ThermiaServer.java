@@ -34,7 +34,6 @@ public class ThermiaServer
 {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final Set<BlockTemperature> BLOCKS_WITH_TEMP = new HashSet<>();
     public static final Set<Item> INSULATING_ITEMS = new HashSet<>();
 
     private static void initDataMap()
@@ -66,7 +65,6 @@ public class ThermiaServer
         BuiltInRegistries.BLOCK.holders().forEach(blockReference ->
         {
             BlockTemperatureDataMap blockTemp = blockReference.getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
-            BLOCKS_WITH_TEMP.clear();
 
             if (blockTemp != null)
             {
@@ -81,16 +79,6 @@ public class ThermiaServer
                 {
                     throw new IllegalStateException("Block searchCap is < 0");
                 }
-
-                float invSqrRange = 1;
-                float distantTemp = 0;
-                while (distantTemp <= 25)
-                {
-                    distantTemp = blockTemp.temperature() / (invSqrRange * invSqrRange);
-                    invSqrRange ++;
-                }
-
-                BLOCKS_WITH_TEMP.add(new BlockTemperature(blockTemp.temperature(), invSqrRange, blockTemp.searchCap(), blockTemp.hasTFCHeat(), blockReference.value()));
             }
         });
 

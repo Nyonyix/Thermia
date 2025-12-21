@@ -1,6 +1,7 @@
 package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
+import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.SolarShadeResult;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
@@ -22,9 +23,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.slf4j.Logger;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class EntityTemperatureManager
 {
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Map<UUID, CompletableFuture<BlockSearchResult>> pendingBlockSearches = new ConcurrentHashMap<>();
 
     private static boolean shouldGetSystem(Entity entity)
     {
@@ -57,9 +64,14 @@ public class EntityTemperatureManager
 
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityTemp);
         }
-        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE))
+        else if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE))
         {
-            if (entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE).toRemove()) entity.removeData(ThermiaAttachments.ENTITY_TEMPERATURE);
+            if (entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE).toRemove())
+            {
+                CompletableFuture<BlockSearchResult> pending = pendingBlockSearches.remove(entity.getUUID());
+                if (pending != null && !pending.isDone()) pending.cancel(true);
+                entity.removeData(ThermiaAttachments.ENTITY_TEMPERATURE);
+            }
         }
     }
 
@@ -69,6 +81,7 @@ public class EntityTemperatureManager
         {
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
             EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
+            CompletableFuture<BlockSearchResult> pendingBlockSearch = pendingBlockSearches.get(entity.getUUID());
 
             BlockPos pos = entity.blockPosition();
             RandomSource random = level.random;
@@ -80,12 +93,27 @@ public class EntityTemperatureManager
 
             SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
 
+            if (pendingBlockSearch != null && pendingBlockSearch.isDone())
+            {
+                try
+                {
+                    entityData = entityData.withBlockSearchResult(pendingBlockSearch.join());
+                    pendingBlockSearches.remove(entity.getUUID());
+                }
+                catch (Exception e)
+                {
+                    LOGGER.error("Error in Async block search for entity: {}", entity.getUUID(), e);
+                    pendingBlockSearches.remove(entity.getUUID());
+                }
+            }
+
             entityData = entityData.withEnvironmentHumidity(level.getChunkAt(entity.blockPosition()).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity());
 
             if (dataMap.isMob())
             {
                 entityData = entityData.withSunOcclusionPos(SolarShadeResult.createDefault());
                 entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, Climate.getTemperature(level, pos), entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f : 0.3f));
+
             }
             else
             {
@@ -96,6 +124,13 @@ public class EntityTemperatureManager
             entityData = entityData.withInternalTemperature(Mth.approach(entityData.internalTemperature(), entityData.environmentTemperature(), 0.1f));
 
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
+
+            if (!pendingBlockSearches.containsKey(entity.getUUID()))
+            {
+                int radius = dataMap.isMob() ? 4 : 8;
+                CompletableFuture<BlockSearchResult> future = BlockSearch.SearchForBlock.searchAllAsync(level, pos, radius);
+                pendingBlockSearches.put(entity.getUUID(), future);
+            }
         }
     }
 }

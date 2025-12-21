@@ -2,6 +2,8 @@ package com.nyonyix.thermia.util;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.data.SolarShadeResult;
+import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
+import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -50,7 +52,7 @@ public class BlockSearch
             allPositions.put(BuiltInRegistries.BLOCK.get(blockId), new ArrayList<>());
         }
 
-        void setNearest(BlockPos pos, double distSq)
+        void setIfNearest(BlockPos pos, double distSq)
         {
             if (distSq < nearestDistSq)
             {
@@ -76,7 +78,7 @@ public class BlockSearch
 
     public static class SearchForBlock
     {
-        private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, int searchCap, Set<Block> targetBlocks, BlockSearchBuilder builder)
+        private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, BlockSearchBuilder builder)
         {
             LevelChunkSection[] sections = chunk.getSections();
             BlockPos chunkPos = chunk.getPos().getWorldPosition();
@@ -101,9 +103,12 @@ public class BlockSearch
 
                             Block block = section.getBlockState(x, y, z).getBlock();
 
-                            if (targetBlocks.contains(block))
+                            BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+
+                            if (dataMap != null)
                             {
-                                builder.setNearest(pos.immutable(), distSq);
+                                if (builder.counts.get(block) >= dataMap.searchCap()) continue;
+                                builder.setIfNearest(pos.immutable(), distSq);
                                 builder.addBlock(pos.immutable(), block);
                             }
                         }
@@ -112,28 +117,7 @@ public class BlockSearch
             }
         }
 
-        public static BlockSearchResult searchAll(Level level, BlockPos center, int radius, int searchCap, Set<Block> targetBlocks)
-        {
-            BlockSearchBuilder builder = new BlockSearchBuilder();
-
-            int chunkRadius = (radius / 16 ) + 1;
-            int radiusSq = radius * radius;
-            int centerChunkX = center.getX() / 16;
-            int centerChunkZ = center.getZ() / 16;
-
-            for (int cx = centerChunkX - chunkRadius; cx <= centerChunkX + chunkRadius; cx++)
-            {
-                for (int cz = centerChunkZ - chunkRadius; cz <= centerChunkZ + chunkRadius; cz++)
-                {
-                    if (!level.hasChunk(cx, cz)) continue;
-                    LevelChunk chunk = level.getChunk(cx, cz);
-                    searchChunk(chunk, center, radiusSq, searchCap, targetBlocks, builder);
-                }
-            }
-            return builder.build();
-        }
-
-        public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, BlockPos center, int radius, int searchCap, Set<Block> targetBlocks)
+        public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, BlockPos center, int radius)
         {
             final BlockPos searchCenter = center.immutable();
             final int chunkRadius = (radius / 16 ) + 1;
@@ -161,7 +145,7 @@ public class BlockSearch
 
                     for (LevelChunk chunk : chunksToSearch)
                     {
-                        searchChunk(chunk, searchCenter, radiusSq, searchCap, targetBlocks, builder);
+                        searchChunk(chunk, searchCenter, radiusSq, builder);
                     }
 
                     return builder.build();
@@ -172,16 +156,6 @@ public class BlockSearch
                 }
 
             }, Util.backgroundExecutor());
-        }
-
-        public static BlockSearchResult searchAll(Level level, BlockPos center, int radius, int searchCap, Block... targetBlocks)
-        {
-            return searchAll(level, center, radius, searchCap, new HashSet<>(Arrays.asList(targetBlocks)));
-        }
-
-        public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, BlockPos center, int radius, int searchCap, Block... targetBlocks)
-        {
-            return searchAllAsync(level, center, radius, searchCap, new HashSet<>(Arrays.asList(targetBlocks)));
         }
 
         public static SolarShadeResult getSolarShade(Level level, BlockPos pos, float zenith, float azimuth)
