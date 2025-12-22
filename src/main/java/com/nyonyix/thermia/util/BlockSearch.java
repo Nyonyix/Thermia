@@ -5,6 +5,7 @@ import com.nyonyix.thermia.data.SolarShadeResult;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import net.minecraft.Util;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -40,8 +41,39 @@ public class BlockSearch
         private Map<Block, Integer> counts = new HashMap<>();
         private Map<Block, List<BlockPos>> allPositions = new HashMap<>();
         private int totalCount = 0;
+        private List<BlockPositionsWithDistance> allFound = new ArrayList<>();
 
-        BlockSearchResult build() {return new BlockSearchResult(nearest, origin, nearestDistSq, levelID, counts, allPositions);}
+        record BlockPositionsWithDistance(BlockPos pos, Block block, double distSq) {}
+
+        void addBlockCandidate(BlockPos pos, Block block, double distSq) { allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq));}
+
+        BlockSearchResult build()
+        {
+            allFound.sort(Comparator.comparingDouble(BlockPositionsWithDistance::distSq));
+
+            Map<Block, Integer> tempCounts = new HashMap<>();
+
+            for (BlockPositionsWithDistance entry : allFound)
+            {
+                BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(entry.block()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+                if (dataMap == null) continue;;
+
+                int currentCount = tempCounts.getOrDefault(entry.block, 0);
+                if (currentCount >= dataMap.searchCap()) continue;
+
+                tempCounts.put(entry.block(), currentCount + 1);
+                counts.put(entry.block(), currentCount + 1);
+                allPositions.computeIfAbsent(entry.block(), k -> new ArrayList<>()).add(entry.pos());
+
+                if (entry.distSq() < nearestDistSq)
+                {
+                    nearestDistSq = entry.distSq();
+                    nearest = entry.pos();
+                }
+            }
+
+            return new BlockSearchResult(nearest, origin, nearestDistSq, levelID, counts, allPositions);
+        }
 
         void initialiseBlock(Block block)
         {
@@ -110,9 +142,7 @@ public class BlockSearch
 
                             if (dataMap != null)
                             {
-                                if (builder.counts.getOrDefault(block, 0) >= dataMap.searchCap()) continue;
-                                builder.setIfNearest(pos.immutable(), distSq);
-                                builder.addBlock(pos.immutable(), block);
+                                builder.addBlockCandidate(pos.immutable(), block, distSq);
                             }
                         }
                     }

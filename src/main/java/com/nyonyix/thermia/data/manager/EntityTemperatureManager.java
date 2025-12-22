@@ -119,7 +119,8 @@ public class EntityTemperatureManager
             }
         }
 
-        return totalTemperature;
+        float maxRadiance = (float) ServerConfig.MAX_RADIANT_HEATING.getAsInt();
+        return maxRadiance * (1f - (float) Math.exp(-totalTemperature / maxRadiance));
     }
 
     private static float calcTemperatureChangeRate(float delta)
@@ -198,13 +199,15 @@ public class EntityTemperatureManager
             {
                 entityData = entityData.withSunOcclusionPos(SolarShadeResult.createDefault());
 //                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f : 0.3f));
-                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: 0.3f));
+                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: 0.3f);
+                entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
             }
             else
             {
                 entityData = entityData.withSunOcclusionPos(BlockSearch.SearchForBlock.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth()));
 //                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade()));
-                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade()));
+                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade());
+                entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
             }
 
 

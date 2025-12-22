@@ -1,6 +1,8 @@
 package com.nyonyix.thermia;
 
 import com.sun.jna.platform.win32.Tlhelp32;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.config.ModConfigs;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ServerConfig
@@ -10,6 +12,8 @@ public class ServerConfig
     public static final ModConfigSpec.IntValue SEARCH_RANGE = BUILDER.comment("Max range to search for blocks from player entities").defineInRange("SearchRange", 16, 4, 32);
 
     public static final ModConfigSpec.IntValue ISMOB_SEARCH_RANGE = BUILDER.comment("Max range to search for blocks from animal entities").defineInRange("isMobSearchRange", 8, 2, 16);
+
+    public static final ModConfigSpec.IntValue MAX_RADIANT_HEATING = BUILDER.comment("Maximum heat by nearby sources").defineInRange("maxRadiantHeating", 256, 50, 512);
 
     public static final ModConfigSpec.DoubleValue MAX_SOLAR_HEATING = BUILDER.comment("Max heating applied by sun").defineInRange("maxSolarHeating", 18.0, 0.0, 22.0);
 
