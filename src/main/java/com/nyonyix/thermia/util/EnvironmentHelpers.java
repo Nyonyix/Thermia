@@ -34,23 +34,86 @@ public class EnvironmentHelpers
         return (float) (temp * Math.atan(0.151977 * Math.sqrt(humidity + 8.313659)) + Math.atan(temp + humidity) - Math.atan(humidity - 1.676331) + 0.00391838 * Math.pow(humidity, 1.5) * Math.atan(0.023101 * humidity) - 4.686035);
     }
 
-    public static float calcGlobeTemperature(float temperature, float solarRadiation, float windSpeed)
+    public static float calcGlobeTemperature(float temperature, float solarRadiation)
     {
         float maxSolarHeating = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
-        float windChillFactor = calcWindChillFactor(windSpeed);
-        float solarHeating = maxSolarHeating * solarRadiation * windChillFactor;
+        float solarHeating = maxSolarHeating * solarRadiation;
 
         return temperature + solarHeating;
     }
 
-    public static float calcWetBulbGlobeTemperature(Level level, BlockPos pos, float temp, float humidity, float shade)
+    public static float calcWetBulbGlobeTemperature(Level level, BlockPos pos, float temp, float humidity, float solarRadiation)
     {
         float wetBulb = calcWetBulbTemperature(temp, humidity);
-        float solarRadiation = getSolarRadiationWeather(level, pos, shade);
-        float windSpeed = getWindSpeed(level, pos);
-        float globeTemp = calcGlobeTemperature(temp, solarRadiation, windSpeed);
+        float globeTemp = calcGlobeTemperature(temp, solarRadiation);
 
         return (0.7f * wetBulb) + (0.2f * globeTemp) + (0.1f * temp);
+    }
+
+    public static float calcForCold(float temp, float windSpeed, float solarRadiation, float humidity)
+    {
+        float maxSolar = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
+        float solarRaw = solarRadiation * maxSolar;
+
+        float solarTempFactor = Mth.clampedMap(temp, -30f, 12f, 0.15f, 0.5f);
+        float solarDelta = solarRaw * solarTempFactor;
+
+        float solarWindLoss = 1f / (1f + 0.25f * windSpeed);
+        solarDelta *= solarWindLoss;
+
+        float windCooling = Mth.clampedMap(windSpeed, 0f, 32f, 0f, 24f);
+
+        float dampPenalty = 0;
+        if (temp < 6f && humidity > 0.6f)
+        {
+            float humidityFactor = (humidity - 0.6f) / 0.4f;
+            dampPenalty = humidityFactor * Mth.clampedMap(windSpeed, 0f, 24f, 0f, 10f);
+        }
+
+        return temp + solarDelta - windCooling - dampPenalty;
+    }
+
+    public static float calcForMild(float temp, float windSpeed, float solarRadiation, float humidity)
+    {
+        float maxSolar = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
+        float solarRaw = solarRadiation * maxSolar;
+
+        float solarTempFactor = Mth.clampedMap(temp, 12f, 22f, 0.5f, 1.0f);
+        float solarDelta = solarRaw * solarTempFactor;
+
+        float solarWindloss = 1f / (1f + 0.2f * windSpeed);
+        solarDelta *= solarWindloss;
+
+        float windCooling = Mth.clampedMap(windSpeed, 0f, 32f, 0f, 8f);
+
+        float humidityPenalty = 0f;
+        if (temp > 16f && humidity > 0.55f) humidityPenalty = (humidity - 0.55f) * Mth.clampedMap(temp, 16f, 22f, 0f, 2.5f);
+
+        return temp + solarDelta - windCooling + humidityPenalty;
+    }
+
+    public static float calcEffectiveTemperature(Level level, BlockPos pos, float temp, float humidity, float shade)
+    {
+        float windSpeed = getWindSpeed(level, pos);
+        float solarRadiation = getSolarRadiationWeather(level, pos, shade);
+
+        float cold = calcForCold(temp, windSpeed, solarRadiation, humidity);
+        float mild = calcForMild(temp, windSpeed, solarRadiation, humidity);
+        float hot = calcWetBulbGlobeTemperature(level, pos, temp, humidity, solarRadiation);
+
+        float coldW =  1f - Mth.clampedMap(temp, 8f, 14f, 0f, 1f);
+        float hotW = Mth.clampedMap(temp, 18f, 26f, 0f, 1f);
+        float mildW = Math.max(0f, 1f - coldW - hotW);
+
+        float totalW = coldW + mildW + hotW;
+        if (totalW > 0)
+        {
+            coldW /= totalW;
+            mildW /= totalW;
+            hotW /= totalW;
+        }
+
+        return cold * coldW + mild * mildW + hot * hotW;
     }
 
     public static float calcWindChillFactor(float windSpeed)

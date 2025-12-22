@@ -197,13 +197,14 @@ public class EntityTemperatureManager
             if (dataMap.isMob())
             {
                 entityData = entityData.withSunOcclusionPos(SolarShadeResult.createDefault());
-                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f : 0.3f));
-
+//                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f : 0.3f));
+                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: 0.3f));
             }
             else
             {
                 entityData = entityData.withSunOcclusionPos(BlockSearch.SearchForBlock.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth()));
-                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade()));
+//                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade()));
+                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade()));
             }
 
 
