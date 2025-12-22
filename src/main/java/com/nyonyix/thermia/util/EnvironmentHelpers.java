@@ -72,7 +72,7 @@ public class EnvironmentHelpers
     public static float getWindSpeed(Level level, BlockPos pos)
     {
         ClimateModel model = Climate.get(level);
-        return WeatherHelpers.windMS(model.getWind(level, pos));
+        return WeatherHelpers.windMS(model.getWind(level, pos)) * windOcclusion(level, pos);
     }
 
     public static float getWindDirection(Level level, BlockPos pos)
@@ -81,6 +81,28 @@ public class EnvironmentHelpers
         Vec2 windVector = model.getWind(level, pos);
 
         return (float) Math.atan2(windVector.y, windVector.x);
+    }
+
+    public static float windOcclusion(Level level, BlockPos pos)
+    {
+        float directionTowards = getWindDirection(level, pos);
+        float directionFromX = -(float) Math.cos(directionTowards);
+        float directionFromZ = -(float) Math.sin(directionTowards);
+
+        Vec3 startVec = Vec3.atCenterOf(pos);
+        Vec3 endVec = startVec.add(directionFromX * 4.0, 0, directionFromZ * 4.0);
+
+        ClipContext context = new ClipContext(startVec, endVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, CollisionContext.empty());
+        BlockHitResult hit = level.clip(context);
+
+        if (hit.getType() != HitResult.Type.MISS)
+        {
+            float hitDist = (float) startVec.distanceTo(hit.getLocation());
+
+            return Mth.clamp((float) (0.1 + (hitDist / 4.0) * 0.9), 0.1f, 1.0f);
+        }
+
+        return 1.0f;
     }
 
     // Solar Radiation

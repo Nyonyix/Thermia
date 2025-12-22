@@ -132,22 +132,26 @@ public class ThermiaServer
 
         for (ServerLevel level : server.getAllLevels())
         {
-            for (Entity entity : level.getAllEntities())
+            try
             {
-                if (server.getTickCount() % 20 == entity.getId() % 20)
+                for (Entity entity : level.getAllEntities())
                 {
-                    EntityTemperatureManager.init(entity);
-                    EntityTemperatureManager.onTick(level, entity);
+                    if (server.getTickCount() % 20 == entity.getId() % 20)
+                    {
+                        EntityTemperatureManager.init(entity);
+                        EntityTemperatureManager.onTick(level, entity);
+                    }
                 }
-            }
 
-            if (ChunkHumidityManager.lastTickedTFCHour != Calendars.get(level).getHourOfDay())
-            {
-                ChunkHumidityManager.lastTickedTFCHour = Calendars.get(level).getHourOfDay();
-                ChunkHumidityManager.refreshWorkingCache(level);
-            }
+                if (ChunkHumidityManager.lastTickedTFCHour != Calendars.get(level).getHourOfDay())
+                {
+                    ChunkHumidityManager.lastTickedTFCHour = Calendars.get(level).getHourOfDay();
+                    ChunkHumidityManager.refreshWorkingCache(level);
+                }
 
-            ChunkHumidityManager.processChunkBatch(level, 100);
+                ChunkHumidityManager.processChunkBatch(level, 100);
+            }
+            catch (ArrayIndexOutOfBoundsException ignored) {}
         }
     }
 

@@ -1,9 +1,9 @@
 package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
+import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.SolarShadeResult;
-import com.nyonyix.thermia.data.attachment.BlockTemperature;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
@@ -13,11 +13,11 @@ import com.nyonyix.thermia.util.BlockSearch;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
+import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.IHeatable;
 import net.dries007.tfc.common.entities.livestock.TFCAnimalProperties;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.climate.Climate;
-import net.dries007.tfc.util.data.EntityDamageResistance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.Mth;
@@ -25,6 +25,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -68,7 +69,9 @@ public class EntityTemperatureManager
         StateDefinition<Block, BlockState> stateDef = state.getBlock().getStateDefinition();
         float temp = dataMap.temperature();
 
-        if (state.getBlock() instanceof IHeatable tfcBlock) return tfcBlock.getTemperature();
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof IHeatable heatable) return heatable.getTemperature();
+        if (blockEntity instanceof CharcoalForgeBlockEntity charcoalForge) return charcoalForge.getTemperature();
 
         for (Map.Entry<String, Boolean> entry : dataMap.stateBools().entrySet())
         {
@@ -117,6 +120,17 @@ public class EntityTemperatureManager
         }
 
         return totalTemperature;
+    }
+
+    private static float calcTemperatureChangeRate(float delta)
+    {
+        float absDelta = Math.abs(delta);
+        float minRate = (float) ServerConfig.TEMP_CHANGE_MIN_RATE.getAsDouble();
+        float maxRate = (float) ServerConfig.TEMP_CHANGE_MAX_RATE.getAsDouble();
+        float scale = (float) ServerConfig.TEMP_CHANGE_SCALE.getAsDouble();
+
+        float normalisedRate = 1.0f - (float) Math.exp(-scale * absDelta);
+        return Mth.lerp(normalisedRate, minRate, maxRate);
     }
 
     public static void init(Entity entity)
@@ -193,14 +207,16 @@ public class EntityTemperatureManager
             }
 
 
-            entityData = entityData.withInternalTemperature(Mth.approach(entityData.internalTemperature(), entityData.environmentTemperature(), 0.1f));
+//            entityData = entityData.withInternalTemperature(Mth.approach(entityData.internalTemperature(), entityData.environmentTemperature(), 0.1f));
+            float delta = entityData.environmentTemperature() - entityData.internalTemperature();
+            entityData = entityData.withInternalTemperature(entityData.internalTemperature() + delta * calcTemperatureChangeRate(delta));
 
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
 
             if (!pendingBlockSearches.containsKey(entity.getUUID()))
             {
-                int radius = dataMap.isMob() ? 4 : 8;
-                CompletableFuture<BlockSearchResult> future = BlockSearch.SearchForBlock.searchAllAsync(level, pos, radius);
+                int searchRadius = dataMap.isMob() ? ServerConfig.ISMOB_SEARCH_RANGE.getAsInt() : ServerConfig.SEARCH_RANGE.getAsInt();
+                CompletableFuture<BlockSearchResult> future = BlockSearch.SearchForBlock.searchAllAsync(level, pos, searchRadius);
                 pendingBlockSearches.put(entity.getUUID(), future);
             }
         }

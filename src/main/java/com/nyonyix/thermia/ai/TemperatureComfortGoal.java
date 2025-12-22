@@ -24,9 +24,6 @@ public class TemperatureComfortGoal extends Goal
 
     public TemperatureComfortGoal(PathfinderMob mob, double speedModifier)
     {
-
-        if (!ServerConfig.APPLY_TO_ANIMALS.getAsBoolean()) throw new IllegalStateException("Attempted TemperatureComfortGoal when APPLY_TO_ANIMALS is false");
-
         this.mob = mob;
         this.speedModifier = speedModifier;
         this.setFlags(EnumSet.of(Flag.MOVE));

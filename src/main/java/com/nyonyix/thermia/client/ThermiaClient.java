@@ -156,6 +156,14 @@ public class ThermiaClient {
         float b = 0.0f;
         float a = 0.8f;
 
+        if (entityPos.distanceTo(occlusionPos) >= 32.0)
+        {
+            r = 0.7f;
+            g = 0.7f;
+            b = 0.0f;
+            a = 0.8f;
+        }
+
         buffer.addVertex(matrix, startX, startY, startZ).setColor(r, g, b, a).setNormal(0, 1, 0);
         buffer.addVertex(matrix, endX, endY, endZ).setColor(r, g, b, a).setNormal(0, 1, 0);
 
