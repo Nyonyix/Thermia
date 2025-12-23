@@ -4,7 +4,9 @@ import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
 import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
+import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
+import net.dries007.tfc.util.calendar.ICalendar;
 import net.dries007.tfc.util.calendar.Month;
 import net.dries007.tfc.util.climate.Climate;
 import net.dries007.tfc.util.climate.ClimateModel;
@@ -14,10 +16,8 @@ import net.dries007.tfc.util.tracker.WeatherHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
@@ -234,6 +234,57 @@ public class EnvironmentHelpers
     }
 
     // Humidity
+
+    public static float newEnvironmentHumidity(Level level, BlockPos pos)
+    {
+        KoppenClimateHumidity koppenClimateHumidity = getKoppenHumidity(level, pos);
+        ICalendar levelCalendar = Calendars.get(level);
+        ClimateModel levelClimate = Climate.get(level);
+
+        float fractionOfYear = levelCalendar.getCalendarFractionOfYear();
+        float rainVar = levelClimate.getRainfallVariance(level, pos);
+        boolean isNorth = SolarCalculator.getInNorthernHemisphere(pos, level);
+
+        float rainIntensity = levelClimate.getRain(levelCalendar.getCalendarTicks());
+        float rainfall = levelClimate.getRainfall(level, pos);
+
+        float timeOfDay = levelCalendar.getCalendarFractionOfDay();
+
+        float climateHumidity = newHumidityKoppen(koppenClimateHumidity, rainVar, fractionOfYear, isNorth);
+        float rainDrivenHumidity = newHumidityRain(rainIntensity, rainfall);
+        float diurnalModifier = 1f + 0.1f * (float) Math.cos((timeOfDay - 0.25) * 2 * Math.PI);
+
+        float forestModifier = 0f; //Todo - Maybe add forest modifier based on forest density.
+
+        return Mth.clamp(climateHumidity + rainDrivenHumidity * diurnalModifier, 0f, 0.99f);
+    }
+
+    public static float getEntityHumidity(float humidity, int nonEmptyAbove)
+    {
+        float depthDrivenHumidity = Mth.clampedMap(nonEmptyAbove, 0, ServerConfig.MAX_BLOCKS_ABOVE.getAsInt(), 0f, 0.8f);
+
+        return Mth.clamp(humidity + depthDrivenHumidity, 0f, 0.99f);
+    }
+
+    public static float newHumidityRain(float rainIntensity, float rainfall)
+    {
+        if (rainIntensity < 0) return 0f;
+
+        float realIntensity = WeatherHelpers.calculateRealRainIntensity(rainIntensity, rainfall);
+        float moisterFactor = Math.max(rainIntensity * 0.3f, realIntensity);
+
+        return Mth.clamp(moisterFactor, 0f, 0.5f);
+    }
+
+    public static float newHumidityKoppen(KoppenClimateHumidity koppenClimateHumidity, float rainVar, float fractionOfYear, boolean isNorth)
+    {
+        if (isNorth) rainVar = -rainVar;
+
+        float seasonalWave = (float) Math.sin((fractionOfYear - 0.25) * 2 * Math.PI);
+        float t = 0.5f + (seasonalWave * rainVar * 0.5f);
+
+        return Mth.lerp(t, koppenClimateHumidity.maxHumidity(), koppenClimateHumidity.maxHumidity());
+    }
 
     public static float getKoppenClimateDefaultHumidity(KoppenClimateHumidity koppenClimateHumidity)
     {

@@ -15,6 +15,8 @@ public class ServerConfig
 
     public static final ModConfigSpec.IntValue MAX_RADIANT_HEATING = BUILDER.comment("Maximum heat by nearby sources").defineInRange("maxRadiantHeating", 256, 50, 512);
 
+    public static final ModConfigSpec.IntValue MAX_BLOCKS_ABOVE = BUILDER.comment("Maximum number of blocks above for depth humidity").defineInRange("maxBlocksAbove", 24576, 8192, 65536);
+
     public static final ModConfigSpec.DoubleValue MAX_SOLAR_HEATING = BUILDER.comment("Max heating applied by sun").defineInRange("maxSolarHeating", 18.0, 0.0, 22.0);
 
     public static final ModConfigSpec.DoubleValue WIND_CHILL_FACTOR = BUILDER.comment("Factor to adjust windchill effectiveness").defineInRange("windChillFactor", 0.15, 0.0, 1.0);

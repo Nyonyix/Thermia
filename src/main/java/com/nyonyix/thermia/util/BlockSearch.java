@@ -255,6 +255,35 @@ public class BlockSearch
 
             return SolarShadeResult.createDefault();
         }
+
+        public static int depthEncasedBlocks(LevelChunk chunk, BlockPos pos)
+        {
+            int totalNonEmpty = 0;
+            int startSection = chunk.getSectionIndex(pos.getY());
+
+            LevelChunkSection currentSection = chunk.getSection(startSection);
+            int localY = pos.getY() & 15;
+            int localX = pos.getX() & 15;
+            int localZ = pos.getZ() & 15;
+
+            if (!currentSection.hasOnlyAir())
+            {
+                for (int y = localY + 1 ; y < 16 ; y++)
+                {
+                    if (!currentSection.getBlockState(localX, y, localZ).isAir()) totalNonEmpty++;
+                }
+            }
+
+            for (int i = startSection +1 ; i < chunk.getSectionsCount() ; i++)
+            {
+                LevelChunkSection section = chunk.getSection(i);
+
+                if (section.hasOnlyAir()) continue;
+                totalNonEmpty += section.nonEmptyBlockCount;
+            }
+
+            return totalNonEmpty;
+        }
     }
 
 }

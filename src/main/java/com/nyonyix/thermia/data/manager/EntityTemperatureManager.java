@@ -173,6 +173,9 @@ public class EntityTemperatureManager
             float baseTemperature = Climate.getTemperature(level, pos);
             float nearbyBlockTemperature = 0f;
 
+            int nonEmptyAbove = 0;
+            if (level.hasChunk(pos.getX() / 16, pos.getZ() / 16)) nonEmptyAbove = BlockSearch.SearchForBlock.depthEncasedBlocks(level.getChunkAt(pos), pos);
+
             SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
 
             if (pendingBlockSearch != null && pendingBlockSearch.isDone())
@@ -193,8 +196,7 @@ public class EntityTemperatureManager
             }
 
             nearbyBlockTemperature = parseBlockSearchResult(level, entity.blockPosition(), entityData.blockSearchResult());
-            entityData = entityData.withEnvironmentHumidity(level.getChunkAt(entity.blockPosition()).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity());
-
+            entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(entity.blockPosition()).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
             if (dataMap.isMob())
             {
                 entityData = entityData.withSunOcclusionPos(SolarShadeResult.createDefault());
