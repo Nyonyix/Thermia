@@ -15,6 +15,7 @@ import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.IHeatable;
+import net.dries007.tfc.common.entities.livestock.TFCAnimal;
 import net.dries007.tfc.common.entities.livestock.TFCAnimalProperties;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.calendar.ICalendar;
@@ -137,24 +138,50 @@ public class EntityTemperatureManager
         return Mth.lerp(normalisedRate, minRate, maxRate);
     }
 
+//    public static void init(Entity entity)
+//    {
+//        if (shouldGetSystem(entity))
+//        {
+//            EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
+//            EntityTemperature entityTemp = EntityTemperature.createDefault().withMaxInternalTemperature(dataMap.maxEntityTemperature()).withMinInternalTemperature(dataMap.minEntityTemperature());
+//
+//            entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityTemp);
+//        }
+//        else if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE))
+//        {
+//            if (entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE).toRemove())
+//            {
+//                CompletableFuture<BlockSearchResult> pending = pendingBlockSearches.remove(entity.getUUID());
+//                if (pending != null && !pending.isDone()) pending.cancel(true);
+//                entity.removeData(ThermiaAttachments.ENTITY_TEMPERATURE);
+//            }
+//        }
+//    }
+
     public static void init(Entity entity)
     {
-        if (shouldGetSystem(entity))
-        {
-            EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
-            EntityTemperature entityTemp = EntityTemperature.createDefault().withMaxInternalTemperature(dataMap.maxEntityTemperature()).withMinInternalTemperature(dataMap.minEntityTemperature());
+        EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
+        if (dataMap == null) return;
+        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
 
-            entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityTemp);
-        }
-        else if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE))
+        if (dataMap.isTamed())
         {
-            if (entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE).toRemove())
+            if (entity instanceof TFCAnimalProperties tfcAnimal)
             {
-                CompletableFuture<BlockSearchResult> pending = pendingBlockSearches.remove(entity.getUUID());
-                if (pending != null && !pending.isDone()) pending.cancel(true);
-                entity.removeData(ThermiaAttachments.ENTITY_TEMPERATURE);
+                if (tfcAnimal.getFamiliarity() >= 0.1)
+                {
+                    entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()));
+                    return;
+                }
+                else return;
+            } else
+            {
+                LOGGER.error("Entity {} is marked 'tamable' but no tamable entity found", entity.getName());
+                return;
             }
         }
+
+        entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()));
     }
 
     public static void onUpdate(Level level, Entity entity)
@@ -166,6 +193,15 @@ public class EntityTemperatureManager
             CompletableFuture<BlockSearchResult> pendingBlockSearch = pendingBlockSearches.get(entity.getUUID());
             ICalendar levelCalender = Calendars.get(level);
             ClimateModel levelModel = Climate.get(level);
+
+            if (entity instanceof TFCAnimalProperties tfcAnimal) if (tfcAnimal.getFamiliarity() < 0.1) entityData = entityData.withToRemove(true);
+            if (entityData.toRemove())
+            {
+                CompletableFuture<BlockSearchResult> pending = pendingBlockSearches.remove(entity.getUUID());
+                if(pending != null && !pending.isDone()) pending.cancel(true);
+                entity.removeData(ThermiaAttachments.ENTITY_TEMPERATURE);
+                return;
+            }
 
             BlockPos pos = entity.blockPosition();
             RandomSource random = level.random;
@@ -182,7 +218,8 @@ public class EntityTemperatureManager
 
             SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
 
-            if (WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getRainfall(level, entity.blockPosition()))) LOGGER.info("{} is in rain", entity.getName());
+            if (WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getRainfall(level, pos)) && level.canSeeSky(pos)) entityData = entityData.withWetness(Mth.approach(entityData.wetness(), 1.0f, 0.1f));
+            else if (!entity.isUnderWater() && !entity.isInWaterOrBubble()) entityData = entityData.withWetness(Mth.approach(entityData.wetness(), 0f, 0.01f));
 
             if (pendingBlockSearch != null && pendingBlockSearch.isDone())
             {
@@ -201,23 +238,21 @@ public class EntityTemperatureManager
                 }
             }
 
-            nearbyBlockTemperature = parseBlockSearchResult(level, entity.blockPosition(), entityData.blockSearchResult());
-            entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(entity.blockPosition()).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
+            nearbyBlockTemperature = parseBlockSearchResult(level, pos, entityData.blockSearchResult());
+            entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(pos).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
             if (dataMap.isMob())
             {
                 entityData = entityData.withSunOcclusionPos(SolarShadeResult.createDefault());
-                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: 0.3f);
+                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: 0.3f, entityData.wetness());
                 entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
             }
             else
             {
                 entityData = entityData.withSunOcclusionPos(BlockSearch.SearchForBlock.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth()));
-                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade());
+                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade(), entityData.wetness());
                 entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
             }
 
-
-//            entityData = entityData.withInternalTemperature(Mth.approach(entityData.internalTemperature(), entityData.environmentTemperature(), 0.1f));
             float delta = entityData.environmentTemperature() - entityData.internalTemperature();
             entityData = entityData.withInternalTemperature(entityData.internalTemperature() + delta * calcTemperatureChangeRate(delta));
 
@@ -239,8 +274,10 @@ public class EntityTemperatureManager
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
             EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
 
-            if (entity.isInWaterOrBubble() && entityData.wetness() < 0.5f) entityData = entityData.withWetness(0.5f);
-            LOGGER.info("Wetness = {}", entityData.wetness());
+            if (entity.isUnderWater()) entityData = entityData.withWetness(1.0f);
+            else if (entity.isInWaterOrBubble() && entityData.wetness() < 0.5f) entityData = entityData.withWetness(0.5f);
+
+            entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
         }
     }
 }

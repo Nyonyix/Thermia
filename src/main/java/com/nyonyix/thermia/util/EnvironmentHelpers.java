@@ -92,7 +92,7 @@ public class EnvironmentHelpers
         return temp + solarDelta - windCooling + humidityPenalty;
     }
 
-    public static float calcEffectiveTemperature(Level level, BlockPos pos, float temp, float humidity, float shade)
+    public static float calcEffectiveTemperature(Level level, BlockPos pos, float temp, float humidity, float shade, float wetness)
     {
         float windSpeed = getWindSpeed(level, pos);
         float solarRadiation = getSolarRadiationWeather(level, pos, shade);
@@ -100,6 +100,8 @@ public class EnvironmentHelpers
         float cold = calcForCold(temp, windSpeed, solarRadiation, humidity);
         float mild = calcForMild(temp, windSpeed, solarRadiation, humidity);
         float hot = calcWetBulbGlobeTemperature(level, pos, temp, humidity, solarRadiation);
+
+        float evapCooling = wetness > 0.0f ? calcEvaporativeCooling(windSpeed, humidity) : 1.0f;
 
         float coldW =  1f - Mth.clampedMap(temp, 8f, 14f, 0f, 1f);
         float hotW = Mth.clampedMap(temp, 18f, 26f, 0f, 1f);
@@ -113,21 +115,15 @@ public class EnvironmentHelpers
             hotW /= totalW;
         }
 
-        return cold * coldW + mild * mildW + hot * hotW;
-    }
-
-    public static float calcWindChillFactor(float windSpeed)
-    {
-        float k = (float) ServerConfig.WIND_CHILL_FACTOR.getAsDouble();
-        return 1.0f / (1.0f + k * windSpeed);
+        return (cold * coldW + mild * mildW + hot * hotW) - evapCooling;
     }
 
     public static float calcEvaporativeCooling(float windSpeed, float humidity)
     {
-        float windComponent = Mth.clampedMap(windSpeed, 0f, 5f, 0.2f, 1.0f);
+        float windComponent = Mth.clampedMap(windSpeed, 0f, 16f, 0.2f, 1.0f);
         float humidityComponent = 1.0f - humidity;
 
-        return (float) Math.sqrt(windComponent * humidityComponent);
+        return (float) Math.sqrt(windComponent * humidityComponent) * 10f;
     }
 
     // Wind
@@ -152,7 +148,7 @@ public class EnvironmentHelpers
         float directionX = (float) Math.cos(direction);
         float directionZ = (float) Math.sin(direction);
 
-        Vec3 startVec = Vec3.atCenterOf(pos);
+        Vec3 startVec = Vec3.atCenterOf(pos.above());
         Vec3 endVec = startVec.add(directionX * 4.0, 0, directionZ * 4.0);
 
         ClipContext context = new ClipContext(startVec, endVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, CollisionContext.empty());

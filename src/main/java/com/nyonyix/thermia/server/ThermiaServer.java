@@ -1,5 +1,6 @@
 package com.nyonyix.thermia.server;
 
+import com.google.common.eventbus.Subscribe;
 import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
@@ -29,6 +30,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -141,7 +144,6 @@ public class ThermiaServer
 
                     if (server.getTickCount() % 20 == entity.getId() % 20)
                     {
-                        EntityTemperatureManager.init(entity);
                         EntityTemperatureManager.onUpdate(level, entity);
                     }
                 }
@@ -150,12 +152,25 @@ public class ThermiaServer
                 {
                     ChunkHumidityManager.lastTickedTFCHour = Calendars.get(level).getHourOfDay();
                     ChunkHumidityManager.refreshWorkingCache(level);
+                    LOGGER.info("Refresh on tick {}", server.getTickCount());
                 }
 
-                ChunkHumidityManager.processChunkBatch(level, 100);
+                ChunkHumidityManager.processChunkBatch(level, 64);
             }
             catch (ArrayIndexOutOfBoundsException ignored) {}
         }
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoinLevel(EntityJoinLevelEvent event)
+    {
+        EntityTemperatureManager.init(event.getEntity());
+    }
+
+    @Subscribe
+    public static void onEntityLeaveLevel(EntityLeaveLevelEvent event)
+    {
+
     }
 
     @SubscribeEvent
