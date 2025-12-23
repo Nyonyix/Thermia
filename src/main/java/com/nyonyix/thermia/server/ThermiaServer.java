@@ -2,6 +2,7 @@ package com.nyonyix.thermia.server;
 
 import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datagen.BlockTemperatureDataMapProvider;
 import com.nyonyix.thermia.data.datagen.EntityTemperatureDataMapProvider;
@@ -136,10 +137,12 @@ public class ThermiaServer
             {
                 for (Entity entity : level.getAllEntities())
                 {
+                    EntityTemperatureManager.onTick(level, entity);
+
                     if (server.getTickCount() % 20 == entity.getId() % 20)
                     {
                         EntityTemperatureManager.init(entity);
-                        EntityTemperatureManager.onTick(level, entity);
+                        EntityTemperatureManager.onUpdate(level, entity);
                     }
                 }
 

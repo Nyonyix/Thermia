@@ -32,6 +32,6 @@ public class EntityTemperatureDataMapProvider extends DataMapProvider
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:donkey")).orElseThrow(), new EntityTemperatureDataMap(40, -15, true, true), false)
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:mule")).orElseThrow(), new EntityTemperatureDataMap(40, -15, true, true), false)
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:horse")).orElseThrow(), new EntityTemperatureDataMap(40, -15, true, true), false)
-                .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("minecraft:player")).orElseThrow(), new EntityTemperatureDataMap(31, 5, false, false), false);
+                .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("minecraft:player")).orElseThrow(), new EntityTemperatureDataMap(32, 5, false, false), false);
     }
 }

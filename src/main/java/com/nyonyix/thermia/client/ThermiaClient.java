@@ -95,12 +95,13 @@ public class ThermiaClient {
                 text.add(String.format("    Environment Temperature: %.2f", playerData.environmentTemperature()));
                 text.add(String.format("    Environment Humidity: %.2f", playerData.environmentHumidity()));
                 text.add(String.format("    Player internal Temp: %.2f", playerData.internalTemperature()));
+                text.add(String.format("    Wetness: %.2f", playerData.wetness()));
 
                 text.add("Chunk:");
                 LevelChunk chunk = clientPlayer.level().getChunkAt(pos);
                 Level level = clientPlayer.level();
                 ClimateModel model = Climate.get(level);
-                text.add(String.format("    Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(model.getAverageTemperature(level, pos), model.getRainfall(level, pos), model.getRainfallVariance(level, pos), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
+                text.add(String.format("    Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(model.getAverageTemperature(level, pos), model.getAverageRainfall(level, pos), model.getRainfallVariance(level, pos), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
                 text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos, playerData.sunOcclusionPos().shade())));
             }
         }

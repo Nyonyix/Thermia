@@ -17,7 +17,10 @@ import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.IHeatable;
 import net.dries007.tfc.common.entities.livestock.TFCAnimalProperties;
 import net.dries007.tfc.util.calendar.Calendars;
+import net.dries007.tfc.util.calendar.ICalendar;
 import net.dries007.tfc.util.climate.Climate;
+import net.dries007.tfc.util.climate.ClimateModel;
+import net.dries007.tfc.util.tracker.WeatherHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.Mth;
@@ -154,29 +157,32 @@ public class EntityTemperatureManager
         }
     }
 
-    public static void onTick(Level level, Entity entity)
+    public static void onUpdate(Level level, Entity entity)
     {
         if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE))
         {
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
             EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
             CompletableFuture<BlockSearchResult> pendingBlockSearch = pendingBlockSearches.get(entity.getUUID());
+            ICalendar levelCalender = Calendars.get(level);
+            ClimateModel levelModel = Climate.get(level);
 
             BlockPos pos = entity.blockPosition();
             RandomSource random = level.random;
-            long calendarTick = Calendars.get(level).getTicks();
-            float fractionOfDay = Calendars.get(level).getCalendarFractionOfDay();
-            float fractionOfYear = Calendars.get(level).getCalendarFractionOfYear();
-            float fractionOfMonth = Calendars.get(level).getCalendarFractionOfMonth();
-            float hemisphereScale = Climate.get(level).hemisphereScale();
-
-            float baseTemperature = Climate.getTemperature(level, pos);
+            long calendarTick = levelCalender.getTicks();
+            float fractionOfDay = levelCalender.getCalendarFractionOfDay();
+            float fractionOfYear = levelCalender.getCalendarFractionOfYear();
+            float fractionOfMonth = levelCalender.getCalendarFractionOfMonth();
+            float hemisphereScale = levelModel.hemisphereScale();
+            float baseTemperature = levelModel.getTemperature(level, pos);
             float nearbyBlockTemperature = 0f;
 
             int nonEmptyAbove = 0;
             if (level.hasChunk(pos.getX() / 16, pos.getZ() / 16)) nonEmptyAbove = BlockSearch.SearchForBlock.depthEncasedBlocks(level.getChunkAt(pos), pos);
 
             SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
+
+            if (WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getRainfall(level, entity.blockPosition()))) LOGGER.info("{} is in rain", entity.getName());
 
             if (pendingBlockSearch != null && pendingBlockSearch.isDone())
             {
@@ -200,14 +206,12 @@ public class EntityTemperatureManager
             if (dataMap.isMob())
             {
                 entityData = entityData.withSunOcclusionPos(SolarShadeResult.createDefault());
-//                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f : 0.3f));
                 float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: 0.3f);
                 entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
             }
             else
             {
                 entityData = entityData.withSunOcclusionPos(BlockSearch.SearchForBlock.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth()));
-//                entityData = entityData.withEnvironmentTemperature(EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade()));
                 float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature + nearbyBlockTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade());
                 entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
             }
@@ -225,6 +229,18 @@ public class EntityTemperatureManager
                 CompletableFuture<BlockSearchResult> future = BlockSearch.SearchForBlock.searchAllAsync(level, pos, searchRadius);
                 pendingBlockSearches.put(entity.getUUID(), future);
             }
+        }
+    }
+
+    public static void onTick(Level level, Entity entity)
+    {
+        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE))
+        {
+            EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
+            EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
+
+            if (entity.isInWaterOrBubble() && entityData.wetness() < 0.5f) entityData = entityData.withWetness(0.5f);
+            LOGGER.info("Wetness = {}", entityData.wetness());
         }
     }
 }

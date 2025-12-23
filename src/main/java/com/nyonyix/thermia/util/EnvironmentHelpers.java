@@ -148,12 +148,12 @@ public class EnvironmentHelpers
 
     public static float windOcclusion(Level level, BlockPos pos)
     {
-        float directionTowards = getWindDirection(level, pos);
-        float directionFromX = -(float) Math.cos(directionTowards);
-        float directionFromZ = -(float) Math.sin(directionTowards);
+        float direction = getWindDirection(level, pos);
+        float directionX = (float) Math.cos(direction);
+        float directionZ = (float) Math.sin(direction);
 
         Vec3 startVec = Vec3.atCenterOf(pos);
-        Vec3 endVec = startVec.add(directionFromX * 4.0, 0, directionFromZ * 4.0);
+        Vec3 endVec = startVec.add(directionX * 4.0, 0, directionZ * 4.0);
 
         ClipContext context = new ClipContext(startVec, endVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, CollisionContext.empty());
         BlockHitResult hit = level.clip(context);
@@ -223,9 +223,11 @@ public class EnvironmentHelpers
 
     public static KoppenClimateHumidity getKoppenHumidity(Level level, BlockPos pos)
     {
-        float avgTemperature = Climate.getAverageTemperature(level, pos);
-        float rainfall = Climate.getRainfall(level, pos);
-        float rainfallVariance = Climate.getRainfallVariance(level, pos);
+        ClimateModel levelModel = Climate.get(level);
+
+        float avgTemperature = levelModel.getAverageTemperature(level, pos);
+        float rainfall = levelModel.getAverageRainfall(level, pos);
+        float rainfallVariance = levelModel.getRainfallVariance(level, pos);
         boolean isNorth = SolarCalculator.getInNorthernHemisphere(pos, level);
 
         KoppenClimateClassification climate = KoppenClimateClassification.classify(avgTemperature, rainfall, rainfallVariance, isNorth);
@@ -256,7 +258,7 @@ public class EnvironmentHelpers
 
         float forestModifier = 0f; //Todo - Maybe add forest modifier based on forest density.
 
-        return Mth.clamp(climateHumidity + rainDrivenHumidity * diurnalModifier, 0f, 0.99f);
+        return Mth.clamp((climateHumidity + rainDrivenHumidity) * diurnalModifier, 0f, 0.99f);
     }
 
     public static float getEntityHumidity(float humidity, int nonEmptyAbove)
@@ -278,12 +280,12 @@ public class EnvironmentHelpers
 
     public static float newHumidityKoppen(KoppenClimateHumidity koppenClimateHumidity, float rainVar, float fractionOfYear, boolean isNorth)
     {
-        if (isNorth) rainVar = -rainVar;
+        if (!isNorth) rainVar = -rainVar;
 
         float seasonalWave = (float) Math.sin((fractionOfYear - 0.25) * 2 * Math.PI);
         float t = 0.5f + (seasonalWave * rainVar * 0.5f);
 
-        return Mth.lerp(t, koppenClimateHumidity.maxHumidity(), koppenClimateHumidity.maxHumidity());
+        return Mth.lerp(t, koppenClimateHumidity.minHumidity(), koppenClimateHumidity.maxHumidity());
     }
 
     public static float getKoppenClimateDefaultHumidity(KoppenClimateHumidity koppenClimateHumidity)
