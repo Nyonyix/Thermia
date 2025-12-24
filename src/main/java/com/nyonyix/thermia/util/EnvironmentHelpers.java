@@ -101,7 +101,7 @@ public class EnvironmentHelpers
         float mild = calcForMild(temp, windSpeed, solarRadiation, humidity);
         float hot = calcWetBulbGlobeTemperature(level, pos, temp, humidity, solarRadiation);
 
-        float evapCooling = wetness > 0.0f ? calcEvaporativeCooling(windSpeed, humidity) : 1.0f;
+        float evapCooling = wetness > 0.0f ? calcEvaporativeCooling(windSpeed, humidity, wetness) : 0.0f;
 
         float coldW =  1f - Mth.clampedMap(temp, 8f, 14f, 0f, 1f);
         float hotW = Mth.clampedMap(temp, 18f, 26f, 0f, 1f);
@@ -118,12 +118,15 @@ public class EnvironmentHelpers
         return (cold * coldW + mild * mildW + hot * hotW) - evapCooling;
     }
 
-    public static float calcEvaporativeCooling(float windSpeed, float humidity)
+    public static float calcEvaporativeCooling(float windSpeed, float humidity, float wetness)
     {
-        float windComponent = Mth.clampedMap(windSpeed, 0f, 16f, 0.2f, 1.0f);
-        float humidityComponent = 1.0f - humidity;
+        float windComponent = Mth.clampedMap(windSpeed, 0f, 32f, 0.2f, 1.0f);
+        float effectiveHumidity = Math.min(1.0f, humidity + (wetness * (1.0f - humidity)));
+        float humidityComponent = 1.0f - effectiveHumidity;
 
-        return (float) Math.sqrt(windComponent * humidityComponent) * 10f;
+        float wetnessBonus = wetness * windComponent * 0.3f;
+
+        return (float) Math.sqrt(windComponent * humidityComponent) + wetnessBonus;
     }
 
     // Wind
@@ -229,6 +232,17 @@ public class EnvironmentHelpers
         KoppenClimateClassification climate = KoppenClimateClassification.classify(avgTemperature, rainfall, rainfallVariance, isNorth);
 
         return KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.getOrDefault(climate, KoppenClimateHumidity.createDefault());
+    }
+
+    public static float calcDryingRate(Level level, BlockPos pos, float temperature, float humidity)
+    {
+        float tempComponent = Mth.clampedMap(temperature,-10f, 40f, 0.1f, 2.0f);
+        float humidityComponent = 1.0f - humidity;
+        float windComponent = 1.0f + ( getWindSpeed(level, pos)* 0.15f);
+
+        float dryingRate = 0.01f * tempComponent * humidityComponent * windComponent;
+
+        return Mth.clamp(dryingRate, 0.001f, 0.2f);
     }
 
     // Humidity

@@ -33,6 +33,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.fluids.FluidType;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -138,25 +140,16 @@ public class EntityTemperatureManager
         return Mth.lerp(normalisedRate, minRate, maxRate);
     }
 
-//    public static void init(Entity entity)
-//    {
-//        if (shouldGetSystem(entity))
-//        {
-//            EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
-//            EntityTemperature entityTemp = EntityTemperature.createDefault().withMaxInternalTemperature(dataMap.maxEntityTemperature()).withMinInternalTemperature(dataMap.minEntityTemperature());
-//
-//            entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityTemp);
-//        }
-//        else if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE))
-//        {
-//            if (entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE).toRemove())
-//            {
-//                CompletableFuture<BlockSearchResult> pending = pendingBlockSearches.remove(entity.getUUID());
-//                if (pending != null && !pending.isDone()) pending.cancel(true);
-//                entity.removeData(ThermiaAttachments.ENTITY_TEMPERATURE);
-//            }
-//        }
-//    }
+    private static float getEntitySubmersion(Entity entity)
+    {
+        double waterHeight = entity.getFluidTypeHeight(NeoForgeMod.WATER_TYPE.value());
+        double entityHeight = entity.getBbHeight();
+
+        if (waterHeight <= 0) return 0.0f;
+        if (waterHeight >= entityHeight) return 1.0f;
+
+        return Mth.clamp((float) (waterHeight / entityHeight), 0.0f, 1.0f);
+    }
 
     public static void init(Entity entity)
     {
@@ -186,7 +179,7 @@ public class EntityTemperatureManager
 
     public static void onUpdate(Level level, Entity entity)
     {
-        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE))
+        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE) && entity.isAlive())
         {
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
             EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
@@ -217,9 +210,6 @@ public class EntityTemperatureManager
             if (level.hasChunk(pos.getX() / 16, pos.getZ() / 16)) nonEmptyAbove = BlockSearch.SearchForBlock.depthEncasedBlocks(level.getChunkAt(pos), pos);
 
             SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
-
-            if (WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getRainfall(level, pos)) && level.canSeeSky(pos)) entityData = entityData.withWetness(Mth.approach(entityData.wetness(), 1.0f, 0.1f));
-            else if (!entity.isUnderWater() && !entity.isInWaterOrBubble()) entityData = entityData.withWetness(Mth.approach(entityData.wetness(), 0f, 0.01f));
 
             if (pendingBlockSearch != null && pendingBlockSearch.isDone())
             {
@@ -253,6 +243,14 @@ public class EntityTemperatureManager
                 entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
             }
 
+            boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getRainfall(level, pos));
+            if (isRaining && level.canSeeSky(pos) && entityData.wetness() <= 0.9)
+            {
+                if (levelModel.getTemperature(level, pos) > 0.0f) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.1f));
+                else if (levelModel.getTemperature(level, pos) > -5) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.05f));
+            }
+            else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos, entityData.environmentTemperature(), entityData.environmentHumidity())));
+
             float delta = entityData.environmentTemperature() - entityData.internalTemperature();
             entityData = entityData.withInternalTemperature(entityData.internalTemperature() + delta * calcTemperatureChangeRate(delta));
 
@@ -269,13 +267,13 @@ public class EntityTemperatureManager
 
     public static void onTick(Level level, Entity entity)
     {
-        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE))
+        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE) && entity.isAlive())
         {
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
             EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
 
-            if (entity.isUnderWater()) entityData = entityData.withWetness(1.0f);
-            else if (entity.isInWaterOrBubble() && entityData.wetness() < 0.5f) entityData = entityData.withWetness(0.5f);
+            float submersion = getEntitySubmersion(entity);
+            if (entityData.wetness() < submersion ) entityData = entityData.withWetness(submersion);
 
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
         }
