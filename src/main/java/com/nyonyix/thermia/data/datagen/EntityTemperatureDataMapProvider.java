@@ -7,6 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.data.DataMapProvider;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -25,7 +26,7 @@ public class EntityTemperatureDataMapProvider extends DataMapProvider
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:yak")).orElseThrow(), new EntityTemperatureDataMap(-11, -30, true, true), false)
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:alpaca")).orElseThrow(), new EntityTemperatureDataMap(20, -8, true, true), false)
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:sheep")).orElseThrow(), new EntityTemperatureDataMap(30, 1, true, true), false)
-                .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:musk_ok")).orElseThrow(), new EntityTemperatureDataMap(-1, -25, true, true), false)
+                .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:musk_ox")).orElseThrow(), new EntityTemperatureDataMap(-1, -25, true, true), false)
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:chicken")).orElseThrow(), new EntityTemperatureDataMap(40, 14, true, true), false)
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:duck")).orElseThrow(), new EntityTemperatureDataMap(30, -25, true, true), false)
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:quail")).orElseThrow(), new EntityTemperatureDataMap(15, -15, true, true), false)
@@ -34,4 +35,7 @@ public class EntityTemperatureDataMapProvider extends DataMapProvider
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("tfc:horse")).orElseThrow(), new EntityTemperatureDataMap(40, -15, true, true), false)
                 .add(BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse("minecraft:player")).orElseThrow(), new EntityTemperatureDataMap(32, 5, false, false), false);
     }
+
+    @Override
+    public @NotNull String getName() { return "Entity_Temperature_DataMap";}
 }

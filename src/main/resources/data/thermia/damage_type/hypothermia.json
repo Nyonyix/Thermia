@@ -1,7 +1,0 @@
-{
-    "message_id": "hypothermia",
-    "scaling": "never",
-    "exhaustion": 0,
-    "effects": "freezing",
-    "death_message_type": "default"
-}

@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.SolarShadeResult;
+import com.nyonyix.thermia.data.ThermiaDamageTypes;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
@@ -17,6 +18,7 @@ import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.IHeatable;
 import net.dries007.tfc.common.entities.livestock.TFCAnimal;
 import net.dries007.tfc.common.entities.livestock.TFCAnimalProperties;
+import net.dries007.tfc.common.fluids.TFCFluids;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.calendar.ICalendar;
 import net.dries007.tfc.util.climate.Climate;
@@ -86,7 +88,7 @@ public class EntityTemperatureManager
             if (property != null)
             {
                 Comparable<?> value = state.getValue(property);
-                if (value.toString().equals(entry.getValue().toString())) return 0.0f;
+                if (!value.toString().equals(entry.getValue().toString())) return 0.0f;
             }
             else LOGGER.error("Property of {} was not found for block {}", entry.getKey(), state.getBlock().getDescriptionId());
         }
@@ -143,12 +145,16 @@ public class EntityTemperatureManager
     private static float getEntitySubmersion(Entity entity)
     {
         double waterHeight = entity.getFluidTypeHeight(NeoForgeMod.WATER_TYPE.value());
+        double saltWaterHeight = entity.getFluidTypeHeight(TFCFluids.SALT_WATER.getType());
+        double springWaterHeight = entity.getFluidTypeHeight(TFCFluids.SPRING_WATER.getType());
+
+        double fluidHeight = Math.max(waterHeight, Math.max(saltWaterHeight, springWaterHeight));
         double entityHeight = entity.getBbHeight();
 
-        if (waterHeight <= 0) return 0.0f;
-        if (waterHeight >= entityHeight) return 1.0f;
+        if (fluidHeight <= 0) return 0.0f;
+        if (fluidHeight >= entityHeight) return 1.0f;
 
-        return Mth.clamp((float) (waterHeight / entityHeight), 0.0f, 1.0f);
+        return Mth.clamp((float) (fluidHeight / entityHeight), 0.0f, 1.0f);
     }
 
     public static void init(Entity entity)
@@ -252,7 +258,11 @@ public class EntityTemperatureManager
             else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos, entityData.environmentTemperature(), entityData.environmentHumidity())));
 
             float delta = entityData.environmentTemperature() - entityData.internalTemperature();
-            entityData = entityData.withInternalTemperature(entityData.internalTemperature() + delta * calcTemperatureChangeRate(delta));
+            float tempChange = calcTemperatureChangeRate(delta);
+            entityData = entityData.withInternalTemperature(entityData.internalTemperature() + delta * tempChange * 0.05f);
+
+            if (entityData.internalTemperature() >= dataMap.maxEntityTemperature()) entity.hurt(ThermiaDamageTypes.hyperDamageSource(level.registryAccess()), 1.0f);
+            if (entityData.internalTemperature() <= dataMap.minEntityTemperature()) entity.hurt(ThermiaDamageTypes.hypoDamageSource(level.registryAccess()), 1.0f);
 
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
 
