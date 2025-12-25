@@ -5,6 +5,7 @@ import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.SolarShadeResult;
 import com.nyonyix.thermia.data.ThermiaDamageTypes;
+import com.nyonyix.thermia.data.attachment.EntityDebug;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
@@ -49,6 +50,7 @@ public class EntityTemperatureManager
 {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<UUID, CompletableFuture<BlockSearchResult>> pendingBlockSearches = new ConcurrentHashMap<>();
+    private static BlockSearchResult newResult = BlockSearchResult.createDefault();
 
     private static boolean shouldGetSystem(Entity entity)
     {
@@ -121,7 +123,8 @@ public class EntityTemperatureManager
 
                 float distance = (float) Math.sqrt(blockSearchResult.searchOrigin().distSqr(pos));
                 float effectiveDistance = Math.max(distance, 1f);
-                float distantTemp = temp / (effectiveDistance * effectiveDistance);
+                float occlusionFactor = blockSearchResult.blockOcclusions().getOrDefault(pos, 1.0f);
+                float distantTemp = (temp * occlusionFactor) / (effectiveDistance * effectiveDistance);
 
                 totalTemperature += distantTemp;
             }
@@ -188,6 +191,7 @@ public class EntityTemperatureManager
         if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE) && entity.isAlive())
         {
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
+            EntityDebug entityDebug = EntityDebug.createDefault();
             EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
             CompletableFuture<BlockSearchResult> pendingBlockSearch = pendingBlockSearches.get(entity.getUUID());
             ICalendar levelCalender = Calendars.get(level);
@@ -215,16 +219,13 @@ public class EntityTemperatureManager
             int nonEmptyAbove = 0;
             if (level.hasChunk(pos.getX() / 16, pos.getZ() / 16)) nonEmptyAbove = BlockSearch.SearchForBlock.depthEncasedBlocks(level.getChunkAt(pos), pos);
 
-            SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
-
             if (pendingBlockSearch != null && pendingBlockSearch.isDone())
             {
                 try
                 {
-                    BlockSearchResult newResult = pendingBlockSearch.join();
                     pendingBlockSearches.remove(entity.getUUID());
 
-                    if (newResult.levelID() == level.dimension())  entityData = entityData.withBlockSearchResult(newResult);
+                    if (newResult.levelID() == level.dimension())  newResult = pendingBlockSearch.join();
                     else LOGGER.debug("Discarding invalid Block search result");
                 }
                 catch (Exception e)
@@ -234,18 +235,22 @@ public class EntityTemperatureManager
                 }
             }
 
-            nearbyBlockTemperature = parseBlockSearchResult(level, pos, entityData.blockSearchResult());
+            nearbyBlockTemperature = parseBlockSearchResult(level, pos, newResult);
             entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(pos).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
             if (dataMap.isMob())
             {
-                entityData = entityData.withSunOcclusionPos(SolarShadeResult.createDefault());
-                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: 0.3f, entityData.wetness());
+                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: 0.3f, entityData.wetness());
                 entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
+
+                entityDebug = entityDebug.withSolarShadeResult(SolarShadeResult.createDefault());
             }
             else
             {
-                entityData = entityData.withSunOcclusionPos(BlockSearch.SearchForBlock.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth()));
-                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos, baseTemperature, entityData.environmentHumidity(), entityData.sunOcclusionPos().shade(), entityData.wetness());
+                SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
+                SolarShadeResult shadeResult = BlockSearch.SearchForBlock.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth());
+                entityDebug = entityDebug.withSolarShadeResult(shadeResult);
+
+                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), shadeResult.shade(), entityData.wetness());
                 entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
             }
 
@@ -255,7 +260,7 @@ public class EntityTemperatureManager
                 if (levelModel.getTemperature(level, pos) > 0.0f) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.1f));
                 else if (levelModel.getTemperature(level, pos) > -5) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.05f));
             }
-            else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos, entityData.environmentTemperature(), entityData.environmentHumidity())));
+            else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos.above(), entityData.environmentTemperature(), entityData.environmentHumidity())));
 
             float delta = entityData.environmentTemperature() - entityData.internalTemperature();
             float tempChange = calcTemperatureChangeRate(delta);
@@ -264,6 +269,7 @@ public class EntityTemperatureManager
             if (entityData.internalTemperature() >= dataMap.maxEntityTemperature()) entity.hurt(ThermiaDamageTypes.hyperDamageSource(level.registryAccess()), 1.0f);
             if (entityData.internalTemperature() <= dataMap.minEntityTemperature()) entity.hurt(ThermiaDamageTypes.hypoDamageSource(level.registryAccess()), 1.0f);
 
+            entity.setData(ThermiaAttachments.ENTITY_DEBUG, entityDebug.withBlockSearchResult(newResult).withWindOcclusionResult(EnvironmentHelpers.getWindOcclusion(level, pos.above())));
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
 
             if (!pendingBlockSearches.containsKey(entity.getUUID()))

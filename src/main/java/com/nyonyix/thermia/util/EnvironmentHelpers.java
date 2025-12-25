@@ -2,6 +2,7 @@ package com.nyonyix.thermia.util;
 
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
+import com.nyonyix.thermia.data.WindOcclusionResult;
 import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
 import net.dries007.tfc.util.calendar.Calendar;
@@ -134,7 +135,7 @@ public class EnvironmentHelpers
     public static float getWindSpeed(Level level, BlockPos pos)
     {
         ClimateModel model = Climate.get(level);
-        return WeatherHelpers.windMS(model.getWind(level, pos)) * windOcclusion(level, pos);
+        return WeatherHelpers.windMS(model.getWind(level, pos)) * getWindOcclusion(level, pos).occlusionMultiplier();
     }
 
     public static float getWindDirection(Level level, BlockPos pos)
@@ -145,7 +146,7 @@ public class EnvironmentHelpers
         return (float) Math.atan2(windVector.y, windVector.x);
     }
 
-    public static float windOcclusion(Level level, BlockPos pos)
+    public static WindOcclusionResult getWindOcclusion(Level level, BlockPos pos)
     {
         float direction = getWindDirection(level, pos);
         float directionX = (float) Math.cos(direction);
@@ -161,10 +162,10 @@ public class EnvironmentHelpers
         {
             float hitDist = (float) startVec.distanceTo(hit.getLocation());
 
-            return Mth.clamp((float) (0.1 + (hitDist / 4.0) * 0.9), 0.1f, 1.0f);
+            return WindOcclusionResult.createDefault().withOccludingBlock(hit.getBlockPos()).withOcclusionMultiplier(Mth.clamp((float) (0.1 + (hitDist / 4.0) * 0.9), 0.1f, 1.0f));
         }
 
-        return 1.0f;
+        return WindOcclusionResult.createDefault();
     }
 
     // Solar Radiation
@@ -238,7 +239,7 @@ public class EnvironmentHelpers
     {
         float tempComponent = Mth.clampedMap(temperature,-10f, 40f, 0.1f, 2.0f);
         float humidityComponent = 1.0f - humidity;
-        float windComponent = 1.0f + ( getWindSpeed(level, pos)* 0.15f);
+        float windComponent = 1.0f + (getWindSpeed(level, pos)* 0.15f);
 
         float dryingRate = 0.01f * tempComponent * humidityComponent * windComponent;
 

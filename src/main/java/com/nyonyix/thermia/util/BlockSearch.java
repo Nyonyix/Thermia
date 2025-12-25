@@ -13,17 +13,22 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import com.nyonyix.thermia.data.BlockSearchResult;
@@ -37,20 +42,20 @@ public class BlockSearch
 
     static class BlockSearchBuilder
     {
-        private BlockPos nearest = BlockPos.ZERO;
-        private double nearestDistSq = Double.MAX_VALUE;
-        private ResourceKey<Level> levelID;
         private BlockPos origin = BlockPos.ZERO;
-        private Map<Block, Integer> counts = new HashMap<>();
+        private ResourceKey<Level> levelID;
         private Map<Block, List<BlockPos>> allPositions = new HashMap<>();
-        private int totalCount = 0;
+        private Map<BlockPos, Float> blockOcclusions = new HashMap<>();
         private List<BlockPositionsWithDistance> allFound = new ArrayList<>();
 
-        record BlockPositionsWithDistance(BlockPos pos, Block block, double distSq) {}
+        record BlockPositionsWithDistance(BlockPos pos, Block block, double distSq, float occlusion) {}
 
-        void addBlockCandidate(BlockPos pos, Block block, double distSq) { allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq));}
+        void addBlockCandidate(BlockPos pos, Block block, double distSq, float occlusion)
+        {
+            allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq, occlusion));
+        }
 
-        BlockSearchResult build()
+        BlockSearchResult build(Level level)
         {
             allFound.sort(Comparator.comparingDouble(BlockPositionsWithDistance::distSq));
 
@@ -59,64 +64,24 @@ public class BlockSearch
             for (BlockPositionsWithDistance entry : allFound)
             {
                 BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(entry.block()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
-                if (dataMap == null) continue;;
+                if (dataMap == null) continue;
 
                 int currentCount = tempCounts.getOrDefault(entry.block, 0);
                 if (currentCount >= dataMap.searchCap()) continue;
 
                 tempCounts.put(entry.block(), currentCount + 1);
-                counts.put(entry.block(), currentCount + 1);
                 allPositions.computeIfAbsent(entry.block(), k -> new ArrayList<>()).add(entry.pos());
 
-                if (entry.distSq() < nearestDistSq)
-                {
-                    nearestDistSq = entry.distSq();
-                    nearest = entry.pos();
-                }
+                blockOcclusions.put(entry.pos(), entry.occlusion());
             }
 
-            return new BlockSearchResult(nearest, origin, nearestDistSq, levelID, counts, allPositions);
-        }
-
-        void initialiseBlock(Block block)
-        {
-            counts.put(block, 0);
-            allPositions.put(block, new ArrayList<>());
-        }
-
-        void initialiseBlock(ResourceLocation blockId)
-        {
-            counts.put(BuiltInRegistries.BLOCK.get(blockId), 0);
-            allPositions.put(BuiltInRegistries.BLOCK.get(blockId), new ArrayList<>());
-        }
-
-        void setIfNearest(BlockPos pos, double distSq)
-        {
-            if (distSq < nearestDistSq)
-            {
-                this.nearestDistSq = distSq;
-                this.nearest = pos;
-            }
-        }
-
-        void addBlock(BlockPos pos, Block block)
-        {
-            counts.put(block, counts.getOrDefault(block, 0) + 1);
-            allPositions.computeIfAbsent(block, k -> new ArrayList<>()).add(pos);
-            totalCount++;
-        }
-
-        void addBlock(BlockPos pos, ResourceLocation blockId)
-        {
-            counts.put(BuiltInRegistries.BLOCK.get(blockId), counts.getOrDefault(BuiltInRegistries.BLOCK.get(blockId), 0) + 1);
-            allPositions.computeIfAbsent(BuiltInRegistries.BLOCK.get(blockId), k -> new ArrayList<>()).add(pos);
-            totalCount++;
+            return new BlockSearchResult(origin, levelID, allPositions, blockOcclusions);
         }
     }
 
     public static class SearchForBlock
     {
-        private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, BlockSearchBuilder builder)
+        private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, BlockSearchBuilder builder, List<LevelChunk> chunks)
         {
             LevelChunkSection[] sections = chunk.getSections();
             BlockPos chunkPos = chunk.getPos().getWorldPosition();
@@ -135,22 +100,110 @@ public class BlockSearch
                         for (int y = 0; y < 16; y++)
                         {
                             BlockPos pos = new BlockPos(chunkPos.getX() + x, sectionY + y, chunkPos.getZ() + z);
-
                             double distSq = center.distSqr(pos);
                             if (distSq > radiusSq) continue;
 
                             Block block = section.getBlockState(x, y, z).getBlock();
-
                             BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
 
                             if (dataMap != null)
                             {
-                                builder.addBlockCandidate(pos.immutable(), block, distSq);
+                                float occlusion = calcOcclusion(center, pos, chunks);
+                                builder.addBlockCandidate(pos.immutable(), block, distSq, occlusion);
                             }
                         }
                     }
                 }
             }
+        }
+
+        private static float calcOcclusion(BlockPos originPos, BlockPos sourcePos, List<LevelChunk> cachedChunks)
+        {
+            double distance = Math.sqrt(originPos.distSqr(sourcePos));
+            if ( distance < 1) return 1.0f;
+
+            Vec3 start = Vec3.atCenterOf(originPos.above());
+            Vec3 end = Vec3.atCenterOf(sourcePos);
+
+            BlockGetter blockGetter = new BlockGetter() {
+
+                @Override
+                public BlockState getBlockState(BlockPos blockPos)
+                {
+                    LevelChunk chunk = findChunkInList(cachedChunks, blockPos.getX() / 16, blockPos.getZ() / 16);
+                    return chunk != null ? chunk.getBlockState(blockPos) : Blocks.AIR.defaultBlockState();
+                }
+
+                @Override
+                public FluidState getFluidState(BlockPos blockPos)
+                {
+                    return getBlockState(blockPos).getFluidState();
+                }
+
+                @Override
+                public int getHeight()
+                {
+                    return cachedChunks.isEmpty() ? 384 : cachedChunks.getFirst().getHeight();
+                }
+
+                @Override
+                public int getMinBuildHeight()
+                {
+                    return cachedChunks.isEmpty() ? -64 : cachedChunks.getFirst().getMinBuildHeight();
+                }
+
+                @Override
+                public @Nullable BlockEntity getBlockEntity(BlockPos blockPos)
+                {
+                    return null;
+                }
+            };
+
+            final int[] blockCount = {0};
+            final BlockState[] firstBlock = {null};
+
+            BlockGetter.traverseBlocks(start, end, blockGetter, (getter,  pos) ->
+            {
+                if (pos.equals(sourcePos)) return null;
+
+                BlockState state = getter.getBlockState(pos);
+                if (!state.isAir())
+                {
+                    blockCount[0]++;
+                    if (firstBlock[0] == null)
+                    {
+                        firstBlock[0] = state;
+                    }
+                }
+                return null;
+            }, (getter) -> null);
+
+            if (blockCount[0] == 0) return 1.0f;
+
+            float transparency = firstBlock[0] != null ? getBlockTransparency(firstBlock[0]) : 0.0f;
+            float countFactor = 1.0f - Math.min(blockCount[0] * 0.15f, 0.9f);
+
+            return Mth.clamp(Mth.lerp(transparency, countFactor * 0.3f, countFactor), 0.1f, 1.0f);
+        }
+
+        private static LevelChunk findChunkInList(List<LevelChunk> chunks, int chunkX, int chunkZ)
+        {
+            for (LevelChunk chunk : chunks)
+            {
+                if (chunk.getPos().x == chunkX && chunk.getPos().z == chunkZ) return chunk;
+            }
+
+            return null;
+        }
+
+        private static float getBlockTransparency(BlockState state)
+        {
+            if (state.is(BlockTags.LEAVES)) return 0.5f;
+            if (!state.isCollisionShapeFullBlock(null, BlockPos.ZERO)) return 0.6f;
+            if (!state.canOcclude()) return 0.7f;
+            if (state.canOcclude()) return 0.0f;
+
+            return 0.3f;
         }
 
         public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, BlockPos center, int radius)
@@ -183,14 +236,14 @@ public class BlockSearch
 
                     for (LevelChunk chunk : chunksToSearch)
                     {
-                        searchChunk(chunk, searchCenter, radiusSq, builder);
+                        searchChunk(chunk, searchCenter, radiusSq, builder, chunksToSearch);
                     }
 
-                    return builder.build();
+                    return builder.build(level);
                 }catch (Exception e)
                 {
                     LOGGER.error("Error in async block search:", e);
-                    return new BlockSearchResult(BlockPos.ZERO, BlockPos.ZERO, 0d, level.dimension(), new HashMap<>(), new HashMap<>());
+                    return new BlockSearchResult(BlockPos.ZERO, level.dimension(), new HashMap<>(), new HashMap<>());
                 }
 
             }, Util.backgroundExecutor());

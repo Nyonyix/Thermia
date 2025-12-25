@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
-import com.nyonyix.thermia.data.attachment.ChunkHumidity;
+import com.nyonyix.thermia.data.attachment.EntityDebug;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
@@ -85,6 +85,7 @@ public class ThermiaClient {
             {
                 RandomSource random = minecraft.level.getRandom();
                 EntityTemperature playerData = clientPlayer.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
+                EntityDebug entityDebug = clientPlayer.getData(ThermiaAttachments.ENTITY_DEBUG);
 
                 List<String> text = event.getLeft();
                 text.add("");
@@ -102,7 +103,7 @@ public class ThermiaClient {
                 Level level = clientPlayer.level();
                 ClimateModel model = Climate.get(level);
                 text.add(String.format("    Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(model.getAverageTemperature(level, pos), model.getAverageRainfall(level, pos), model.getRainfallVariance(level, pos), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
-                text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos, playerData.sunOcclusionPos().shade())));
+                text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos, entityDebug.solarShadeResult().shade())));
             }
         }
     }
@@ -122,21 +123,25 @@ public class ThermiaClient {
 
         for (Entity entity : minecraft.level.entitiesForRendering())
         {
-            if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) continue;
+            if (!entity.hasData(ThermiaAttachments.ENTITY_DEBUG)) continue;
 
-            EntityTemperature tempData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
-            BlockPos occlusionPos = tempData.sunOcclusionPos().sunOcclusionPos();
-
-            if (occlusionPos.equals(BlockPos.ZERO)) continue;
-
+            EntityDebug entityDebug = entity.getData(ThermiaAttachments.ENTITY_DEBUG);
+            BlockPos sunOcclusionPos = entityDebug.solarShadeResult().sunOcclusionPos();
+            BlockPos windOcclusionPos = entityDebug.windOcclusionResult().occludingBlock();
             Vec3 entityPos = new Vec3(entity.position().x, entity.position().y + 1.0, entity.position().z);
-            renderSunOcclusionLine(poseStack, bufferSource, cameraPos, entityPos, Vec3.atCenterOf(occlusionPos));
+
+
+            if (windOcclusionPos.equals(BlockPos.ZERO)) continue;
+            renderDebugOcclusionLine(poseStack, bufferSource, cameraPos, entityPos, Vec3.atCenterOf(windOcclusionPos), "wind");
+
+            if (sunOcclusionPos.equals(BlockPos.ZERO)) continue;
+            renderDebugOcclusionLine(poseStack, bufferSource, cameraPos, entityPos, Vec3.atCenterOf(sunOcclusionPos), "sun");
         }
 
         bufferSource.endBatch();
     }
 
-    private static void renderSunOcclusionLine(PoseStack poseStack, MultiBufferSource bufferSource, Vec3 cameraPos, Vec3 entityPos, Vec3 occlusionPos)
+    private static void renderDebugOcclusionLine(PoseStack poseStack, MultiBufferSource bufferSource, Vec3 cameraPos, Vec3 entityPos, Vec3 occlusionPos, String type)
     {
         poseStack.pushPose();
         poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
@@ -152,16 +157,31 @@ public class ThermiaClient {
         float endY = (float) occlusionPos.y;
         float endZ = (float) occlusionPos.z;
 
-        float r = 1.0f;
-        float g = 1.0f;
+        float r = 0.0f;
+        float g = 0.0f;
         float b = 0.0f;
-        float a = 0.8f;
+        float a = 0.0f;
 
-        if (entityPos.distanceTo(occlusionPos) >= 32.0)
+        if (type.equals("sun"))
         {
-            r = 0.7f;
-            g = 0.7f;
+            r = 1.0f;
+            g = 1.0f;
             b = 0.0f;
+            a = 0.8f;
+
+            if (entityPos.distanceTo(occlusionPos) >= 32.0)
+            {
+                r = 0.7f;
+                g = 0.7f;
+                b = 0.0f;
+                a = 0.8f;
+            }
+        }
+        else if (type.equals("wind"))
+        {
+            r = 0.0f;
+            g = 0.5f;
+            b = 1.0f;
             a = 0.8f;
         }
 
