@@ -27,6 +27,7 @@ public class BlockTemperatureDataMapProvider extends DataMapProvider
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:rock/magma/rhyolite")).orElseThrow(), new BlockTemperatureDataMap(800f, 16, false, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:rock/magma/andesite")).orElseThrow(), new BlockTemperatureDataMap(800f, 16, false, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:rock/magma/dacite")).orElseThrow(), new BlockTemperatureDataMap(800f, 16, false, Map.of(), Map.of(), Map.of()), false)
+                .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:rock/magma/basalt")).orElseThrow(), new BlockTemperatureDataMap(800f, 16, false, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:magma_block")).orElseThrow(), new BlockTemperatureDataMap(800f, 16, false, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:pit_kiln")).orElseThrow(), new BlockTemperatureDataMap(1800f, 16, false, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:fire")).orElseThrow(), new BlockTemperatureDataMap(600f, 32, false, Map.of(), Map.of(), Map.of()), false)

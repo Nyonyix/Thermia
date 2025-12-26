@@ -126,7 +126,7 @@ public class EntityTemperatureManager
                 float occlusionFactor = blockSearchResult.blockOcclusions().getOrDefault(pos, 1.0f);
                 float distantTemp = (temp * occlusionFactor) / (effectiveDistance * effectiveDistance);
 
-                totalTemperature += distantTemp;
+                totalTemperature += distantTemp / 10;
             }
         }
 
