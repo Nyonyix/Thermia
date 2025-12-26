@@ -20,6 +20,8 @@ import net.dries007.tfc.common.blockentities.IHeatable;
 import net.dries007.tfc.common.entities.livestock.TFCAnimal;
 import net.dries007.tfc.common.entities.livestock.TFCAnimalProperties;
 import net.dries007.tfc.common.fluids.TFCFluids;
+import net.dries007.tfc.common.player.IPlayerInfo;
+import net.dries007.tfc.config.TFCConfig;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.calendar.ICalendar;
 import net.dries007.tfc.util.climate.Climate;
@@ -50,7 +52,6 @@ public class EntityTemperatureManager
 {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<UUID, CompletableFuture<BlockSearchResult>> pendingBlockSearches = new ConcurrentHashMap<>();
-    private static BlockSearchResult newResult = BlockSearchResult.createDefault();
 
     private static boolean shouldGetSystem(Entity entity)
     {
@@ -160,6 +161,37 @@ public class EntityTemperatureManager
         return Mth.clamp((float) (fluidHeight / entityHeight), 0.0f, 1.0f);
     }
 
+    private static EntityTemperature handlePlayerSweat(Entity entity, EntityTemperature entityTemperature)
+    {
+        float heatStress = entityTemperature.internalTemperature() - entityTemperature.maxInternalTemperature();
+
+        if (entity instanceof IPlayerInfo playerInfo)
+        {
+            float currentHydration = playerInfo.getThirst();
+            float sweatEfficiency = Mth.clampedMap(currentHydration, 0f, 50f, 0.1f, 1.0f);
+//            float sweatEfficiency = (currentHydration / 100) * (currentHydration / 100);
+
+            if (heatStress > -5)
+            {
+                float baseSweatRate = Mth.clampedMap(heatStress, -5f, 5f, 0f, 0.05f);
+                float actualSweatRate = baseSweatRate * sweatEfficiency;
+                float newWetness = Math.min(1.0f, entityTemperature.wetness() + actualSweatRate);
+
+                entityTemperature = entityTemperature.withWetness(newWetness);
+
+                float hydrationLoss = baseSweatRate * 10;
+                playerInfo.addThirst(-hydrationLoss);
+            }
+
+            return entityTemperature;
+        }
+        else
+        {
+            if (heatStress > -5) entityTemperature = entityTemperature.withWetness(Math.min(1.0f, entityTemperature.wetness() + Mth.clampedMap(heatStress, -5f, 5f, 0f, 0.05f)));
+            return entityTemperature;
+        }
+    }
+
     public static void init(Entity entity)
     {
         EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
@@ -173,6 +205,7 @@ public class EntityTemperatureManager
                 if (tfcAnimal.getFamiliarity() >= 0.1)
                 {
                     entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()));
+                    entity.setData(ThermiaAttachments.ENTITY_DEBUG, EntityDebug.createDefault());
                     return;
                 }
                 else return;
@@ -184,6 +217,7 @@ public class EntityTemperatureManager
         }
 
         entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()));
+        entity.setData(ThermiaAttachments.ENTITY_DEBUG, EntityDebug.createDefault());
     }
 
     public static void onUpdate(Level level, Entity entity)
@@ -223,9 +257,10 @@ public class EntityTemperatureManager
             {
                 try
                 {
+                    BlockSearchResult newResult = pendingBlockSearch.join();
                     pendingBlockSearches.remove(entity.getUUID());
 
-                    if (newResult.levelID() == level.dimension())  newResult = pendingBlockSearch.join();
+                    if (newResult.levelID() == level.dimension())  entityData = entityData.withBlockSearchResult(newResult);
                     else LOGGER.debug("Discarding invalid Block search result");
                 }
                 catch (Exception e)
@@ -235,11 +270,12 @@ public class EntityTemperatureManager
                 }
             }
 
-            nearbyBlockTemperature = parseBlockSearchResult(level, pos, newResult);
+            nearbyBlockTemperature = parseBlockSearchResult(level, pos, entityData.blockSearchResult());
             entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(pos).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
+            float shade = 0.3f;
             if (dataMap.isMob())
             {
-                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: 0.3f, entityData.wetness());
+                float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: shade, entityData.wetness());
                 entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
 
                 entityDebug = entityDebug.withSolarShadeResult(SolarShadeResult.createDefault());
@@ -249,10 +285,13 @@ public class EntityTemperatureManager
                 SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
                 SolarShadeResult shadeResult = BlockSearch.SearchForBlock.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth());
                 entityDebug = entityDebug.withSolarShadeResult(shadeResult);
+                shade = shadeResult.shade();
 
                 float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), shadeResult.shade(), entityData.wetness());
                 entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
             }
+
+            entityData = handlePlayerSweat(entity, entityData);
 
             boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getRainfall(level, pos));
             if (isRaining && level.canSeeSky(pos) && entityData.wetness() <= 0.9)
@@ -260,7 +299,7 @@ public class EntityTemperatureManager
                 if (levelModel.getTemperature(level, pos) > 0.0f) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.1f));
                 else if (levelModel.getTemperature(level, pos) > -5) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.05f));
             }
-            else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos.above(), entityData.environmentTemperature(), entityData.environmentHumidity())));
+            else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos.above(), entityData.environmentTemperature(), entityData.environmentHumidity(), shade)));
 
             float delta = entityData.environmentTemperature() - entityData.internalTemperature();
             float tempChange = calcTemperatureChangeRate(delta);
@@ -269,7 +308,7 @@ public class EntityTemperatureManager
             if (entityData.internalTemperature() >= dataMap.maxEntityTemperature()) entity.hurt(ThermiaDamageTypes.hyperDamageSource(level.registryAccess()), 1.0f);
             if (entityData.internalTemperature() <= dataMap.minEntityTemperature()) entity.hurt(ThermiaDamageTypes.hypoDamageSource(level.registryAccess()), 1.0f);
 
-            entity.setData(ThermiaAttachments.ENTITY_DEBUG, entityDebug.withBlockSearchResult(newResult).withWindOcclusionResult(EnvironmentHelpers.getWindOcclusion(level, pos.above())));
+            entity.setData(ThermiaAttachments.ENTITY_DEBUG, entityDebug.withBlockSearchResult(entityData.blockSearchResult()).withWindOcclusionResult(EnvironmentHelpers.getWindOcclusion(level, pos.above())));
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
 
             if (!pendingBlockSearches.containsKey(entity.getUUID()))

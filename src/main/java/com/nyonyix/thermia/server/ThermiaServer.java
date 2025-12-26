@@ -136,28 +136,40 @@ public class ThermiaServer
 
         for (ServerLevel level : server.getAllLevels())
         {
+            List<Entity> entitySnapshot = new ArrayList<>();
             try
             {
                 for (Entity entity : level.getAllEntities())
                 {
-                    EntityTemperatureManager.onTick(level, entity);
-
-                    if (server.getTickCount() % 20 == entity.getId() % 20)
-                    {
-                        EntityTemperatureManager.onUpdate(level, entity);
-                    }
+                    if (entity != null && entity.isAlive()) entitySnapshot.add(entity);
                 }
-
-                if (ChunkHumidityManager.lastTickedTFCHour != Calendars.get(level).getHourOfDay())
-                {
-                    ChunkHumidityManager.lastTickedTFCHour = Calendars.get(level).getHourOfDay();
-                    ChunkHumidityManager.refreshWorkingCache(level);
-                    LOGGER.info("Refresh on tick {}", server.getTickCount());
-                }
-
-                ChunkHumidityManager.processChunkBatch(level, 64);
             }
-            catch (ArrayIndexOutOfBoundsException ignored) {}
+            catch (ArrayIndexOutOfBoundsException e)
+            {
+                LOGGER.debug("Entity iteration interrupted: {}", e.getMessage());
+                continue;
+            }
+
+            for (Entity entity : entitySnapshot)
+            {
+                if (entity.isRemoved()) continue;
+
+                EntityTemperatureManager.onTick(level, entity);
+
+                if (server.getTickCount() % 20 == entity.getId() % 20)
+                {
+                    EntityTemperatureManager.onUpdate(level, entity);
+                }
+            }
+
+            if (ChunkHumidityManager.lastTickedTFCHour != Calendars.get(level).getHourOfDay())
+            {
+                ChunkHumidityManager.lastTickedTFCHour = Calendars.get(level).getHourOfDay();
+                ChunkHumidityManager.refreshWorkingCache(level);
+                LOGGER.info("Refresh on tick {}", server.getTickCount());
+            }
+
+            ChunkHumidityManager.processChunkBatch(level, 64);
         }
     }
 

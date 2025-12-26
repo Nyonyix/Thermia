@@ -201,8 +201,6 @@ public class BlockSearch
             if (state.is(BlockTags.LEAVES)) return 0.5f;
             if (!state.isCollisionShapeFullBlock(null, BlockPos.ZERO)) return 0.6f;
             if (!state.canOcclude()) return 0.7f;
-            if (state.canOcclude()) return 0.0f;
-
             return 0.3f;
         }
 

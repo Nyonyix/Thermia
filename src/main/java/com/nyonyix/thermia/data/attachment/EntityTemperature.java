@@ -68,4 +68,6 @@ public record EntityTemperature(
     public EntityTemperature withMinInternalTemperature(float minInternalTemperature) {return  new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, minInternalTemperature, this.toRemove, this.blockSearchResult);}
 
     public EntityTemperature withToRemove(boolean toRemove) {return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, toRemove, this.blockSearchResult);}
+
+    public EntityTemperature withBlockSearchResult(BlockSearchResult blockSearchResult) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.toRemove, blockSearchResult);}
 }

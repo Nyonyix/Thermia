@@ -65,10 +65,11 @@ public class EnvironmentHelpers
         float windCooling = Mth.clampedMap(windSpeed, 0f, 32f, 0f, 24f);
 
         float dampPenalty = 0;
-        if (temp < 6f && humidity > 0.6f)
+        if (temp < 12f && humidity > 0.6f)
         {
+            float tempFactor = Mth.clampedMap(temp, -5f, 12f, 1.0f, 0.0f);
             float humidityFactor = (humidity - 0.6f) / 0.4f;
-            dampPenalty = humidityFactor * Mth.clampedMap(windSpeed, 0f, 24f, 0f, 10f);
+            dampPenalty = tempFactor * humidityFactor * Mth.clampedMap(windSpeed, 0f, 24f, 0f, 10f);
         }
 
         return temp + solarDelta - windCooling - dampPenalty;
@@ -87,10 +88,10 @@ public class EnvironmentHelpers
 
         float windCooling = Mth.clampedMap(windSpeed, 0f, 32f, 0f, 8f);
 
-        float humidityPenalty = 0f;
-        if (temp > 16f && humidity > 0.55f) humidityPenalty = (humidity - 0.55f) * Mth.clampedMap(temp, 16f, 22f, 0f, 2.5f);
+        float humidityDiscomfort = 0f;
+        if (temp > 16f && humidity > 0.55f) humidityDiscomfort = (humidity - 0.55f) * Mth.clampedMap(temp, 16f, 22f, 0f, 2.5f);
 
-        return temp + solarDelta - windCooling + humidityPenalty;
+        return temp + solarDelta - windCooling + humidityDiscomfort;
     }
 
     public static float calcEffectiveTemperature(Level level, BlockPos pos, float temp, float humidity, float shade, float wetness)
@@ -122,12 +123,9 @@ public class EnvironmentHelpers
     public static float calcEvaporativeCooling(float windSpeed, float humidity, float wetness)
     {
         float windComponent = Mth.clampedMap(windSpeed, 0f, 32f, 0.2f, 1.0f);
-        float effectiveHumidity = Math.min(1.0f, humidity + (wetness * (1.0f - humidity)));
-        float humidityComponent = 1.0f - effectiveHumidity;
+        float humidityResistance = Mth.clampedMap(humidity, 0f, 0.95f, 1.0f, 0.3f);
 
-        float wetnessBonus = wetness * windComponent * 0.3f;
-
-        return (float) Math.sqrt(windComponent * humidityComponent) + wetnessBonus;
+        return wetness * windComponent * humidityResistance * 8.0f;
     }
 
     // Wind
@@ -143,7 +141,7 @@ public class EnvironmentHelpers
         ClimateModel model = Climate.get(level);
         Vec2 windVector = model.getWind(level, pos);
 
-        return (float) Math.atan2(windVector.y, windVector.x);
+        return (float) Math.atan2(-windVector.y, -windVector.x);
     }
 
     public static WindOcclusionResult getWindOcclusion(Level level, BlockPos pos)
@@ -235,13 +233,14 @@ public class EnvironmentHelpers
         return KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.getOrDefault(climate, KoppenClimateHumidity.createDefault());
     }
 
-    public static float calcDryingRate(Level level, BlockPos pos, float temperature, float humidity)
+    public static float calcDryingRate(Level level, BlockPos pos, float temperature, float humidity, float shade)
     {
         float tempComponent = Mth.clampedMap(temperature,-10f, 40f, 0.1f, 2.0f);
         float humidityComponent = 1.0f - humidity;
         float windComponent = 1.0f + (getWindSpeed(level, pos)* 0.15f);
+        float solarComponent = 1.0f + (getSolarRadiationWeather(level, pos, shade) * 2.0f);
 
-        float dryingRate = 0.01f * tempComponent * humidityComponent * windComponent;
+        float dryingRate = 0.01f * tempComponent * humidityComponent * windComponent * solarComponent;
 
         return Mth.clamp(dryingRate, 0.001f, 0.2f);
     }
@@ -264,12 +263,15 @@ public class EnvironmentHelpers
         float timeOfDay = levelCalendar.getCalendarFractionOfDay();
 
         float climateHumidity = newHumidityKoppen(koppenClimateHumidity, rainVar, fractionOfYear, isNorth);
-        float rainDrivenHumidity = newHumidityRain(rainIntensity, rainfall);
+        float rainBoost = newHumidityRain(rainIntensity, rainfall);
         float diurnalModifier = 1f + 0.1f * (float) Math.cos((timeOfDay - 0.25) * 2 * Math.PI);
 
         float forestModifier = 0f; //Todo - Maybe add forest modifier based on forest density.
 
-        return Mth.clamp((climateHumidity + rainDrivenHumidity) * diurnalModifier, 0f, 0.99f);
+        float baseHumidity = climateHumidity * diurnalModifier;
+        float rainAdjusted = Mth.lerp(rainBoost, baseHumidity, 0.95f);
+
+        return Mth.clamp(rainAdjusted, 0f, 0.99f);
     }
 
     public static float getEntityHumidity(float humidity, int nonEmptyAbove)

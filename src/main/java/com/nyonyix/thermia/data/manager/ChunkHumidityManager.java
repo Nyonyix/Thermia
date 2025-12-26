@@ -33,13 +33,12 @@ public class ChunkHumidityManager
     {
         if (chunk.hasData(ThermiaAttachments.CHUNK_HUMIDITY))
         {
-            float humidity = chunk.getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity();
             Level level = chunk.getLevel();
             int chunkCenterX = chunk.getPos().getWorldPosition().getX() + 8;
             int chunkCenterZ = chunk.getPos().getWorldPosition().getZ() + 8;
             BlockPos pos = new BlockPos(chunkCenterX, chunk.getHeight(Heightmap.Types.WORLD_SURFACE, chunkCenterX, chunkCenterZ), chunkCenterZ).above();
 
-            humidity = EnvironmentHelpers.newEnvironmentHumidity(level, pos);
+            float humidity = EnvironmentHelpers.newEnvironmentHumidity(level, pos);
 
             chunk.setData(ThermiaAttachments.CHUNK_HUMIDITY, ChunkHumidity.createDefault().withHumidity(humidity));
         }
