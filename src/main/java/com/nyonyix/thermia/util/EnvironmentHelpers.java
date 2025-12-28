@@ -141,14 +141,14 @@ public class EnvironmentHelpers
         ClimateModel model = Climate.get(level);
         Vec2 windVector = model.getWind(level, pos);
 
-        return (float) Math.atan2(-windVector.y, -windVector.x);
+        return (float) Math.atan2(windVector.y, windVector.x);
     }
 
     public static WindOcclusionResult getWindOcclusion(Level level, BlockPos pos)
     {
         float direction = getWindDirection(level, pos);
-        float directionX = (float) Math.cos(direction);
-        float directionZ = (float) Math.sin(direction);
+        float directionX = -(float) Math.cos(direction);
+        float directionZ = -(float) Math.sin(direction);
 
         Vec3 startVec = Vec3.atCenterOf(pos.above());
         Vec3 endVec = startVec.add(directionX * 4.0, 0, directionZ * 4.0);

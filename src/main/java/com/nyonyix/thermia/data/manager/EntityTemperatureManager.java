@@ -53,89 +53,7 @@ public class EntityTemperatureManager
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<UUID, CompletableFuture<BlockSearchResult>> pendingBlockSearches = new ConcurrentHashMap<>();
 
-    private static boolean shouldGetSystem(Entity entity)
-    {
-        EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
-        if (dataMap == null) return false;
-
-        if (entity instanceof TFCAnimalProperties tfcAnimalProperties)
-        {
-            if (tfcAnimalProperties.getFamiliarity() >= 0.15f) return true;
-            else
-            {
-                if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE).withToRemove(true));
-            }
-            return tfcAnimalProperties.getFamiliarity() >= 0.15f;
-        }
-
-        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
-
-        if (!dataMap.isMob()) return true;
-
-        return false;
-    }
-
-    private static float parseBlockState(BlockState state, Level level, BlockPos pos, BlockTemperatureDataMap dataMap)
-    {
-        StateDefinition<Block, BlockState> stateDef = state.getBlock().getStateDefinition();
-        float temp = dataMap.temperature();
-
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof IHeatable heatable) return heatable.getTemperature();
-        if (blockEntity instanceof CharcoalForgeBlockEntity charcoalForge) return charcoalForge.getTemperature();
-
-        for (Map.Entry<String, Boolean> entry : dataMap.stateBools().entrySet())
-        {
-            Property<?> property = stateDef.getProperty(entry.getKey());
-
-            if (property != null)
-            {
-                Comparable<?> value = state.getValue(property);
-                if (!value.toString().equals(entry.getValue().toString())) return 0.0f;
-            }
-            else LOGGER.error("Property of {} was not found for block {}", entry.getKey(), state.getBlock().getDescriptionId());
-        }
-
-        return temp;
-    }
-
-    private static float parseBlockSearchResult(Level curLevel, BlockPos curPos, BlockSearchResult blockSearchResult)
-    {
-        float totalTemperature = 0f;
-        for (Map.Entry<Block, List<BlockPos>> entry : blockSearchResult.allPositions().entrySet())
-        {
-            if (blockSearchResult.levelID() != curLevel.dimension()) return 0.0f;
-
-            Block block = entry.getKey();
-            BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
-            if (dataMap == null) continue;
-
-            int blockLimit = Math.min(dataMap.searchCap(), entry.getValue().size());
-
-            for (int i = 0 ; i < blockLimit ; i++)
-            {
-                BlockPos pos = entry.getValue().get(i);
-                if (!curLevel.hasChunk(pos.getX() / 16, pos.getZ() / 16)) continue;
-
-                BlockState state = curLevel.getBlockState(pos);
-
-                float temp = parseBlockState(state, curLevel, pos, dataMap);
-                if (temp == 0f) continue;
-
-                float distance = (float) Math.sqrt(blockSearchResult.searchOrigin().distSqr(pos));
-                float effectiveDistance = Math.max(distance, 1f);
-                float occlusionFactor = blockSearchResult.blockOcclusions().getOrDefault(pos, 1.0f);
-                float distantTemp = (temp * occlusionFactor) / (effectiveDistance * effectiveDistance);
-
-                totalTemperature += distantTemp / 10;
-            }
-        }
-
-        float maxRadiance = (float) ServerConfig.MAX_RADIANT_HEATING.getAsInt();
-        return maxRadiance * (1f - (float) Math.exp(-totalTemperature / maxRadiance));
-    }
-
-    private static float calcTemperatureChangeRate(float delta)
+    private static float calcTemperatureChangeRate(float delta, float insulation)
     {
         float absDelta = Math.abs(delta);
         float minRate = (float) ServerConfig.TEMP_CHANGE_MIN_RATE.getAsDouble();
@@ -143,7 +61,10 @@ public class EntityTemperatureManager
         float scale = (float) ServerConfig.TEMP_CHANGE_SCALE.getAsDouble();
 
         float normalisedRate = 1.0f - (float) Math.exp(-scale * absDelta);
-        return Mth.lerp(normalisedRate, minRate, maxRate);
+        float baseRate = Mth.lerp(normalisedRate, minRate, maxRate);
+        float rateModifier = 1.0f - Mth.clamp(insulation, -1.0f, 1.0f);
+
+        return (baseRate * rateModifier);
     }
 
     private static float getEntitySubmersion(Entity entity)
@@ -204,7 +125,8 @@ public class EntityTemperatureManager
             {
                 if (tfcAnimal.getFamiliarity() >= 0.1)
                 {
-                    entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()));
+                    float defaultTemp = dataMap.maxEntityTemperature() - dataMap.minEntityTemperature();
+                    entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()).withInternalTemperature(defaultTemp));
                     entity.setData(ThermiaAttachments.ENTITY_DEBUG, EntityDebug.createDefault());
                     return;
                 }
@@ -270,7 +192,7 @@ public class EntityTemperatureManager
                 }
             }
 
-            nearbyBlockTemperature = parseBlockSearchResult(level, pos, entityData.blockSearchResult());
+            nearbyBlockTemperature = entityData.blockSearchResult().parseBlockSearchResult(level, pos);
             entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(pos).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
             float shade = 0.3f;
             if (dataMap.isMob())
@@ -288,7 +210,8 @@ public class EntityTemperatureManager
                 shade = shadeResult.shade();
 
                 float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), shadeResult.shade(), entityData.wetness());
-                entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
+                float inventoryHeat = ItemInventoryManager.getInventoryTemperature(entity);
+                entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature + inventoryHeat);
             }
 
             entityData = handlePlayerSweat(entity, entityData);
@@ -302,8 +225,9 @@ public class EntityTemperatureManager
             else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos.above(), entityData.environmentTemperature(), entityData.environmentHumidity(), shade)));
 
             float delta = entityData.environmentTemperature() - entityData.internalTemperature();
-            float tempChange = calcTemperatureChangeRate(delta);
-            entityData = entityData.withInternalTemperature(entityData.internalTemperature() + delta * tempChange * 0.05f);
+            float tempChange = calcTemperatureChangeRate(delta, ItemInventoryManager.getInventoryInsulation(entity));
+
+            entityData = entityData.withInternalTemperature(entityData.internalTemperature() + delta * tempChange);
 
             if (entityData.internalTemperature() >= dataMap.maxEntityTemperature()) entity.hurt(ThermiaDamageTypes.hyperDamageSource(level.registryAccess()), 1.0f);
             if (entityData.internalTemperature() <= dataMap.minEntityTemperature()) entity.hurt(ThermiaDamageTypes.hypoDamageSource(level.registryAccess()), 1.0f);

@@ -21,11 +21,15 @@ public class ServerConfig
 
     public static final ModConfigSpec.DoubleValue WIND_CHILL_FACTOR = BUILDER.comment("Factor to adjust windchill effectiveness").defineInRange("windChillFactor", 0.15, 0.0, 1.0);
 
-    public static final ModConfigSpec.DoubleValue TEMP_CHANGE_MIN_RATE = BUILDER.comment("Minimum rate for which entity internal temperature changes").defineInRange("tempChangeMinRate", 0.005, 0.001, 0.01);
+    public static final ModConfigSpec.DoubleValue TEMP_CHANGE_MIN_RATE = BUILDER.comment("Minimum rate for which entity internal temperature changes").defineInRange("tempChangeMinRate", 0.01, 0.001, 0.1);
 
-    public static final ModConfigSpec.DoubleValue TEMP_CHANGE_MAX_RATE = BUILDER.comment("Maximum rate for which entity internal temperature changes").defineInRange("tempChangeMaxRate", 0.05, 0.01, 0.1);
+    public static final ModConfigSpec.DoubleValue TEMP_CHANGE_MAX_RATE = BUILDER.comment("Maximum rate for which entity internal temperature changes").defineInRange("tempChangeMaxRate", 0.5, 0.1, 1.0);
 
-    public static final ModConfigSpec.DoubleValue TEMP_CHANGE_SCALE = BUILDER.comment("Scale of delta curve").defineInRange("TempChangeScale", 0.05, 0.01, 0.2);
+    public static final ModConfigSpec.DoubleValue TEMP_CHANGE_SCALE = BUILDER.comment("Scale of delta curve").defineInRange("TempChangeScale", 0.005, 0.001, 0.01);
+
+    public static final ModConfigSpec.DoubleValue MAX_INVENTORY_HEATING = BUILDER.comment("Maximum heating from hot TFC items in inventory").defineInRange("maxInvetoryHeating", 256.0, 50.0, 512.0);
+
+    public static final ModConfigSpec.DoubleValue INVENTORY_HEATING_SCALE = BUILDER.comment("Scale at which each item contributes to overall inventory heating").defineInRange("inventoryHeatingScale", 20000.0, 5000.0, 50000.0);
 
     public static final ModConfigSpec.BooleanValue OVERRIDE_TFC_TEMP_THIRST = BUILDER.comment("Disable TFC's temperature dependant thirst.").define("overrideTFCTempThirst", true);
 

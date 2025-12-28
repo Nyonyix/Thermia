@@ -1,8 +1,14 @@
 package com.nyonyix.thermia.data;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.nyonyix.thermia.ServerConfig;
+import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
+import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import com.nyonyix.thermia.util.BlockSearch;
+import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
+import net.dries007.tfc.common.blockentities.IHeatable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -13,6 +19,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.Property;
+import org.slf4j.Logger;
 
 import java.util.*;
 
@@ -23,6 +34,8 @@ public record BlockSearchResult(
         Map<BlockPos, Float> blockOcclusions
 )
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public static final Codec<BlockSearchResult> CODEC = RecordCodecBuilder.create(blockSearchResultInstance -> blockSearchResultInstance.group(
             BlockPos.CODEC.fieldOf("search_origin").forGetter(BlockSearchResult::searchOrigin),
             ResourceKey.codec(Registries.DIMENSION).fieldOf("level_id").forGetter(BlockSearchResult::levelID),
@@ -84,6 +97,30 @@ public record BlockSearchResult(
             }
     );
 
+    private float parseBlockState(BlockState state, Level level, BlockPos pos, BlockTemperatureDataMap dataMap)
+    {
+        StateDefinition<Block, BlockState> stateDef = state.getBlock().getStateDefinition();
+        float temp = dataMap.temperature();
+
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof IHeatable heatable) return heatable.getTemperature();
+        if (blockEntity instanceof CharcoalForgeBlockEntity charcoalForge) return charcoalForge.getTemperature();
+
+        for (Map.Entry<String, Boolean> entry : dataMap.stateBools().entrySet())
+        {
+            Property<?> property = stateDef.getProperty(entry.getKey());
+
+            if (property != null)
+            {
+                Comparable<?> value = state.getValue(property);
+                if (!value.toString().equals(entry.getValue().toString())) return 0.0f;
+            }
+            else LOGGER.error("Property of {} was not found for block {}", entry.getKey(), state.getBlock().getDescriptionId());
+        }
+
+        return temp;
+    }
+
     public static BlockSearchResult createDefault() {return new BlockSearchResult(BlockPos.ZERO, Level.OVERWORLD, new HashMap<>(), new HashMap<>());}
 
     public BlockSearchResult withSearchOrigin(BlockPos searchOrigin) {return new BlockSearchResult(searchOrigin, this.levelID, this.allPositions, this.blockOcclusions);}
@@ -97,5 +134,41 @@ public record BlockSearchResult(
     public BlockPos getNearest()
     {
         return BlockPos.ZERO;
+    }
+
+    public float parseBlockSearchResult(Level curLevel, BlockPos curPos)
+    {
+        float totalTemperature = 0f;
+        for (Map.Entry<Block, List<BlockPos>> entry : this.allPositions().entrySet())
+        {
+            if (this.levelID() != curLevel.dimension()) return 0.0f;
+
+            Block block = entry.getKey();
+            BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+            if (dataMap == null) continue;
+
+            int blockLimit = Math.min(dataMap.searchCap(), entry.getValue().size());
+
+            for (int i = 0 ; i < blockLimit ; i++)
+            {
+                BlockPos pos = entry.getValue().get(i);
+                if (!curLevel.hasChunk(pos.getX() / 16, pos.getZ() / 16)) continue;
+
+                BlockState state = curLevel.getBlockState(pos);
+
+                float temp = parseBlockState(state, curLevel, pos, dataMap);
+                if (temp == 0f) continue;
+
+                float distance = (float) Math.sqrt(this.searchOrigin().distSqr(pos));
+                float effectiveDistance = Math.max(distance, 1f);
+                float occlusionFactor = this.blockOcclusions().getOrDefault(pos, 1.0f);
+                float distantTemp = (temp * occlusionFactor) / (effectiveDistance * effectiveDistance);
+
+                totalTemperature += distantTemp / 10;
+            }
+        }
+
+        float maxRadiance = (float) ServerConfig.MAX_RADIANT_HEATING.getAsInt();
+        return maxRadiance * (1f - (float) Math.exp(-totalTemperature / maxRadiance));
     }
 }

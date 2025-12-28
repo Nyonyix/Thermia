@@ -7,6 +7,7 @@ import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datagen.BlockTemperatureDataMapProvider;
 import com.nyonyix.thermia.data.datagen.EntityTemperatureDataMapProvider;
+import com.nyonyix.thermia.data.datagen.ItemInsulationDataMapProvider;
 import com.nyonyix.thermia.data.datagen.ThermiaDamageTypesDataGen;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
@@ -119,6 +120,7 @@ public class ThermiaServer
 
         gen.addProvider(event.includeServer(), new BlockTemperatureDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new EntityTemperatureDataMapProvider(packOutput, lookupProvider));
+        gen.addProvider(event.includeServer(), new ItemInsulationDataMapProvider(packOutput, lookupProvider));
 
         gen.addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(packOutput, lookupProvider, new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, ThermiaDamageTypesDataGen::bootstrap), Set.of(Thermia.MODID)));
     }
@@ -158,6 +160,7 @@ public class ThermiaServer
 
                 if (server.getTickCount() % 20 == entity.getId() % 20)
                 {
+                    EntityTemperatureManager.init(entity);
                     EntityTemperatureManager.onUpdate(level, entity);
                 }
             }
@@ -176,7 +179,7 @@ public class ThermiaServer
     @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event)
     {
-        EntityTemperatureManager.init(event.getEntity());
+//        EntityTemperatureManager.init(event.getEntity());
     }
 
     @Subscribe
