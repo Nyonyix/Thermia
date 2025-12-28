@@ -159,6 +159,7 @@ public class EntityTemperatureManager
                 CompletableFuture<BlockSearchResult> pending = pendingBlockSearches.remove(entity.getUUID());
                 if(pending != null && !pending.isDone()) pending.cancel(true);
                 entity.removeData(ThermiaAttachments.ENTITY_TEMPERATURE);
+                entity.removeData(ThermiaAttachments.ENTITY_DEBUG);
                 return;
             }
 
