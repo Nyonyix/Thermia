@@ -58,7 +58,7 @@ public class EntityTemperatureManager
         float normalisedRate = 1.0f - (float) Math.exp(-scale * absDelta);
         float baseRate = Mth.lerp(normalisedRate, minRate, maxRate);
 
-        return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate) / 1f);
+        return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate) / 10f);
     }
 
     private static float getEntitySubmersion(Entity entity)
