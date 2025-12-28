@@ -156,7 +156,7 @@ public class ThermiaServer
             {
                 if (entity.isRemoved()) continue;
 
-                EntityTemperatureManager.onTick(level, entity);
+                EntityTemperatureManager.onTick(entity);
 
                 if (server.getTickCount() % 20 == entity.getId() % 20)
                 {

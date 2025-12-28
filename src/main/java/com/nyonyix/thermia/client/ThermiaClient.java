@@ -5,12 +5,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
-import com.nyonyix.thermia.data.attachment.EntityDebug;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.dries007.tfc.client.overworld.SolarCalculator;
-import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.climate.Climate;
 import net.dries007.tfc.util.climate.ClimateModel;
 import net.dries007.tfc.util.climate.KoppenClimateClassification;
@@ -19,10 +17,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.PackOutput;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -39,15 +33,10 @@ import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
-import org.codehaus.plexus.util.dag.Vertex;
 import org.joml.Matrix4f;
 import org.slf4j.Logger;
-import oshi.hardware.LogicalVolumeGroup;
 
-import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = Thermia.MODID, dist = Dist.CLIENT)
@@ -83,9 +72,7 @@ public class ThermiaClient {
             BlockPos pos = BlockPos.containing(clientPlayer.position());
             if (minecraft.level.hasChunk(pos.getX() / 16, pos.getZ() / 16))
             {
-                RandomSource random = minecraft.level.getRandom();
                 EntityTemperature playerData = clientPlayer.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
-                EntityDebug entityDebug = clientPlayer.getData(ThermiaAttachments.ENTITY_DEBUG);
 
                 List<String> text = event.getLeft();
                 text.add("");
@@ -99,11 +86,10 @@ public class ThermiaClient {
                 text.add(String.format("    Wetness: %.2f", playerData.wetness()));
 
                 text.add("Chunk:");
-                LevelChunk chunk = clientPlayer.level().getChunkAt(pos);
                 Level level = clientPlayer.level();
                 ClimateModel model = Climate.get(level);
                 text.add(String.format("    Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(model.getAverageTemperature(level, pos), model.getAverageRainfall(level, pos), model.getRainfallVariance(level, pos), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
-                text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos, entityDebug.solarShadeResult().shade())));
+                text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos, playerData.solarShadeResult().shade())));
             }
         }
     }
@@ -123,11 +109,11 @@ public class ThermiaClient {
 
         for (Entity entity : minecraft.level.entitiesForRendering())
         {
-            if (!entity.hasData(ThermiaAttachments.ENTITY_DEBUG)) continue;
+            if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) continue;
 
-            EntityDebug entityDebug = entity.getData(ThermiaAttachments.ENTITY_DEBUG);
-            BlockPos sunOcclusionPos = entityDebug.solarShadeResult().sunOcclusionPos();
-            BlockPos windOcclusionPos = entityDebug.windOcclusionResult().occludingBlock();
+            EntityTemperature entityTemperature = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
+            BlockPos sunOcclusionPos = entityTemperature.solarShadeResult().sunOcclusionPos();
+            BlockPos windOcclusionPos = entityTemperature.windOcclusionResult().occludingBlock();
             Vec3 entityPos = new Vec3(entity.position().x, entity.position().y + 1.0, entity.position().z);
 
 

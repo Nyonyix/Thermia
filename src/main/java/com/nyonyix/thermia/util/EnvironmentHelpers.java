@@ -94,9 +94,9 @@ public class EnvironmentHelpers
         return temp + solarDelta - windCooling + humidityDiscomfort;
     }
 
-    public static float calcEffectiveTemperature(Level level, BlockPos pos, float temp, float humidity, float shade, float wetness)
+    public static float calcEffectiveTemperature(Level level, BlockPos pos, float temp, float humidity, float shade, float wetness, float windOcclusion)
     {
-        float windSpeed = getWindSpeed(level, pos);
+        float windSpeed = getWindSpeed(level, pos, windOcclusion);
         float solarRadiation = getSolarRadiationWeather(level, pos, shade);
 
         float cold = calcForCold(temp, windSpeed, solarRadiation, humidity);
@@ -130,10 +130,10 @@ public class EnvironmentHelpers
 
     // Wind
 
-    public static float getWindSpeed(Level level, BlockPos pos)
+    public static float getWindSpeed(Level level, BlockPos pos, float windOcclusion)
     {
         ClimateModel model = Climate.get(level);
-        return WeatherHelpers.windMS(model.getWind(level, pos)) * getWindOcclusion(level, pos).occlusionMultiplier();
+        return WeatherHelpers.windMS(model.getWind(level, pos)) * windOcclusion;
     }
 
     public static float getWindDirection(Level level, BlockPos pos)
@@ -142,28 +142,6 @@ public class EnvironmentHelpers
         Vec2 windVector = model.getWind(level, pos);
 
         return (float) Math.atan2(windVector.y, windVector.x);
-    }
-
-    public static WindOcclusionResult getWindOcclusion(Level level, BlockPos pos)
-    {
-        float direction = getWindDirection(level, pos);
-        float directionX = -(float) Math.cos(direction);
-        float directionZ = -(float) Math.sin(direction);
-
-        Vec3 startVec = Vec3.atCenterOf(pos.above());
-        Vec3 endVec = startVec.add(directionX * 4.0, 0, directionZ * 4.0);
-
-        ClipContext context = new ClipContext(startVec, endVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, CollisionContext.empty());
-        BlockHitResult hit = level.clip(context);
-
-        if (hit.getType() != HitResult.Type.MISS)
-        {
-            float hitDist = (float) startVec.distanceTo(hit.getLocation());
-
-            return WindOcclusionResult.createDefault().withOccludingBlock(hit.getBlockPos()).withOcclusionMultiplier(Mth.clamp((float) (0.1 + (hitDist / 4.0) * 0.9), 0.1f, 1.0f));
-        }
-
-        return WindOcclusionResult.createDefault();
     }
 
     // Solar Radiation
@@ -233,11 +211,11 @@ public class EnvironmentHelpers
         return KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.getOrDefault(climate, KoppenClimateHumidity.createDefault());
     }
 
-    public static float calcDryingRate(Level level, BlockPos pos, float temperature, float humidity, float shade)
+    public static float calcDryingRate(Level level, BlockPos pos, float temperature, float humidity, float shade, float windOcclusion)
     {
         float tempComponent = Mth.clampedMap(temperature,-10f, 40f, 0.1f, 2.0f);
         float humidityComponent = 1.0f - humidity;
-        float windComponent = 1.0f + (getWindSpeed(level, pos)* 0.15f);
+        float windComponent = 1.0f + (getWindSpeed(level, pos, windOcclusion)* 0.15f);
         float solarComponent = 1.0f + (getSolarRadiationWeather(level, pos, shade) * 2.0f);
 
         float dryingRate = 0.01f * tempComponent * humidityComponent * windComponent * solarComponent;

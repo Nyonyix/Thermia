@@ -42,7 +42,7 @@ public class ItemInventoryManager
 
                     if (insulation != null)
                     {
-                        if (stack.getItem() instanceof Equipable) inventoryInsulation += insulation.insulationModifier() / 10f;
+                        if (stack.getItem() instanceof Equipable) inventoryInsulation += (insulation.insulationModifier() / 10f);
                         else inventoryInsulation += insulation.insulationModifier();
                     }
                 }

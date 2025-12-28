@@ -23,7 +23,7 @@ public class ServerConfig
 
     public static final ModConfigSpec.DoubleValue TEMP_CHANGE_MIN_RATE = BUILDER.comment("Minimum rate for which entity internal temperature changes").defineInRange("tempChangeMinRate", 0.01, 0.001, 0.1);
 
-    public static final ModConfigSpec.DoubleValue TEMP_CHANGE_MAX_RATE = BUILDER.comment("Maximum rate for which entity internal temperature changes").defineInRange("tempChangeMaxRate", 0.5, 0.1, 1.0);
+    public static final ModConfigSpec.DoubleValue TEMP_CHANGE_MAX_RATE = BUILDER.comment("Maximum rate for which entity internal temperature changes").defineInRange("tempChangeMaxRate", 0.1, 0.05, 0.5);
 
     public static final ModConfigSpec.DoubleValue TEMP_CHANGE_SCALE = BUILDER.comment("Scale of delta curve").defineInRange("TempChangeScale", 0.005, 0.001, 0.01);
 

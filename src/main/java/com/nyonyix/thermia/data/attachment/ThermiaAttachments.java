@@ -18,6 +18,4 @@ public class ThermiaAttachments
     public static final Supplier<AttachmentType<BlockTemperature>> BLOCK_TEMPERATURE = ATTACHMENTS.register("block_temperature", () -> AttachmentType.builder(BlockTemperature::createDefault).serialize(BlockTemperature.CODEC).build());
 
     public static final Supplier<AttachmentType<ChunkHumidity>> CHUNK_HUMIDITY = ATTACHMENTS.register("chunk_humidity", () -> AttachmentType.builder(ChunkHumidity::createDefault).serialize(ChunkHumidity.CODEC).build());
-
-    public static final Supplier<AttachmentType<EntityDebug>> ENTITY_DEBUG = ATTACHMENTS.register("entity_debug", () -> AttachmentType.builder(EntityDebug::createDefault).sync(EntityDebug.STREAM_CODEC).build());
 }

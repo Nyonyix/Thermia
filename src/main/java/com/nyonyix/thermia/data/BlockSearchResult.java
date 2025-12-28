@@ -6,17 +6,15 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
-import com.nyonyix.thermia.util.BlockSearch;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.IHeatable;
+import net.dries007.tfc.common.blockentities.PitKilnBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -26,6 +24,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public record BlockSearchResult(
         BlockPos searchOrigin,
@@ -36,11 +35,24 @@ public record BlockSearchResult(
 {
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    private record OcclusionEntry(BlockPos pos, float occlusion)
+    {
+        public static final Codec<OcclusionEntry> CODEC = RecordCodecBuilder.create(occlusionEntryInstance -> occlusionEntryInstance.group(
+                BlockPos.CODEC.fieldOf("pos").forGetter(OcclusionEntry::pos),
+                Codec.FLOAT.fieldOf("occlusion").forGetter(OcclusionEntry::occlusion)
+        ).apply(occlusionEntryInstance, OcclusionEntry::new));
+    }
+
+    private static final Codec<Map<BlockPos, Float>> BLOCK_OCCLUSION_CODEC = Codec.list(OcclusionEntry.CODEC).xmap(
+            list -> list.stream().collect(Collectors.toMap(OcclusionEntry::pos, OcclusionEntry::occlusion, (a, b) -> b, HashMap::new)),
+            map -> map.entrySet().stream().map(e -> new OcclusionEntry(e.getKey(), e.getValue())).toList()
+    );
+
     public static final Codec<BlockSearchResult> CODEC = RecordCodecBuilder.create(blockSearchResultInstance -> blockSearchResultInstance.group(
             BlockPos.CODEC.fieldOf("search_origin").forGetter(BlockSearchResult::searchOrigin),
             ResourceKey.codec(Registries.DIMENSION).fieldOf("level_id").forGetter(BlockSearchResult::levelID),
             Codec.unboundedMap(BuiltInRegistries.BLOCK.byNameCodec(), Codec.list(BlockPos.CODEC)).fieldOf("all_positions").forGetter(BlockSearchResult::allPositions),
-            Codec.unboundedMap(BlockPos.CODEC, Codec.FLOAT).fieldOf("block_occlusions").forGetter(BlockSearchResult::blockOcclusions)
+            BLOCK_OCCLUSION_CODEC.fieldOf("block_occlusions").forGetter(BlockSearchResult::blockOcclusions)
     ).apply(blockSearchResultInstance, BlockSearchResult::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, BlockSearchResult> STREAM_CODEC = StreamCodec.of(
@@ -105,6 +117,7 @@ public record BlockSearchResult(
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof IHeatable heatable) return heatable.getTemperature();
         if (blockEntity instanceof CharcoalForgeBlockEntity charcoalForge) return charcoalForge.getTemperature();
+        if (blockEntity instanceof PitKilnBlockEntity pitKiln) return pitKiln.isLit() ? dataMap.temperature() : 0.0f;
 
         for (Map.Entry<String, Boolean> entry : dataMap.stateBools().entrySet())
         {
