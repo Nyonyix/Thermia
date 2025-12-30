@@ -44,9 +44,9 @@ public class EntityTemperatureManager
     {
         float environmentDelta = entityTemperature.environmentTemperature() - entityTemperature.internalTemperature();
         float entityMedian = (entityTemperature.maxInternalTemperature() + entityTemperature.minInternalTemperature()) / 2f;
-        float medianDelta = entityMedian - entityTemperature.internalTemperature();
+        float medianDelta = (entityMedian - entityTemperature.internalTemperature()) * 0.5f;
 
-        float insulation = 1f - Mth.clamp(ItemInventoryManager.getInventoryInsulation(entity), -1.0f, 1.0f);
+        float insulation = 1f - (Mth.clamp(ItemInventoryManager.getInventoryInsulation(entity), -1.0f, 1.0f) * (1f - entityTemperature.wetness()));
 
         float effectiveDelta = medianDelta + (environmentDelta * insulation);
 
@@ -58,7 +58,7 @@ public class EntityTemperatureManager
         float normalisedRate = 1.0f - (float) Math.exp(-scale * absDelta);
         float baseRate = Mth.lerp(normalisedRate, minRate, maxRate);
 
-        return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate) / 10f);
+        return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate) / 2.5f);
     }
 
     private static float getEntitySubmersion(Entity entity)

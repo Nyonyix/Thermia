@@ -117,11 +117,9 @@ public class ThermiaClient {
             Vec3 entityPos = new Vec3(entity.position().x, entity.position().y + 1.0, entity.position().z);
 
 
-            if (windOcclusionPos.equals(BlockPos.ZERO)) continue;
-            renderDebugOcclusionLine(poseStack, bufferSource, cameraPos, entityPos, Vec3.atCenterOf(windOcclusionPos), "wind");
+            if (!windOcclusionPos.equals(BlockPos.ZERO)) renderDebugOcclusionLine(poseStack, bufferSource, cameraPos, entityPos, Vec3.atCenterOf(windOcclusionPos), "wind");
 
-            if (sunOcclusionPos.equals(BlockPos.ZERO)) continue;
-            renderDebugOcclusionLine(poseStack, bufferSource, cameraPos, entityPos, Vec3.atCenterOf(sunOcclusionPos), "sun");
+            if (!sunOcclusionPos.equals(BlockPos.ZERO)) renderDebugOcclusionLine(poseStack, bufferSource, cameraPos, entityPos, Vec3.atCenterOf(sunOcclusionPos), "sun");
         }
 
         bufferSource.endBatch();

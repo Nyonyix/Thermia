@@ -8,6 +8,7 @@ import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import net.minecraft.Util;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoulFireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -107,13 +109,126 @@ public class BlockSearch
 
                         if (dataMap != null)
                         {
-                            float occlusion = calcOcclusion(center, pos, chunks);
+                            float occlusion = calcOcclusionNew(center, pos, chunks);
                             builder.addBlockCandidate(pos.immutable(), block, distSq, occlusion);
                         }
                     }
                 }
             }
         }
+    }
+
+    private static float calcOcclusionNew(BlockPos originPos, BlockPos sourcePos, List<LevelChunk> cachedChunks)
+    {
+        double distance = Math.sqrt(originPos.distSqr(sourcePos));
+        if (distance < 1) return 1.0f;
+
+        Vec3 entityEye = Vec3.atCenterOf(originPos);
+        Vec3 sourceCenter = Vec3.atCenterOf(sourcePos);
+        Vec3 toEntity = entityEye.subtract(sourceCenter).normalize();
+
+        float totalOcclusion = 0.0f;
+
+        for (Direction direction : Direction.values())
+        {
+            Vec3 faceNormal = Vec3.atLowerCornerOf(direction.getNormal());
+
+            double alignment = toEntity.dot(faceNormal);
+            if (alignment < 0) continue;
+
+            BlockPos adjacentPos = sourcePos.relative(direction);
+            LevelChunk chunk = findChunkInList(cachedChunks, adjacentPos.getX() / 16, adjacentPos.getZ() / 16);
+            if (chunk != null)
+            {
+                BlockState adjacentState = chunk.getBlockState(adjacentPos);
+
+                if (!adjacentState.isAir() && adjacentState.canOcclude())
+                {
+                    double distToAdjacent = Math.sqrt(originPos.distSqr(adjacentPos));
+                    totalOcclusion += distToAdjacent < 2.0 ? 0.1f : 0.0f;
+                    continue;
+                }
+            }
+
+            Vec3 faceCenter = getFaceCenterPosition(sourcePos, direction);
+            BlockPos hitPos = raycastToFace(entityEye, faceCenter, cachedChunks);
+
+            if (hitPos != null && !hitPos.equals(sourcePos))
+            {
+                double distToBlock = Math.sqrt(originPos.distSqr(hitPos));
+                totalOcclusion += distToBlock < 2.0 ? 0.1f : 0.0f;
+            }
+            else if (hitPos != null && hitPos.equals(sourcePos)) continue;
+            else
+            {
+                double cosAngle = toEntity.dot(faceNormal);
+                totalOcclusion += Math.max(0f, (float) cosAngle);
+            }
+        }
+
+        return totalOcclusion / 6f;
+    }
+
+    private static Vec3 getFaceCenterPosition(BlockPos blockPos, Direction direction)
+    {
+        Vec3 center = Vec3.atCenterOf(blockPos);
+        Vec3 normal = Vec3.atLowerCornerOf(direction.getNormal());
+
+        return center.add(normal.scale(0.5));
+    }
+
+    private static BlockPos raycastToFace(Vec3 from, Vec3 to, List<LevelChunk> cachedChunks)
+    {
+        BlockGetter blockGetter = new BlockGetter() {
+
+            @Override
+            public BlockState getBlockState(BlockPos blockPos)
+            {
+                LevelChunk chunk = findChunkInList(cachedChunks, blockPos.getX() / 16, blockPos.getZ() / 16);
+                return chunk != null ? chunk.getBlockState(blockPos) : Blocks.AIR.defaultBlockState();
+            }
+
+            @Override
+            public FluidState getFluidState(BlockPos blockPos)
+            {
+                return getBlockState(blockPos).getFluidState();
+            }
+
+            @Override
+            public int getHeight()
+            {
+                return cachedChunks.isEmpty() ? 384 : cachedChunks.getFirst().getHeight();
+            }
+
+            @Override
+            public int getMinBuildHeight()
+            {
+                return cachedChunks.isEmpty() ? -64 : cachedChunks.getFirst().getMinBuildHeight();
+            }
+
+            @Override
+            public @Nullable BlockEntity getBlockEntity(BlockPos blockPos)
+            {
+                return null;
+            }
+        };
+
+        final BlockPos[] hitBlock = {null};
+
+        BlockGetter.traverseBlocks(from, to, blockGetter, (getter, pos) -> {
+
+            BlockState state = getter.getBlockState(pos);
+
+           if (!state.isAir())
+           {
+               hitBlock[0] = pos.immutable();
+               return  pos;
+           }
+
+           return null;
+        }, (getter) -> null);
+
+        return hitBlock[0];
     }
 
     private static float calcOcclusion(BlockPos originPos, BlockPos sourcePos, List<LevelChunk> cachedChunks)
@@ -354,6 +469,8 @@ public class BlockSearch
     {
         int totalNonEmpty = 0;
         int startSection = chunk.getSectionIndex(pos.getY());
+
+        if (startSection < 0 || startSection >= chunk.getSectionsCount()) return 0;
 
         LevelChunkSection currentSection = chunk.getSection(startSection);
         int localY = pos.getY() & 15;

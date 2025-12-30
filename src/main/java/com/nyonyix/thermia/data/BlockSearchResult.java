@@ -177,7 +177,7 @@ public record BlockSearchResult(
                 float occlusionFactor = this.blockOcclusions().getOrDefault(pos, 1.0f);
                 float distantTemp = (temp * occlusionFactor) / (effectiveDistance * effectiveDistance);
 
-                totalTemperature += distantTemp / 10;
+                totalTemperature += distantTemp;
             }
         }
 
