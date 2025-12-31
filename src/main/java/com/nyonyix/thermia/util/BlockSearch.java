@@ -105,6 +105,8 @@ public class BlockSearch
 
                         if (dataMap != null)
                         {
+                            if (isEncased(pos.immutable(), chunks)) continue;
+
                             float exposure = calcExposure(origin, pos.immutable(), chunks);
                             builder.addBlockCandidate(pos.immutable(), block, distSq, exposure);
                         }
@@ -122,7 +124,7 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
     {
         Vec3 entityCenter = origin.add(0, 1, 0);
         BlockPos adjacentPos = sourcePos.relative(direction);
-        LevelChunk adjacentChunk = findChunkInList(cachedChunks, adjacentPos.getX() >> 4, adjacentPos.getZ() >> 4);
+        LevelChunk adjacentChunk = findChunkInList(cachedChunks,adjacentPos);
         if (adjacentChunk == null) continue;
 
         BlockState adjacentState = adjacentChunk.getBlockState(adjacentPos);
@@ -157,7 +159,7 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
             @Override
             public BlockState getBlockState(BlockPos blockPos)
             {
-                LevelChunk chunk = findChunkInList(cachedChunks, blockPos.getX() >> 4, blockPos.getZ() >> 4);
+                LevelChunk chunk = findChunkInList(cachedChunks, blockPos);
                 return chunk != null ? chunk.getBlockState(blockPos) : Blocks.AIR.defaultBlockState();
             }
 
@@ -205,8 +207,11 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
         return hitBlock[0];
     }
 
-    private static LevelChunk findChunkInList(List<LevelChunk> chunks, int chunkX, int chunkZ)
+    private static LevelChunk findChunkInList(List<LevelChunk> chunks, BlockPos pos)
     {
+        int chunkX = pos.getX() >> 4;
+        int chunkZ = pos.getZ() >> 4;
+
         for (LevelChunk chunk : chunks)
         {
             if (chunk.getPos().x == chunkX && chunk.getPos().z == chunkZ) return chunk;
@@ -215,12 +220,19 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
         return null;
     }
 
-    private static float getBlockTransparency(BlockState state)
+    private static boolean isEncased(BlockPos pos, List<LevelChunk> cachedChunks)
     {
-        if (state.is(BlockTags.LEAVES)) return 0.5f;
-        if (!state.isCollisionShapeFullBlock(null, BlockPos.ZERO)) return 0.6f;
-        if (!state.canOcclude()) return 0.7f;
-        return 0.3f;
+        for (Direction dir : Direction.values())
+        {
+            BlockPos adjacentPos = pos.relative(dir);
+            LevelChunk chunk = findChunkInList(cachedChunks, adjacentPos);
+            if (chunk == null) continue;
+
+            BlockState state = chunk.getBlockState(adjacentPos);
+            if (!state.canOcclude()) return false;
+        }
+
+        return true;
     }
 
     public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, Vec3 origin, int radius)
