@@ -30,29 +30,29 @@ public record BlockSearchResult(
         BlockPos searchOrigin,
         ResourceKey<Level> levelID,
         Map<Block, List<BlockPos>> allPositions,
-        Map<BlockPos, Float> blockOcclusions
+        Map<BlockPos, Float> blockExposures
 )
 {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private record OcclusionEntry(BlockPos pos, float occlusion)
+    private record ExposureEntry(BlockPos pos, float exposure)
     {
-        public static final Codec<OcclusionEntry> CODEC = RecordCodecBuilder.create(occlusionEntryInstance -> occlusionEntryInstance.group(
-                BlockPos.CODEC.fieldOf("pos").forGetter(OcclusionEntry::pos),
-                Codec.FLOAT.fieldOf("occlusion").forGetter(OcclusionEntry::occlusion)
-        ).apply(occlusionEntryInstance, OcclusionEntry::new));
+        public static final Codec<ExposureEntry> CODEC = RecordCodecBuilder.create(exposureEntryInstance -> exposureEntryInstance.group(
+                BlockPos.CODEC.fieldOf("pos").forGetter(ExposureEntry::pos),
+                Codec.FLOAT.fieldOf("exposure").forGetter(ExposureEntry::exposure)
+        ).apply(exposureEntryInstance, ExposureEntry::new));
     }
 
-    private static final Codec<Map<BlockPos, Float>> BLOCK_OCCLUSION_CODEC = Codec.list(OcclusionEntry.CODEC).xmap(
-            list -> list.stream().collect(Collectors.toMap(OcclusionEntry::pos, OcclusionEntry::occlusion, (a, b) -> b, HashMap::new)),
-            map -> map.entrySet().stream().map(e -> new OcclusionEntry(e.getKey(), e.getValue())).toList()
+    private static final Codec<Map<BlockPos, Float>> BLOCK_EXPOSURE_CODEC = Codec.list(ExposureEntry.CODEC).xmap(
+            list -> list.stream().collect(Collectors.toMap(ExposureEntry::pos, ExposureEntry::exposure, (a, b) -> b, HashMap::new)),
+            map -> map.entrySet().stream().map(e -> new ExposureEntry(e.getKey(), e.getValue())).toList()
     );
 
     public static final Codec<BlockSearchResult> CODEC = RecordCodecBuilder.create(blockSearchResultInstance -> blockSearchResultInstance.group(
             BlockPos.CODEC.fieldOf("search_origin").forGetter(BlockSearchResult::searchOrigin),
             ResourceKey.codec(Registries.DIMENSION).fieldOf("level_id").forGetter(BlockSearchResult::levelID),
             Codec.unboundedMap(BuiltInRegistries.BLOCK.byNameCodec(), Codec.list(BlockPos.CODEC)).fieldOf("all_positions").forGetter(BlockSearchResult::allPositions),
-            BLOCK_OCCLUSION_CODEC.fieldOf("block_occlusions").forGetter(BlockSearchResult::blockOcclusions)
+            BLOCK_EXPOSURE_CODEC.fieldOf("block_exposures").forGetter(BlockSearchResult::blockExposures)
     ).apply(blockSearchResultInstance, BlockSearchResult::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, BlockSearchResult> STREAM_CODEC = StreamCodec.of(
@@ -72,8 +72,8 @@ public record BlockSearchResult(
                     }
                 }
 
-                buf.writeInt(result.blockOcclusions.size());
-                for (Map.Entry<BlockPos, Float> entry : result.blockOcclusions.entrySet())
+                buf.writeInt(result.blockExposures.size());
+                for (Map.Entry<BlockPos, Float> entry : result.blockExposures.entrySet())
                 {
                     BlockPos.STREAM_CODEC.encode(buf, entry.getKey());
                     buf.writeFloat(entry.getValue());
@@ -98,14 +98,14 @@ public record BlockSearchResult(
                     allPositions.put(block, positions);
                 }
 
-                int blockOcclusionSize = buf.readInt();
-                Map<BlockPos, Float> blockOcclusions = new HashMap<>();
-                for (int i = 0; i < blockOcclusionSize; i++)
+                int blockExposureSize = buf.readInt();
+                Map<BlockPos, Float> blockExposure = new HashMap<>();
+                for (int i = 0; i < blockExposureSize; i++)
                 {
-                    blockOcclusions.put(BlockPos.STREAM_CODEC.decode(buf), buf.readFloat());
+                    blockExposure.put(BlockPos.STREAM_CODEC.decode(buf), buf.readFloat());
                 }
 
-                return new BlockSearchResult(searchOrigin, levelID, allPositions, blockOcclusions);
+                return new BlockSearchResult(searchOrigin, levelID, allPositions, blockExposure);
             }
     );
 
@@ -136,13 +136,13 @@ public record BlockSearchResult(
 
     public static BlockSearchResult createDefault() {return new BlockSearchResult(BlockPos.ZERO, Level.OVERWORLD, new HashMap<>(), new HashMap<>());}
 
-    public BlockSearchResult withSearchOrigin(BlockPos searchOrigin) {return new BlockSearchResult(searchOrigin, this.levelID, this.allPositions, this.blockOcclusions);}
+    public BlockSearchResult withSearchOrigin(BlockPos searchOrigin) {return new BlockSearchResult(searchOrigin, this.levelID, this.allPositions, this.blockExposures);}
 
-    public BlockSearchResult withLevelID(ResourceKey<Level> levelID) {return new BlockSearchResult(this.searchOrigin, levelID, this.allPositions, this.blockOcclusions);}
+    public BlockSearchResult withLevelID(ResourceKey<Level> levelID) {return new BlockSearchResult(this.searchOrigin, levelID, this.allPositions, this.blockExposures);}
 
-    public BlockSearchResult withAllPositions(Map<Block, List<BlockPos>> allPositions) {return new BlockSearchResult(this.searchOrigin, this.levelID, allPositions, this.blockOcclusions);}
+    public BlockSearchResult withAllPositions(Map<Block, List<BlockPos>> allPositions) {return new BlockSearchResult(this.searchOrigin, this.levelID, allPositions, this.blockExposures);}
 
-    public BlockSearchResult withBlockOcclusions(Map<BlockPos, Float> blockOcclusions) {return new BlockSearchResult(this.searchOrigin, this.levelID, this.allPositions, blockOcclusions);}
+    public BlockSearchResult withBlockExposures(Map<BlockPos, Float> blockExposures) {return new BlockSearchResult(this.searchOrigin, this.levelID, this.allPositions, blockExposures);}
 
     public BlockPos getNearest()
     {
@@ -174,8 +174,8 @@ public record BlockSearchResult(
 
                 float distance = (float) Math.sqrt(this.searchOrigin().distSqr(pos));
                 float effectiveDistance = Math.max(distance, 1f);
-                float occlusionFactor = this.blockOcclusions().getOrDefault(pos, 1.0f);
-                float distantTemp = (temp * occlusionFactor) / (effectiveDistance * effectiveDistance);
+                float exposureFactor = this.blockExposures().getOrDefault(pos, 1.0f);
+                float distantTemp = (temp * exposureFactor) / (effectiveDistance * effectiveDistance);
 
                 totalTemperature += distantTemp;
             }

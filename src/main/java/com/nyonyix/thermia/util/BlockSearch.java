@@ -6,21 +6,17 @@ import com.nyonyix.thermia.data.WindOcclusionResult;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import net.minecraft.Util;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoulFireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -48,14 +44,14 @@ public class BlockSearch
         private BlockPos origin = BlockPos.ZERO;
         private ResourceKey<Level> levelID;
         private Map<Block, List<BlockPos>> allPositions = new HashMap<>();
-        private Map<BlockPos, Float> blockOcclusions = new HashMap<>();
+        private Map<BlockPos, Float> blockExposures = new HashMap<>();
         private List<BlockPositionsWithDistance> allFound = new ArrayList<>();
 
         record BlockPositionsWithDistance(BlockPos pos, Block block, double distSq, float occlusion) {}
 
-        void addBlockCandidate(BlockPos pos, Block block, double distSq, float occlusion)
+        void addBlockCandidate(BlockPos pos, Block block, double distSq, float exposure)
         {
-            allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq, occlusion));
+            allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq, exposure));
         }
 
         BlockSearchResult build(Level level)
@@ -75,10 +71,10 @@ public class BlockSearch
                 tempCounts.put(entry.block(), currentCount + 1);
                 allPositions.computeIfAbsent(entry.block(), k -> new ArrayList<>()).add(entry.pos());
 
-                blockOcclusions.put(entry.pos(), entry.occlusion());
+                blockExposures.put(entry.pos(), entry.occlusion());
             }
 
-            return new BlockSearchResult(origin, levelID, allPositions, blockOcclusions);
+            return new BlockSearchResult(origin, levelID, allPositions, blockExposures);
         }
     }
 
@@ -109,8 +105,8 @@ public class BlockSearch
 
                         if (dataMap != null)
                         {
-                            float occlusion = calcOcclusionNew(center, pos, chunks);
-                            builder.addBlockCandidate(pos.immutable(), block, distSq, occlusion);
+                            float exposure = calcExposure(center, pos.immutable(), chunks);
+                            builder.addBlockCandidate(pos.immutable(), block, distSq, exposure);
                         }
                     }
                 }
@@ -118,66 +114,57 @@ public class BlockSearch
         }
     }
 
-    private static float calcOcclusionNew(BlockPos originPos, BlockPos sourcePos, List<LevelChunk> cachedChunks)
+private static float calcExposure(BlockPos originPos, BlockPos sourcePos, List<LevelChunk> cachedChunks)
+{
+    Vec3 entityCenter = Vec3.atCenterOf(originPos.above());
+    float totalExposure = 0f;
+
+    for (Direction direction : Direction.values())
     {
-        double distance = Math.sqrt(originPos.distSqr(sourcePos));
-        if (distance < 1) return 1.0f;
+        BlockPos adjacentPos = sourcePos.relative(direction);
+        LevelChunk adjacentChunk = findChunkInList(cachedChunks, adjacentPos.getX() / 16, adjacentPos.getZ() /16);
+        if (adjacentChunk == null) continue;
 
-        Vec3 entityEye = Vec3.atCenterOf(originPos);
-        Vec3 sourceCenter = Vec3.atCenterOf(sourcePos);
-        Vec3 toEntity = entityEye.subtract(sourceCenter).normalize();
+        BlockState adjacentState = adjacentChunk.getBlockState(adjacentPos);
+        if (adjacentState.canOcclude()) continue;
 
-        float totalOcclusion = 0.0f;
+        Vec3 faceNormal = Vec3.atLowerCornerOf(direction.getNormal());
+        Vec3 faceCenter = Vec3.atCenterOf(sourcePos).add(faceNormal.scale(0.5));
+        Vec3 toEntity = entityCenter.subtract(faceCenter).normalize();
 
-        for (Direction direction : Direction.values())
-        {
-            Vec3 faceNormal = Vec3.atLowerCornerOf(direction.getNormal());
+        double dot = faceNormal.dot(toEntity);
+        if (dot <= 0) continue;
 
-            double alignment = toEntity.dot(faceNormal);
-            if (alignment < 0) continue;
+        if (!hasLineOfSight(faceCenter, entityCenter, sourcePos, cachedChunks)) continue;
 
-            BlockPos adjacentPos = sourcePos.relative(direction);
-            LevelChunk chunk = findChunkInList(cachedChunks, adjacentPos.getX() / 16, adjacentPos.getZ() / 16);
-            if (chunk != null)
-            {
-                BlockState adjacentState = chunk.getBlockState(adjacentPos);
-
-                if (!adjacentState.isAir() && adjacentState.canOcclude())
-                {
-                    double distToAdjacent = Math.sqrt(originPos.distSqr(adjacentPos));
-                    totalOcclusion += distToAdjacent < 2.0 ? 0.1f : 0.0f;
-                    continue;
-                }
-            }
-
-            Vec3 faceCenter = getFaceCenterPosition(sourcePos, direction);
-            BlockPos hitPos = raycastToFace(entityEye, faceCenter, cachedChunks);
-
-            if (hitPos != null && !hitPos.equals(sourcePos))
-            {
-                double distToBlock = Math.sqrt(originPos.distSqr(hitPos));
-                totalOcclusion += distToBlock < 2.0 ? 0.1f : 0.0f;
-            }
-            else if (hitPos != null && hitPos.equals(sourcePos)) continue;
-            else
-            {
-                double cosAngle = toEntity.dot(faceNormal);
-                totalOcclusion += Math.max(0f, (float) cosAngle);
-            }
-        }
-
-        return totalOcclusion / 6f;
+        totalExposure += (float) dot;
     }
 
-    private static Vec3 getFaceCenterPosition(BlockPos blockPos, Direction direction)
-    {
-        Vec3 center = Vec3.atCenterOf(blockPos);
-        Vec3 normal = Vec3.atLowerCornerOf(direction.getNormal());
+    return totalExposure;
+}
 
-        return center.add(normal.scale(0.5));
+    private static Vec3 genFibSpherePoint(int i, int n)
+    {
+        float phi = (float) (Math.PI * (Math.sqrt(5.0) - 10));
+
+        float y = 1.0f - (i / (float) (n - 1)) * 2f;
+        float radius = (float) Math.sqrt(1f - y * y);
+
+        float theta = phi * i;
+        float x = (float) Math.cos(theta) * radius;
+        float z = (float) Math.sin(theta) * radius;
+
+        return new Vec3(x, y, z);
     }
 
-    private static BlockPos raycastToFace(Vec3 from, Vec3 to, List<LevelChunk> cachedChunks)
+    private static boolean hasLineOfSight(Vec3 from, Vec3 to, BlockPos sourcePos, List<LevelChunk> cachedChunks)
+    {
+        BlockPos hitPos = raycastToPoint(from, to, cachedChunks);
+
+        return hitPos == null || hitPos.equals(sourcePos);
+    }
+
+    private static BlockPos raycastToPoint(Vec3 from, Vec3 to, List<LevelChunk> cachedChunks)
     {
         BlockGetter blockGetter = new BlockGetter() {
 
@@ -219,13 +206,13 @@ public class BlockSearch
 
             BlockState state = getter.getBlockState(pos);
 
-           if (!state.isAir())
-           {
-               hitBlock[0] = pos.immutable();
-               return  pos;
-           }
+            if (!state.isAir())
+            {
+                hitBlock[0] = pos.immutable();
+                return  pos;
+            }
 
-           return null;
+            return null;
         }, (getter) -> null);
 
         return hitBlock[0];
