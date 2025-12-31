@@ -120,6 +120,7 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
 
     for (Direction direction : Direction.values())
     {
+        Vec3 entityCenter = origin.add(0, 1, 0);
         BlockPos adjacentPos = sourcePos.relative(direction);
         LevelChunk adjacentChunk = findChunkInList(cachedChunks, adjacentPos.getX() >> 4, adjacentPos.getZ() >> 4);
         if (adjacentChunk == null) continue;
@@ -129,12 +130,12 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
 
         Vec3 faceNormal = Vec3.atLowerCornerOf(direction.getNormal());
         Vec3 faceCenter = Vec3.atCenterOf(sourcePos).add(faceNormal.scale(0.5));
-        Vec3 toEntity = origin.subtract(faceCenter).normalize();
+        Vec3 toEntity = entityCenter.subtract(faceCenter).normalize();
 
         double dot = faceNormal.dot(toEntity);
         if (dot <= 0) continue;
 
-        if (!hasLineOfSight(faceCenter, origin, sourcePos, cachedChunks)) continue;
+        if (!hasLineOfSight(faceCenter, entityCenter, sourcePos, cachedChunks)) continue;
 
         totalExposure += (float) dot;
     }
@@ -144,12 +145,12 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
 
     private static boolean hasLineOfSight(Vec3 from, Vec3 to, BlockPos sourcePos, List<LevelChunk> cachedChunks)
     {
-        BlockPos hitPos = raycastToPoint(from, to, cachedChunks);
+        BlockPos hitPos = raycastToPoint(from, to, sourcePos, cachedChunks);
 
         return hitPos == null || hitPos.equals(sourcePos);
     }
 
-    private static BlockPos raycastToPoint(Vec3 from, Vec3 to, List<LevelChunk> cachedChunks)
+    private static BlockPos raycastToPoint(Vec3 from, Vec3 to, BlockPos source, List<LevelChunk> cachedChunks)
     {
         BlockGetter blockGetter = new BlockGetter() {
 
@@ -191,7 +192,8 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
 
             BlockState state = getter.getBlockState(pos);
 
-            if (!state.isAir())
+            if (pos.equals(source)) return null;
+            if (!state.isAir() && state.canOcclude())
             {
                 hitBlock[0] = pos.immutable();
                 return  pos;
