@@ -70,7 +70,7 @@ public class ThermiaClient {
         if (clientPlayer != null)
         {
             BlockPos pos = BlockPos.containing(clientPlayer.position());
-            if (minecraft.level.hasChunk(pos.getX() / 16, pos.getZ() / 16))
+            if (minecraft.level.hasChunk(pos.getX() >> 4, pos.getZ() >> 4))
             {
                 EntityTemperature playerData = clientPlayer.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
 

@@ -21,13 +21,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public record BlockSearchResult(
-        BlockPos searchOrigin,
+        Vec3 searchOrigin,
         ResourceKey<Level> levelID,
         Map<Block, List<BlockPos>> allPositions,
         Map<BlockPos, Float> blockExposures
@@ -49,16 +50,23 @@ public record BlockSearchResult(
     );
 
     public static final Codec<BlockSearchResult> CODEC = RecordCodecBuilder.create(blockSearchResultInstance -> blockSearchResultInstance.group(
-            BlockPos.CODEC.fieldOf("search_origin").forGetter(BlockSearchResult::searchOrigin),
+            Vec3.CODEC.fieldOf("search_origin").forGetter(BlockSearchResult::searchOrigin),
             ResourceKey.codec(Registries.DIMENSION).fieldOf("level_id").forGetter(BlockSearchResult::levelID),
             Codec.unboundedMap(BuiltInRegistries.BLOCK.byNameCodec(), Codec.list(BlockPos.CODEC)).fieldOf("all_positions").forGetter(BlockSearchResult::allPositions),
             BLOCK_EXPOSURE_CODEC.fieldOf("block_exposures").forGetter(BlockSearchResult::blockExposures)
     ).apply(blockSearchResultInstance, BlockSearchResult::new));
 
+    private static final StreamCodec<RegistryFriendlyByteBuf, Vec3> VEC_3_STREAM_CODEC = StreamCodec.of(
+            (buf, vec) -> {
+             buf.writeDouble(vec.x);
+             buf.writeDouble(vec.y);
+             buf.writeDouble(vec.z);
+            }, (buf) -> new Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble()));
+
     public static final StreamCodec<RegistryFriendlyByteBuf, BlockSearchResult> STREAM_CODEC = StreamCodec.of(
             (buf, result) ->
             {
-                BlockPos.STREAM_CODEC.encode(buf, result.searchOrigin);
+                VEC_3_STREAM_CODEC.encode(buf, result.searchOrigin);
                 buf.writeResourceKey(result.levelID);
 
                 buf.writeInt(result.allPositions.size());
@@ -81,7 +89,7 @@ public record BlockSearchResult(
             },
             (buf) ->
             {
-                BlockPos searchOrigin = BlockPos.STREAM_CODEC.decode(buf);
+                Vec3 searchOrigin = VEC_3_STREAM_CODEC.decode(buf);
                 ResourceKey<Level> levelID = buf.readResourceKey(Registries.DIMENSION);
 
                 int allPositionSize = buf.readInt();
@@ -134,9 +142,9 @@ public record BlockSearchResult(
         return temp;
     }
 
-    public static BlockSearchResult createDefault() {return new BlockSearchResult(BlockPos.ZERO, Level.OVERWORLD, new HashMap<>(), new HashMap<>());}
+    public static BlockSearchResult createDefault() {return new BlockSearchResult(Vec3.ZERO, Level.OVERWORLD, new HashMap<>(), new HashMap<>());}
 
-    public BlockSearchResult withSearchOrigin(BlockPos searchOrigin) {return new BlockSearchResult(searchOrigin, this.levelID, this.allPositions, this.blockExposures);}
+    public BlockSearchResult withSearchOrigin(Vec3 searchOrigin) {return new BlockSearchResult(searchOrigin, this.levelID, this.allPositions, this.blockExposures);}
 
     public BlockSearchResult withLevelID(ResourceKey<Level> levelID) {return new BlockSearchResult(this.searchOrigin, levelID, this.allPositions, this.blockExposures);}
 
@@ -149,7 +157,7 @@ public record BlockSearchResult(
         return BlockPos.ZERO;
     }
 
-    public float parseBlockSearchResult(Level curLevel, BlockPos curPos)
+    public float parseBlockSearchResult(Level curLevel)
     {
         float totalTemperature = 0f;
         for (Map.Entry<Block, List<BlockPos>> entry : this.allPositions().entrySet())
@@ -165,14 +173,14 @@ public record BlockSearchResult(
             for (int i = 0 ; i < blockLimit ; i++)
             {
                 BlockPos pos = entry.getValue().get(i);
-                if (!curLevel.hasChunk(pos.getX() / 16, pos.getZ() / 16)) continue;
+                if (!curLevel.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) continue;
 
                 BlockState state = curLevel.getBlockState(pos);
 
                 float temp = parseBlockState(state, curLevel, pos, dataMap);
                 if (temp == 0f) continue;
 
-                float distance = (float) Math.sqrt(this.searchOrigin().distSqr(pos));
+                float distance = (float) this.searchOrigin.distanceTo(Vec3.atCenterOf(pos));
                 float effectiveDistance = Math.max(distance, 1f);
                 float exposureFactor = this.blockExposures().getOrDefault(pos, 1.0f);
                 float distantTemp = (temp * exposureFactor) / (effectiveDistance * effectiveDistance);

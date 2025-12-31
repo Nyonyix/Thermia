@@ -41,7 +41,7 @@ public class BlockSearch
 
     static class BlockSearchBuilder
     {
-        private BlockPos origin = BlockPos.ZERO;
+        private Vec3 origin = Vec3.ZERO;
         private ResourceKey<Level> levelID;
         private Map<Block, List<BlockPos>> allPositions = new HashMap<>();
         private Map<BlockPos, Float> blockExposures = new HashMap<>();
@@ -78,7 +78,7 @@ public class BlockSearch
         }
     }
 
-    private static void searchChunk(LevelChunk chunk, BlockPos center, int radiusSq, BlockSearchBuilder builder, List<LevelChunk> chunks)
+    private static void searchChunk(LevelChunk chunk, Vec3 origin, int radiusSq, BlockSearchBuilder builder, List<LevelChunk> chunks)
     {
         LevelChunkSection[] sections = chunk.getSections();
         BlockPos chunkPos = chunk.getPos().getWorldPosition();
@@ -97,7 +97,7 @@ public class BlockSearch
                     for (int y = 0; y < 16; y++)
                     {
                         BlockPos pos = new BlockPos(chunkPos.getX() + x, sectionY + y, chunkPos.getZ() + z);
-                        double distSq = center.distSqr(pos);
+                        double distSq = origin.distanceToSqr(Vec3.atCenterOf(pos));
                         if (distSq > radiusSq) continue;
 
                         Block block = section.getBlockState(x, y, z).getBlock();
@@ -105,7 +105,7 @@ public class BlockSearch
 
                         if (dataMap != null)
                         {
-                            float exposure = calcExposure(center, pos.immutable(), chunks);
+                            float exposure = calcExposure(origin, pos.immutable(), chunks);
                             builder.addBlockCandidate(pos.immutable(), block, distSq, exposure);
                         }
                     }
@@ -114,15 +114,14 @@ public class BlockSearch
         }
     }
 
-private static float calcExposure(BlockPos originPos, BlockPos sourcePos, List<LevelChunk> cachedChunks)
+private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChunk> cachedChunks)
 {
-    Vec3 entityCenter = Vec3.atCenterOf(originPos.above());
     float totalExposure = 0f;
 
     for (Direction direction : Direction.values())
     {
         BlockPos adjacentPos = sourcePos.relative(direction);
-        LevelChunk adjacentChunk = findChunkInList(cachedChunks, adjacentPos.getX() / 16, adjacentPos.getZ() /16);
+        LevelChunk adjacentChunk = findChunkInList(cachedChunks, adjacentPos.getX() >> 4, adjacentPos.getZ() >> 4);
         if (adjacentChunk == null) continue;
 
         BlockState adjacentState = adjacentChunk.getBlockState(adjacentPos);
@@ -130,32 +129,18 @@ private static float calcExposure(BlockPos originPos, BlockPos sourcePos, List<L
 
         Vec3 faceNormal = Vec3.atLowerCornerOf(direction.getNormal());
         Vec3 faceCenter = Vec3.atCenterOf(sourcePos).add(faceNormal.scale(0.5));
-        Vec3 toEntity = entityCenter.subtract(faceCenter).normalize();
+        Vec3 toEntity = origin.subtract(faceCenter).normalize();
 
         double dot = faceNormal.dot(toEntity);
         if (dot <= 0) continue;
 
-        if (!hasLineOfSight(faceCenter, entityCenter, sourcePos, cachedChunks)) continue;
+        if (!hasLineOfSight(faceCenter, origin, sourcePos, cachedChunks)) continue;
 
         totalExposure += (float) dot;
     }
 
     return totalExposure;
 }
-
-    private static Vec3 genFibSpherePoint(int i, int n)
-    {
-        float phi = (float) (Math.PI * (Math.sqrt(5.0) - 10));
-
-        float y = 1.0f - (i / (float) (n - 1)) * 2f;
-        float radius = (float) Math.sqrt(1f - y * y);
-
-        float theta = phi * i;
-        float x = (float) Math.cos(theta) * radius;
-        float z = (float) Math.sin(theta) * radius;
-
-        return new Vec3(x, y, z);
-    }
 
     private static boolean hasLineOfSight(Vec3 from, Vec3 to, BlockPos sourcePos, List<LevelChunk> cachedChunks)
     {
@@ -171,7 +156,7 @@ private static float calcExposure(BlockPos originPos, BlockPos sourcePos, List<L
             @Override
             public BlockState getBlockState(BlockPos blockPos)
             {
-                LevelChunk chunk = findChunkInList(cachedChunks, blockPos.getX() / 16, blockPos.getZ() / 16);
+                LevelChunk chunk = findChunkInList(cachedChunks, blockPos.getX() >> 4, blockPos.getZ() >> 4);
                 return chunk != null ? chunk.getBlockState(blockPos) : Blocks.AIR.defaultBlockState();
             }
 
@@ -218,75 +203,6 @@ private static float calcExposure(BlockPos originPos, BlockPos sourcePos, List<L
         return hitBlock[0];
     }
 
-    private static float calcOcclusion(BlockPos originPos, BlockPos sourcePos, List<LevelChunk> cachedChunks)
-    {
-        double distance = Math.sqrt(originPos.distSqr(sourcePos));
-        if ( distance < 1) return 1.0f;
-
-        Vec3 start = Vec3.atCenterOf(originPos.above());
-        Vec3 end = Vec3.atCenterOf(sourcePos);
-
-        BlockGetter blockGetter = new BlockGetter() {
-
-            @Override
-            public BlockState getBlockState(BlockPos blockPos)
-            {
-                LevelChunk chunk = findChunkInList(cachedChunks, blockPos.getX() / 16, blockPos.getZ() / 16);
-                return chunk != null ? chunk.getBlockState(blockPos) : Blocks.AIR.defaultBlockState();
-            }
-
-            @Override
-            public FluidState getFluidState(BlockPos blockPos)
-            {
-                return getBlockState(blockPos).getFluidState();
-            }
-
-            @Override
-            public int getHeight()
-            {
-                return cachedChunks.isEmpty() ? 384 : cachedChunks.getFirst().getHeight();
-            }
-
-            @Override
-            public int getMinBuildHeight()
-            {
-                return cachedChunks.isEmpty() ? -64 : cachedChunks.getFirst().getMinBuildHeight();
-            }
-
-            @Override
-            public @Nullable BlockEntity getBlockEntity(BlockPos blockPos)
-            {
-                return null;
-            }
-        };
-
-        final int[] blockCount = {0};
-        final BlockState[] firstBlock = {null};
-
-        BlockGetter.traverseBlocks(start, end, blockGetter, (getter,  pos) ->
-        {
-            if (pos.equals(sourcePos)) return null;
-
-            BlockState state = getter.getBlockState(pos);
-            if (!state.isAir())
-            {
-                blockCount[0]++;
-                if (firstBlock[0] == null)
-                {
-                    firstBlock[0] = state;
-                }
-            }
-            return null;
-        }, (getter) -> null);
-
-        if (blockCount[0] == 0) return 1.0f;
-
-        float transparency = firstBlock[0] != null ? getBlockTransparency(firstBlock[0]) : 0.0f;
-        float countFactor = 1.0f - Math.min(blockCount[0] * 0.15f, 0.9f);
-
-        return Mth.clamp(Mth.lerp(transparency, countFactor * 0.3f, countFactor), 0.1f, 1.0f);
-    }
-
     private static LevelChunk findChunkInList(List<LevelChunk> chunks, int chunkX, int chunkZ)
     {
         for (LevelChunk chunk : chunks)
@@ -305,13 +221,13 @@ private static float calcExposure(BlockPos originPos, BlockPos sourcePos, List<L
         return 0.3f;
     }
 
-    public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, BlockPos center, int radius)
+    public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, Vec3 origin, int radius)
     {
-        final BlockPos searchCenter = center.immutable();
-        final int chunkRadius = (radius / 16 ) + 1;
+        final BlockPos centerBlockPos = BlockPos.containing(origin);
+        final int chunkRadius = (radius >> 4 ) + 1;
         final int radiusSq = radius * radius;
-        final int centerChunkX = center.getX() / 16;
-        final int centerChunkZ = center.getZ() / 16;
+        final int centerChunkX = centerBlockPos.getX() >> 4;
+        final int centerChunkZ = centerBlockPos.getZ() >> 4;
 
         final List<LevelChunk> chunksToSearch = new ArrayList<>();
         for (int cx = centerChunkX - chunkRadius; cx <= centerChunkX + chunkRadius; cx++)
@@ -331,18 +247,18 @@ private static float calcExposure(BlockPos originPos, BlockPos sourcePos, List<L
             {
                 BlockSearchBuilder builder =  new BlockSearchBuilder();
                 builder.levelID = level.dimension();
-                builder.origin = center.immutable();
+                builder.origin = origin;
 
                 for (LevelChunk chunk : chunksToSearch)
                 {
-                    searchChunk(chunk, searchCenter, radiusSq, builder, chunksToSearch);
+                    searchChunk(chunk, origin, radiusSq, builder, chunksToSearch);
                 }
 
                 return builder.build(level);
             }catch (Exception e)
             {
                 LOGGER.error("Error in async block search:", e);
-                return new BlockSearchResult(BlockPos.ZERO, level.dimension(), new HashMap<>(), new HashMap<>());
+                return new BlockSearchResult(Vec3.ZERO, level.dimension(), new HashMap<>(), new HashMap<>());
             }
 
         }, Util.backgroundExecutor());
@@ -376,7 +292,7 @@ private static float calcExposure(BlockPos originPos, BlockPos sourcePos, List<L
                 int sampleX = (int) (pos.getX() + sunDirX * distance);
                 int sampleZ = (int) (pos.getZ() + sunDirZ * distance);
 
-                if (!level.getChunkSource().hasChunk(sampleX / 16, sampleZ / 16)) continue;
+                if (!level.getChunkSource().hasChunk(sampleX >> 4, sampleZ >> 4)) continue;
 
                 int terrainHeight = level.getHeight(Heightmap.Types.MOTION_BLOCKING, sampleX, sampleZ);
 

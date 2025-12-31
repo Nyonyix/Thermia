@@ -160,7 +160,7 @@ public class EntityTemperatureManager
             float nearbyBlockTemperature = 0f;
 
             int nonEmptyAbove = 0;
-            if (level.hasChunk(pos.getX() / 16, pos.getZ() / 16)) nonEmptyAbove = BlockSearch.depthEncasedBlocks(level.getChunkAt(pos), pos);
+            if (level.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) nonEmptyAbove = BlockSearch.depthEncasedBlocks(level.getChunkAt(pos), pos);
 
             if (pendingBlockSearch != null && pendingBlockSearch.isDone())
             {
@@ -181,7 +181,7 @@ public class EntityTemperatureManager
 
             entityData = entityData.withWindOcclusionResult(BlockSearch.getWindOcclusion(level, pos));
 
-            nearbyBlockTemperature = entityData.blockSearchResult().parseBlockSearchResult(level, pos);
+            nearbyBlockTemperature = entityData.blockSearchResult().parseBlockSearchResult(level);
             entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(pos).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
             float shade = 0.3f;
             if (dataMap.isMob())
@@ -221,7 +221,7 @@ public class EntityTemperatureManager
             if (!pendingBlockSearches.containsKey(entity.getUUID()))
             {
                 int searchRadius = dataMap.isMob() ? ServerConfig.ISMOB_SEARCH_RANGE.getAsInt() : ServerConfig.SEARCH_RANGE.getAsInt();
-                CompletableFuture<BlockSearchResult> future = BlockSearch.searchAllAsync(level, pos, searchRadius);
+                CompletableFuture<BlockSearchResult> future = BlockSearch.searchAllAsync(level, entity.position(), searchRadius);
                 pendingBlockSearches.put(entity.getUUID(), future);
             }
         }
