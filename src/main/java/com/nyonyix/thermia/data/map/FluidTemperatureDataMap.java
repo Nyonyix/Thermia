@@ -5,23 +5,28 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.neoforged.neoforge.fluids.FluidType;
 
-public record FluidTemperatureDataMap(float temperature, int searchCap)
+public record FluidTemperatureDataMap(float temperature, int searchCap, boolean isRadiative)
 {
     public static final Codec<FluidTemperatureDataMap> CODEC = RecordCodecBuilder.create(fluidTemperatureDataMapInstance -> fluidTemperatureDataMapInstance.group(
             Codec.FLOAT.fieldOf("temperature").forGetter(FluidTemperatureDataMap::temperature),
-            Codec.INT.fieldOf("search_cap").forGetter(FluidTemperatureDataMap::searchCap)
+            Codec.INT.fieldOf("search_cap").forGetter(FluidTemperatureDataMap::searchCap),
+            Codec.BOOL.fieldOf("is_radiative").forGetter(FluidTemperatureDataMap::isRadiative)
     ).apply(fluidTemperatureDataMapInstance, FluidTemperatureDataMap::new));
 
     public static final StreamCodec<ByteBuf, FluidTemperatureDataMap> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.FLOAT, FluidTemperatureDataMap::temperature,
             ByteBufCodecs.INT, FluidTemperatureDataMap::searchCap,
+            ByteBufCodecs.BOOL, FluidTemperatureDataMap::isRadiative,
             FluidTemperatureDataMap::new
     );
 
-    public static FluidTemperatureDataMap createDefault() {return new FluidTemperatureDataMap(0f, 16);}
+    public static FluidTemperatureDataMap createDefault() {return new FluidTemperatureDataMap(0f, 16, true);}
 
-    public FluidTemperatureDataMap withTemperature(float temperature) {return new FluidTemperatureDataMap(temperature, this.searchCap);}
+    public FluidTemperatureDataMap withTemperature(float temperature) {return new FluidTemperatureDataMap(temperature, this.searchCap, this.isRadiative);}
 
-    public FluidTemperatureDataMap withSearchCap(int searchCap) {return new FluidTemperatureDataMap(this.temperature, searchCap);}
+    public FluidTemperatureDataMap withSearchCap(int searchCap) {return new FluidTemperatureDataMap(this.temperature, searchCap, this.isRadiative);}
+
+    public FluidTemperatureDataMap withIsRadiative(boolean isRadiative) {return new FluidTemperatureDataMap(this.temperature, this.searchCap, isRadiative);}
 }

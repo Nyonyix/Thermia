@@ -208,14 +208,22 @@ public record BlockSearchResult(
             BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
             if (dataMap == null) continue;
 
+            float totalTempForBlock = 0f;
             for (BlockPos pos : entry.getValue())
             {
                 if (!curLevel.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) continue;
 
                 BlockState state = curLevel.getBlockState(pos);
 
-                totalBlockTemp += calcTemp(pos, parseBlockState(state, curLevel, pos, dataMap), this.blockExposures);
+                if (!dataMap.isRadiative())
+                {
+                    float distance = (float) this.searchOrigin.distanceTo(Vec3.atCenterOf(pos));
+                    if (distance < 1.2f) totalTempForBlock += dataMap.temperature();
+                }
+                else totalTempForBlock += calcTemp(pos, parseBlockState(state, curLevel, pos, dataMap), this.blockExposures);
             }
+
+            totalBlockTemp += Math.min(totalTempForBlock, dataMap.temperature());
         }
 
         return totalBlockTemp;
@@ -231,6 +239,7 @@ public record BlockSearchResult(
             FluidTemperatureDataMap dataMap = BuiltInRegistries.FLUID.wrapAsHolder(fluid).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
             if (dataMap == null) continue;
 
+            float totalTempForFluid = 0f;
             for (BlockPos pos : entry.getValue())
             {
                 if (!curLevel.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) continue;
@@ -241,8 +250,15 @@ public record BlockSearchResult(
 
                 float blockTemp = blockDataMap != null ? parseBlockState(state, curLevel, pos, blockDataMap) : 0f;
 
-                totalFluidTemp += calcTemp(pos, blockTemp != 0f ? blockTemp : dataMap.temperature(), this.fluidExposures);
+                if (!dataMap.isRadiative())
+                {
+                    float distance = (float) this.searchOrigin.distanceTo(Vec3.atCenterOf(pos));
+                    if (distance < 1.2f) totalTempForFluid += dataMap.temperature();
+                }
+                else totalTempForFluid += calcTemp(pos, blockTemp != 0f ? blockTemp : dataMap.temperature(), this.fluidExposures);
             }
+
+            totalFluidTemp += Math.min(totalTempForFluid, dataMap.temperature());
         }
 
         return totalFluidTemp;

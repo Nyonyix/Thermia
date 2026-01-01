@@ -61,38 +61,18 @@ public class FluidTemperatureDataMapProvider extends DataMapProvider
     @Override
     protected void gather()
     {
-
-        for (Map.Entry<DyeColor, FluidHolder<BaseFlowingFluid>> entry : TFCFluids.COLORED_FLUIDS.entrySet())
-        {
-            builder(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP)
-                    .add(entry.getValue().source(), new FluidTemperatureDataMap(-10f, 16), false)
-                    .add(entry.getValue().flowing(), new FluidTemperatureDataMap(-15f, 16), false);
-        }
-
-        for (Map.Entry<SimpleFluid, FluidHolder<BaseFlowingFluid>> entry : TFCFluids.SIMPLE_FLUIDS.entrySet())
-        {
-            builder(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP)
-                    .add(entry.getValue().source(), new FluidTemperatureDataMap(-10f, 16), false)
-                    .add(entry.getValue().flowing(), new FluidTemperatureDataMap(-15f, 16), false);
-        }
-
         for (Map.Entry<Metal, FluidHolder<BaseFlowingFluid>> entry : TFCFluids.METALS.entrySet())
         {
             builder(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP)
-                    .add(entry.getValue().source(), new FluidTemperatureDataMap(getMetalTemperature(entry.getKey()), 16), false)
-                    .add(entry.getValue().flowing(), new FluidTemperatureDataMap(getMetalTemperature(entry.getKey()) * 1.5f, 16), false);
+                    .add(entry.getValue().source(), new FluidTemperatureDataMap(getMetalTemperature(entry.getKey()) * 0.8f, 16, true), false)
+                    .add(entry.getValue().flowing(), new FluidTemperatureDataMap(getMetalTemperature(entry.getKey()), 16, true), false);
         }
 
         builder(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP)
-                .add(TFCFluids.RIVER_WATER.getDelegate(), new FluidTemperatureDataMap(-15f, 16), false)
-                .add(TFCFluids.SPRING_WATER.source(), new FluidTemperatureDataMap(40f, 16), false)
-                .add(TFCFluids.SPRING_WATER.flowing(), new FluidTemperatureDataMap(40f, 16), false)
-                .add(TFCFluids.SALT_WATER.source(), new FluidTemperatureDataMap(-10f, 16), false)
-                .add(TFCFluids.SALT_WATER.flowing(), new FluidTemperatureDataMap(-15f, 16), false)
-                .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.WATER), new FluidTemperatureDataMap(-10, 16), false)
-                .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.FLOWING_WATER), new FluidTemperatureDataMap(-15f, 16), false)
-                .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.LAVA), new FluidTemperatureDataMap(1000f, 16), false)
-                .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.FLOWING_LAVA), new FluidTemperatureDataMap(1200f, 16), false);
+                .add(TFCFluids.SPRING_WATER.source(), new FluidTemperatureDataMap(40f, 16, false), false)
+                .add(TFCFluids.SPRING_WATER.flowing(), new FluidTemperatureDataMap(40f, 16, false), false)
+                .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.LAVA), new FluidTemperatureDataMap(1000f, 16, true), false)
+                .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.FLOWING_LAVA), new FluidTemperatureDataMap(1200f, 16, true), false);
 
     }
 
