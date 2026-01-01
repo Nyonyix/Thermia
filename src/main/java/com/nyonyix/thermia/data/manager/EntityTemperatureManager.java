@@ -221,7 +221,7 @@ public class EntityTemperatureManager
             if (!pendingBlockSearches.containsKey(entity.getUUID()))
             {
                 int searchRadius = dataMap.isMob() ? ServerConfig.ISMOB_SEARCH_RANGE.getAsInt() : ServerConfig.SEARCH_RANGE.getAsInt();
-                CompletableFuture<BlockSearchResult> future = BlockSearch.searchAllAsync(level, entity.position(), searchRadius);
+                CompletableFuture<BlockSearchResult> future = BlockSearch.searchAllAsync(level, entity.position().add(0, (double) entity.getBbHeight() / 2, 0), searchRadius);
                 pendingBlockSearches.put(entity.getUUID(), future);
             }
         }

@@ -3,12 +3,8 @@ package com.nyonyix.thermia.server;
 import com.google.common.eventbus.Subscribe;
 import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
-import com.nyonyix.thermia.data.datagen.BlockTemperatureDataMapProvider;
-import com.nyonyix.thermia.data.datagen.EntityTemperatureDataMapProvider;
-import com.nyonyix.thermia.data.datagen.ItemInsulationDataMapProvider;
-import com.nyonyix.thermia.data.datagen.ThermiaDamageTypesDataGen;
+import com.nyonyix.thermia.data.datagen.*;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import com.nyonyix.thermia.data.map.*;
@@ -98,7 +94,7 @@ public class ThermiaServer
 
         BuiltInRegistries.ITEM.holders().forEach(itemReference ->
         {
-            ItemInsulation insulation = itemReference.getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
+            ItemInsulationDataMap insulation = itemReference.getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
             INSULATING_ITEMS.clear();
 
             if (insulation != null)
@@ -121,6 +117,7 @@ public class ThermiaServer
         gen.addProvider(event.includeServer(), new BlockTemperatureDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new EntityTemperatureDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new ItemInsulationDataMapProvider(packOutput, lookupProvider));
+        gen.addProvider(event.includeServer(), new FluidTemperatureDataMapProvider(packOutput, lookupProvider));
 
         gen.addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(packOutput, lookupProvider, new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, ThermiaDamageTypesDataGen::bootstrap), Set.of(Thermia.MODID)));
     }

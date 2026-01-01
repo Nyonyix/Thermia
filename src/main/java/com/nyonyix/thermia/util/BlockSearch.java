@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.data.SolarShadeResult;
 import com.nyonyix.thermia.data.WindOcclusionResult;
 import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
+import com.nyonyix.thermia.data.map.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -31,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import com.nyonyix.thermia.data.BlockSearchResult;
+import oshi.driver.windows.wmi.MSAcpiThermalZoneTemperature;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -44,26 +47,29 @@ public class BlockSearch
         private Vec3 origin = Vec3.ZERO;
         private ResourceKey<Level> levelID;
         private Map<Block, List<BlockPos>> allPositions = new HashMap<>();
+        private Map<Fluid, List<BlockPos>> allFluidPositions = new HashMap<>();
         private Map<BlockPos, Float> blockExposures = new HashMap<>();
+        private Map<BlockPos, Float> fluidExposures = new HashMap<>();
         private List<BlockPositionsWithDistance> allFound = new ArrayList<>();
+        private List<FluidPositionsWithDistance> allFoundFluid = new ArrayList<>();
 
-        record BlockPositionsWithDistance(BlockPos pos, Block block, double distSq, float occlusion) {}
+        record BlockPositionsWithDistance(BlockPos pos, Block block, double distSq, float exposure) {}
+        record FluidPositionsWithDistance(BlockPos pos, Fluid fluid, double distSq, float exposure) {}
 
-        void addBlockCandidate(BlockPos pos, Block block, double distSq, float exposure)
-        {
-            allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq, exposure));
-        }
+        void addBlockCandidate(BlockPos pos, Block block, double distSq, float exposure) {allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq, exposure));}
+
+        void addFluidCandidate(BlockPos pos, Fluid fluid, double distSq, float exposure) {allFoundFluid.add(new FluidPositionsWithDistance(pos.immutable(), fluid, distSq, exposure));}
 
         BlockSearchResult build(Level level)
         {
             allFound.sort(Comparator.comparingDouble(BlockPositionsWithDistance::distSq));
+            allFoundFluid.sort(Comparator.comparingDouble(FluidPositionsWithDistance::distSq));
 
             Map<Block, Integer> tempCounts = new HashMap<>();
 
             for (BlockPositionsWithDistance entry : allFound)
             {
                 BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(entry.block()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
-                if (dataMap == null) continue;
 
                 int currentCount = tempCounts.getOrDefault(entry.block, 0);
                 if (currentCount >= dataMap.searchCap()) continue;
@@ -71,10 +77,25 @@ public class BlockSearch
                 tempCounts.put(entry.block(), currentCount + 1);
                 allPositions.computeIfAbsent(entry.block(), k -> new ArrayList<>()).add(entry.pos());
 
-                blockExposures.put(entry.pos(), entry.occlusion());
+                blockExposures.put(entry.pos(), entry.exposure());
             }
 
-            return new BlockSearchResult(origin, levelID, allPositions, blockExposures);
+            Map<Fluid, Integer> tempCountsFluid = new HashMap<>();
+
+            for (FluidPositionsWithDistance entry : allFoundFluid)
+            {
+                FluidTemperatureDataMap dataMap = BuiltInRegistries.FLUID.wrapAsHolder(entry.fluid()).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
+
+                int currentCount = tempCountsFluid.getOrDefault(entry.fluid(), 0);
+                if (currentCount >= dataMap.searchCap()) continue;
+
+                tempCountsFluid.put(entry.fluid(), currentCount + 1);
+                allFluidPositions.computeIfAbsent(entry.fluid(), k -> new ArrayList<>()).add(entry.pos());
+
+                fluidExposures.put(entry.pos(), entry.exposure());
+            }
+
+            return new BlockSearchResult(origin, levelID, allPositions, allFluidPositions, blockExposures, fluidExposures);
         }
     }
 
@@ -100,15 +121,29 @@ public class BlockSearch
                         double distSq = origin.distanceToSqr(Vec3.atCenterOf(pos));
                         if (distSq > radiusSq) continue;
 
-                        Block block = section.getBlockState(x, y, z).getBlock();
+                        BlockState state = section.getBlockState(x, y, z);
+                        Block block = state.getBlock();
                         BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
 
                         if (dataMap != null)
                         {
                             if (isEncased(pos.immutable(), chunks)) continue;
 
-                            float exposure = calcExposure(origin, pos.immutable(), chunks);
+                            float exposure = calcExposure(origin, pos.immutable(), chunks, false);
                             builder.addBlockCandidate(pos.immutable(), block, distSq, exposure);
+                        }
+
+                        FluidState fluidState = state.getFluidState();
+                        if (!fluidState.isEmpty())
+                        {
+                            Fluid fluid = fluidState.getType();
+                            FluidTemperatureDataMap fluidDataMap = BuiltInRegistries.FLUID.wrapAsHolder(fluid).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
+
+                            if (fluidDataMap != null)
+                            {
+                                float exposure = calcExposure(origin, pos.immutable(), chunks, true);
+                                builder.addFluidCandidate(pos.immutable(), fluid, distSq, exposure);
+                            }
                         }
                     }
                 }
@@ -116,13 +151,19 @@ public class BlockSearch
         }
     }
 
-private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChunk> cachedChunks)
+private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChunk> cachedChunks, boolean isFluid)
 {
     float totalExposure = 0f;
 
+    LevelChunk sourceChunk = findChunkInList(cachedChunks, sourcePos);
+    if (sourceChunk == null) return 0f;
+
+    BlockState sourceState = sourceChunk.getBlockState(sourcePos);
+    FluidState fluidState = sourceState.getFluidState();
+    float fluidHeight = isFluid ? fluidState.getHeight(sourceChunk, sourcePos) : 1f;
+
     for (Direction direction : Direction.values())
     {
-        Vec3 entityCenter = origin.add(0, 1, 0);
         BlockPos adjacentPos = sourcePos.relative(direction);
         LevelChunk adjacentChunk = findChunkInList(cachedChunks,adjacentPos);
         if (adjacentChunk == null) continue;
@@ -132,14 +173,17 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
 
         Vec3 faceNormal = Vec3.atLowerCornerOf(direction.getNormal());
         Vec3 faceCenter = Vec3.atCenterOf(sourcePos).add(faceNormal.scale(0.5));
-        Vec3 toEntity = entityCenter.subtract(faceCenter).normalize();
+        Vec3 toEntity = origin.subtract(faceCenter).normalize();
 
         double dot = faceNormal.dot(toEntity);
         if (dot <= 0) continue;
 
-        if (!hasLineOfSight(faceCenter, entityCenter, sourcePos, cachedChunks)) continue;
+        if (!hasLineOfSight(faceCenter, origin, sourcePos, cachedChunks)) continue;
 
-        totalExposure += (float) dot;
+        float exposureModifier = 1f;
+        if (direction.getAxis().isHorizontal() && fluidHeight < 1f) exposureModifier = fluidHeight;
+
+        totalExposure += (float) dot * exposureModifier;
     }
 
     return totalExposure;
@@ -272,7 +316,7 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
             }catch (Exception e)
             {
                 LOGGER.error("Error in async block search:", e);
-                return new BlockSearchResult(Vec3.ZERO, level.dimension(), new HashMap<>(), new HashMap<>());
+                return new BlockSearchResult(Vec3.ZERO, level.dimension(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
             }
 
         }, Util.backgroundExecutor());

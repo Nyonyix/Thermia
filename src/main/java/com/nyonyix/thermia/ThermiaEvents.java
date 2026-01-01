@@ -1,7 +1,7 @@
 //package com.nyonyix.thermia;
 //
 //import com.mojang.logging.LogUtils;
-//import com.nyonyix.thermia.data.map.ItemInsulation;
+//import com.nyonyix.thermia.data.map.ItemInsulationDataMap;
 //import com.nyonyix.thermia.data.ThermiaDamageTypes;
 //import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
 //import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
@@ -81,7 +81,7 @@
 //
 //        BuiltInRegistries.ITEM.holders().forEach(itemReference ->
 //        {
-//            ItemInsulation insulation = itemReference.getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
+//            ItemInsulationDataMap insulation = itemReference.getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
 //
 //            if (insulation != null)
 //            {

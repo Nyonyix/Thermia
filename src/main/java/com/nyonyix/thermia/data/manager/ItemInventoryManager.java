@@ -1,7 +1,7 @@
 package com.nyonyix.thermia.data.manager;
 
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.data.map.ItemInsulation;
+import com.nyonyix.thermia.data.map.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import net.dries007.tfc.common.component.heat.HeatCapability;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -24,7 +24,7 @@ public class ItemInventoryManager
         {
             if (!armour.isEmpty())
             {
-                ItemInsulation insulation = BuiltInRegistries.ITEM.wrapAsHolder(armour.getItem()).getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
+                ItemInsulationDataMap insulation = BuiltInRegistries.ITEM.wrapAsHolder(armour.getItem()).getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
 
                 if (insulation != null) armourInsulation += insulation.insulationModifier();
 
@@ -38,7 +38,7 @@ public class ItemInventoryManager
             {
                 if (!stack.isEmpty())
                 {
-                    ItemInsulation insulation = BuiltInRegistries.ITEM.wrapAsHolder(stack.getItem()).getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
+                    ItemInsulationDataMap insulation = BuiltInRegistries.ITEM.wrapAsHolder(stack.getItem()).getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
 
                     if (insulation != null)
                     {

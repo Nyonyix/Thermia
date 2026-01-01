@@ -20,7 +20,6 @@ public class BlockTemperatureDataMapProvider extends DataMapProvider
     protected void gather()
     {
         builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).replace(true)
-                .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:lava")).orElseThrow(), new BlockTemperatureDataMap(1200f, 8, false, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:rock/magma/granite")).orElseThrow(), new BlockTemperatureDataMap(800f, 16, false, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:rock/magma/diorite")).orElseThrow(), new BlockTemperatureDataMap(800f, 16, false, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:rock/magma/gabbro")).orElseThrow(), new BlockTemperatureDataMap(800f, 16, false, Map.of(), Map.of(), Map.of()), false)
