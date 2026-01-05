@@ -4,11 +4,11 @@ import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.SolarShadeResult;
-import com.nyonyix.thermia.data.ThermiaDamageTypes;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
+import com.nyonyix.thermia.effect.ThermiaEffects;
 import com.nyonyix.thermia.util.BlockSearch;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.dries007.tfc.client.overworld.SkyPos;
@@ -22,10 +22,16 @@ import net.dries007.tfc.util.climate.Climate;
 import net.dries007.tfc.util.climate.ClimateModel;
 import net.dries007.tfc.util.tracker.WeatherHelpers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import org.slf4j.Logger;
@@ -76,33 +82,156 @@ public class EntityTemperatureManager
         return Mth.clamp((float) (fluidHeight / entityHeight), 0.0f, 1.0f);
     }
 
-    private static EntityTemperature handlePlayerSweat(Entity entity, EntityTemperature entityTemperature)
+    private static EntityTemperature handlePlayerSweat(Entity entity, EntityTemperature entityData)
     {
-        float heatStress = entityTemperature.internalTemperature() - entityTemperature.maxInternalTemperature();
+        float currentTemperature = entityData.internalTemperature();
+        float minTemperature = entityData.minInternalTemperature();
+        float maxTemperature = entityData.maxInternalTemperature();
+        float delta = maxTemperature - minTemperature;
+        float bufferPercentFromConfig = (float) ServerConfig.TEMPERATURE_BUFFER_PERCENT.getAsInt() / 100;
+        float heatBufferZone = delta * bufferPercentFromConfig;
+        float heatComfortThreshold = maxTemperature - heatBufferZone;
+        float heatStress = currentTemperature - heatComfortThreshold;
 
-        if (entity instanceof IPlayerInfo playerInfo)
+        if (entity instanceof IPlayerInfo player)
         {
-            float currentHydration = playerInfo.getThirst();
-            float sweatEfficiency = Mth.clampedMap(currentHydration, 0f, 60f, 0.1f, 1.0f);
+            float currentHydration = player.getThirst();
+            float sweatEfficiency = Mth.clampedMap(currentHydration, 0f, 60f, 0.1f, 1f);
 
-            if (heatStress > -5)
+            if (heatStress > 0)
             {
-                float baseSweatRate = Mth.clampedMap(heatStress, -5f, 5f, 0f, 0.05f);
+                float normalisedHeatStress = Mth.clamp(heatStress / heatBufferZone, 0f, 1f);
+                float baseSweatRate = normalisedHeatStress * 0.05f;
                 float actualSweatRate = baseSweatRate * sweatEfficiency;
-                float newWetness = Math.min(1.0f, entityTemperature.wetness() + actualSweatRate);
+                float newWetness = Math.min(1.0f, entityData.wetness() + actualSweatRate);
 
-                entityTemperature = entityTemperature.withWetness(newWetness);
-
-                float hydrationLoss = baseSweatRate * 10;
-                playerInfo.addThirst(-hydrationLoss);
+                entityData = entityData.withWetness(newWetness);
+                player.addThirst(-(baseSweatRate * 10));
             }
-
         }
         else
         {
-            if (heatStress > -5) entityTemperature = entityTemperature.withWetness(Math.min(1.0f, entityTemperature.wetness() + Mth.clampedMap(heatStress, -5f, 5f, 0f, 0.05f)));
+            if (heatStress > 0)
+            {
+                float normalisedHeatStress = Mth.clamp(heatStress / heatBufferZone, 0f, 1f);
+                float baseSweatRate = normalisedHeatStress * 0.05f;
+                float newWetness = Math.min(1.0f, entityData.wetness() + baseSweatRate);
+
+                entityData = entityData.withWetness(newWetness);
+            }
         }
-        return entityTemperature;
+
+        return entityData;
+    }
+
+    private static void handlePlayerTemperatureEffect(Entity entity)
+    {
+        if (!(entity instanceof LivingEntity living)) return;
+        if (living instanceof Player player)
+        {
+            if (player.isCreative() || player.isSpectator()) return;
+        }
+        EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
+
+        float entityTemperatureMidpoint = (entityData.maxInternalTemperature() + entityData.minInternalTemperature()) / 2f;
+        float effectScale = getTemperatureEffectScale(entity);
+        int amplifier = getEffectAmplifierFromScale(effectScale);
+
+        Holder<MobEffect> hyperthermia = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPERTHERMIA.get());
+        Holder<MobEffect> hypothermia = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPOTHERMIA.get());
+        boolean hasEffect = living.hasEffect(hyperthermia) || living.hasEffect(hypothermia);
+
+        if (hasEffect && !(effectScale > 0f))
+        {
+            if (living.hasEffect(hyperthermia))
+            {
+                living.removeEffect(hyperthermia);
+                living.removeEffect(MobEffects.CONFUSION);
+            }
+            else if (living.hasEffect(hypothermia))
+            {
+                living.removeEffect(hypothermia);
+                living.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+                living.removeEffect(MobEffects.DIG_SLOWDOWN);
+            }
+            return;
+        }
+
+        if (!(effectScale > 0)) return;
+
+        if (entityData.internalTemperature() > entityTemperatureMidpoint)
+        {
+            MobEffectInstance effect = new MobEffectInstance(hyperthermia, -1, amplifier, false, false, true);
+            MobEffectInstance currentEffect = living.getEffect(hyperthermia);
+            living.removeEffect(hyperthermia);
+
+            if (currentEffect == null || currentEffect.getAmplifier() != amplifier)
+            {
+                living.addEffect(effect);
+
+                living.addEffect(new MobEffectInstance(MobEffects.CONFUSION, -1, 0, false, false, false));
+            }
+            else living.addEffect(currentEffect);
+        }
+        else if (entityData.internalTemperature() < entityTemperatureMidpoint)
+        {
+            MobEffectInstance effect = new MobEffectInstance(hypothermia, -1, amplifier, false, false, true);
+            MobEffectInstance currentEffect = living.getEffect(hypothermia);
+            living.removeEffect(hypothermia);
+
+            if (currentEffect == null || currentEffect.getAmplifier() != amplifier)
+            {
+                living.addEffect(effect);
+
+                living.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, -1, amplifier, false, false, false));
+                living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, -1, amplifier, false, false, false));
+            }
+            else living.addEffect(currentEffect);
+        }
+
+        return;
+    }
+
+    public static float getTemperatureEffectScale(Entity entity)
+    {
+        if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return 0f;
+        EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
+
+        float bufferFromConfig = (float) ServerConfig.TEMPERATURE_BUFFER_PERCENT.getAsInt() / 100;
+        int maxEffectLevels = ServerConfig.MAX_TEMPERATURE_EFFECT_LEVEL.getAsInt();
+
+        float minTemperature = entityData.minInternalTemperature();
+        float maxTemperature = entityData.maxInternalTemperature();
+        float currentTemperature = entityData.internalTemperature();
+
+        float minMaxDelta = maxTemperature - minTemperature;
+        float bufferAmount = minMaxDelta * bufferFromConfig;
+
+        if (currentTemperature >= minTemperature && currentTemperature <= maxTemperature) return 0f;
+
+        if (currentTemperature < minTemperature)
+        {
+            float coldDelta = minTemperature - currentTemperature;
+            float maxColdRange = bufferAmount * maxEffectLevels;
+
+            return Mth.clamp(coldDelta / maxColdRange, 0f, 1f);
+        }
+
+        if (currentTemperature > maxTemperature)
+        {
+            float hotDelta = currentTemperature - maxTemperature;
+            float maxHotRange = bufferAmount * maxEffectLevels;
+
+            return Mth.clamp(hotDelta / maxHotRange, 0f, 1f);
+        }
+
+        return 0f;
+    }
+
+    public static int getEffectAmplifierFromScale(float scale)
+    {
+        int maxEffectLevels = ServerConfig.MAX_TEMPERATURE_EFFECT_LEVEL.getAsInt();
+        return Math.min((int) (scale * maxEffectLevels), maxEffectLevels - 1);
     }
 
     public static void init(Entity entity)
@@ -111,29 +240,25 @@ public class EntityTemperatureManager
         if (dataMap == null) return;
         if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
 
+        float defaultTemp = (dataMap.maxEntityTemperature() + dataMap.minEntityTemperature()) / 2;
+
         if (dataMap.isTamed())
         {
             if (entity instanceof TFCAnimalProperties tfcAnimal)
             {
-                if (tfcAnimal.getFamiliarity() >= 0.1)
-                {
-                    float defaultTemp = (dataMap.maxEntityTemperature() + dataMap.minEntityTemperature()) / 2;
-                    entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()).withInternalTemperature(defaultTemp));
-                }
-            } else
-            {
-                LOGGER.error("Entity {} is marked 'tamable' but no tamable entity found", entity.getName());
-            }
+                if (tfcAnimal.getFamiliarity() >= 0.1) entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()).withInternalTemperature(defaultTemp));
+            } else  LOGGER.error("Entity {} is marked 'tamable' but no tamable entity found", entity.getName());
             return;
         }
 
-        entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()));
+        entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()).withInternalTemperature(defaultTemp));
     }
 
     public static void onUpdate(Level level, Entity entity)
     {
-        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE) && entity.isAlive())
+        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE) && entity.isAlive() && entity instanceof LivingEntity living)
         {
+
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
             EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
             CompletableFuture<BlockSearchResult> pendingBlockSearch = pendingBlockSearches.get(entity.getUUID());
@@ -213,9 +338,6 @@ public class EntityTemperatureManager
 
             entityData = handleTemperatureChange(entity, entityData);
 
-            if (entityData.internalTemperature() >= dataMap.maxEntityTemperature()) entity.hurt(ThermiaDamageTypes.hyperDamageSource(level.registryAccess()), 1.0f);
-            if (entityData.internalTemperature() <= dataMap.minEntityTemperature()) entity.hurt(ThermiaDamageTypes.hypoDamageSource(level.registryAccess()), 1.0f);
-
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
 
             if (!pendingBlockSearches.containsKey(entity.getUUID()))
@@ -235,6 +357,8 @@ public class EntityTemperatureManager
 
             float submersion = getEntitySubmersion(entity);
             if (entityData.wetness() < submersion ) entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData.withWetness(submersion));
+
+            handlePlayerTemperatureEffect(entity);
         }
     }
 }

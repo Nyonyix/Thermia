@@ -1,8 +1,5 @@
 package com.nyonyix.thermia;
 
-import com.sun.jna.platform.win32.Tlhelp32;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.config.ModConfigs;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ServerConfig
@@ -13,13 +10,15 @@ public class ServerConfig
 
     public static final ModConfigSpec.IntValue ISMOB_SEARCH_RANGE = BUILDER.comment("Max range to search for blocks from animal entities").defineInRange("isMobSearchRange", 8, 2, 16);
 
-    public static final ModConfigSpec.IntValue MAX_RADIANT_HEATING = BUILDER.comment("Maximum heat by nearby sources").defineInRange("maxRadiantHeating", 256, 50, 512);
+    public static final ModConfigSpec.IntValue MAX_RADIANT_HEATING = BUILDER.comment("Maximum heat by nearby sources").defineInRange("maxRadiantHeating", 128, 64, 256);
 
     public static final ModConfigSpec.IntValue MAX_BLOCKS_ABOVE = BUILDER.comment("Maximum number of blocks above for depth humidity").defineInRange("maxBlocksAbove", 24576, 8192, 65536);
 
-    public static final ModConfigSpec.DoubleValue MAX_SOLAR_HEATING = BUILDER.comment("Max heating applied by sun").defineInRange("maxSolarHeating", 18.0, 0.0, 22.0);
+    public static final ModConfigSpec.IntValue TEMPERATURE_BUFFER_PERCENT = BUILDER.comment("Percent as integer for min/max temp buffer").defineInRange("temp_buffer_percent", 15, 0, 50);
 
-    public static final ModConfigSpec.DoubleValue WIND_CHILL_FACTOR = BUILDER.comment("Factor to adjust windchill effectiveness").defineInRange("windChillFactor", 0.15, 0.0, 1.0);
+    public static final ModConfigSpec.IntValue MAX_TEMPERATURE_EFFECT_LEVEL = BUILDER.comment("Maximum amount of hyper/hypothermia effect levels.").defineInRange("max_temperature_effect_level", 4, 2, 8);
+
+    public static final ModConfigSpec.DoubleValue MAX_SOLAR_HEATING = BUILDER.comment("Max heating applied by sun").defineInRange("maxSolarHeating", 18.0, 0.0, 22.0);
 
     public static final ModConfigSpec.DoubleValue TEMP_CHANGE_MIN_RATE = BUILDER.comment("Minimum rate for which entity internal temperature changes").defineInRange("tempChangeMinRate", 0.01, 0.001, 0.1);
 

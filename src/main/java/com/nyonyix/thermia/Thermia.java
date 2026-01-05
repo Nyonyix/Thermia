@@ -3,6 +3,7 @@ package com.nyonyix.thermia;
 import com.google.common.eventbus.Subscribe;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.map.ThermiaDataMaps;
+import com.nyonyix.thermia.effect.ThermiaEffects;
 import net.dries007.tfc.config.TFCConfig;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -42,6 +43,7 @@ public class Thermia {
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         ThermiaAttachments.ATTACHMENTS.register(modEventBus);
+        ThermiaEffects.MOB_EFFECTS.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SERVER_CONFIG);

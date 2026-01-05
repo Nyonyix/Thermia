@@ -194,7 +194,7 @@ public record BlockSearchResult(
         float effectiveDistance = Math.max(distance, 1f);
         float exposureFactor = exposureMap.getOrDefault(pos, 1.0f);
 
-        return (temp * exposureFactor) / (effectiveDistance * effectiveDistance);
+        return (temp * exposureFactor) / (effectiveDistance * effectiveDistance) * 0.15f;
 
     }
 
@@ -223,7 +223,7 @@ public record BlockSearchResult(
                 else totalTempForBlock += calcTemp(pos, parseBlockState(state, curLevel, pos, dataMap), this.blockExposures);
             }
 
-            totalBlockTemp += Math.min(totalTempForBlock, dataMap.temperature());
+            totalBlockTemp += dataMap.temperature() == 0f ? totalTempForBlock : Math.min(totalTempForBlock, dataMap.temperature());
         }
 
         return totalBlockTemp;
