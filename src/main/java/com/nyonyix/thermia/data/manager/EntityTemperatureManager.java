@@ -306,7 +306,7 @@ public class EntityTemperatureManager
 
             entityData = entityData.withWindOcclusionResult(BlockSearch.getWindOcclusion(level, pos));
 
-            nearbyBlockTemperature = entityData.blockSearchResult().parseBlockSearchResult(level);
+            nearbyBlockTemperature = entityData.blockSearchResult().parseBlockSearchResult(level, entity, dataMap.isMob());
             entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(pos).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
             float shade = 0.3f;
             if (dataMap.isMob())

@@ -48,17 +48,15 @@ public class BlockSearch
         private ResourceKey<Level> levelID;
         private Map<Block, List<BlockPos>> allPositions = new HashMap<>();
         private Map<Fluid, List<BlockPos>> allFluidPositions = new HashMap<>();
-        private Map<BlockPos, Float> blockExposures = new HashMap<>();
-        private Map<BlockPos, Float> fluidExposures = new HashMap<>();
         private List<BlockPositionsWithDistance> allFound = new ArrayList<>();
         private List<FluidPositionsWithDistance> allFoundFluid = new ArrayList<>();
 
-        record BlockPositionsWithDistance(BlockPos pos, Block block, double distSq, float exposure) {}
-        record FluidPositionsWithDistance(BlockPos pos, Fluid fluid, double distSq, float exposure) {}
+        record BlockPositionsWithDistance(BlockPos pos, Block block, double distSq) {}
+        record FluidPositionsWithDistance(BlockPos pos, Fluid fluid, double distSq) {}
 
-        void addBlockCandidate(BlockPos pos, Block block, double distSq, float exposure) {allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq, exposure));}
+        void addBlockCandidate(BlockPos pos, Block block, double distSq) {allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq));}
 
-        void addFluidCandidate(BlockPos pos, Fluid fluid, double distSq, float exposure) {allFoundFluid.add(new FluidPositionsWithDistance(pos.immutable(), fluid, distSq, exposure));}
+        void addFluidCandidate(BlockPos pos, Fluid fluid, double distSq) {allFoundFluid.add(new FluidPositionsWithDistance(pos.immutable(), fluid, distSq));}
 
         BlockSearchResult build(Level level)
         {
@@ -76,8 +74,6 @@ public class BlockSearch
 
                 tempCounts.put(entry.block(), currentCount + 1);
                 allPositions.computeIfAbsent(entry.block(), k -> new ArrayList<>()).add(entry.pos());
-
-                blockExposures.put(entry.pos(), entry.exposure());
             }
 
             Map<Fluid, Integer> tempCountsFluid = new HashMap<>();
@@ -91,11 +87,9 @@ public class BlockSearch
 
                 tempCountsFluid.put(entry.fluid(), currentCount + 1);
                 allFluidPositions.computeIfAbsent(entry.fluid(), k -> new ArrayList<>()).add(entry.pos());
-
-                fluidExposures.put(entry.pos(), entry.exposure());
             }
 
-            return new BlockSearchResult(origin, levelID, allPositions, allFluidPositions, blockExposures, fluidExposures);
+            return new BlockSearchResult(origin, levelID, allPositions, allFluidPositions);
         }
     }
 
@@ -129,8 +123,7 @@ public class BlockSearch
                         {
                             if (isEncased(pos.immutable(), chunks)) continue;
 
-                            float exposure = calcExposure(origin, pos.immutable(), chunks, false);
-                            builder.addBlockCandidate(pos.immutable(), block, distSq, exposure);
+                            builder.addBlockCandidate(pos.immutable(), block, distSq);
                         }
 
                         FluidState fluidState = state.getFluidState();
@@ -141,114 +134,13 @@ public class BlockSearch
 
                             if (fluidDataMap != null)
                             {
-                                float exposure = calcExposure(origin, pos.immutable(), chunks, true);
-                                builder.addFluidCandidate(pos.immutable(), fluid, distSq, exposure);
+                                builder.addFluidCandidate(pos.immutable(), fluid, distSq);
                             }
                         }
                     }
                 }
             }
         }
-    }
-
-private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChunk> cachedChunks, boolean isFluid)
-{
-    float totalExposure = 0f;
-
-    LevelChunk sourceChunk = findChunkInList(cachedChunks, sourcePos);
-    if (sourceChunk == null) return 0f;
-
-    BlockState sourceState = sourceChunk.getBlockState(sourcePos);
-    FluidState fluidState = sourceState.getFluidState();
-    float fluidHeight = isFluid ? fluidState.getHeight(sourceChunk, sourcePos) : 1f;
-
-    for (Direction direction : Direction.values())
-    {
-        BlockPos adjacentPos = sourcePos.relative(direction);
-        LevelChunk adjacentChunk = findChunkInList(cachedChunks,adjacentPos);
-        if (adjacentChunk == null) continue;
-
-        BlockState adjacentState = adjacentChunk.getBlockState(adjacentPos);
-        if (adjacentState.canOcclude()) continue;
-
-        Vec3 faceNormal = Vec3.atLowerCornerOf(direction.getNormal());
-        Vec3 faceCenter = Vec3.atCenterOf(sourcePos).add(faceNormal.scale(0.5));
-        Vec3 toEntity = origin.subtract(faceCenter).normalize();
-
-        double dot = faceNormal.dot(toEntity);
-        if (dot <= 0) continue;
-
-        if (!hasLineOfSight(faceCenter, origin, sourcePos, cachedChunks)) continue;
-
-        float exposureModifier = 1f;
-        if (direction.getAxis().isHorizontal() && fluidHeight < 1f) exposureModifier = fluidHeight;
-
-        totalExposure += (float) dot * exposureModifier;
-    }
-
-    return totalExposure;
-}
-
-    private static boolean hasLineOfSight(Vec3 from, Vec3 to, BlockPos sourcePos, List<LevelChunk> cachedChunks)
-    {
-        BlockPos hitPos = raycastToPoint(from, to, sourcePos, cachedChunks);
-
-        return hitPos == null || hitPos.equals(sourcePos);
-    }
-
-    private static BlockPos raycastToPoint(Vec3 from, Vec3 to, BlockPos source, List<LevelChunk> cachedChunks)
-    {
-        BlockGetter blockGetter = new BlockGetter() {
-
-            @Override
-            public BlockState getBlockState(BlockPos blockPos)
-            {
-                LevelChunk chunk = findChunkInList(cachedChunks, blockPos);
-                return chunk != null ? chunk.getBlockState(blockPos) : Blocks.AIR.defaultBlockState();
-            }
-
-            @Override
-            public FluidState getFluidState(BlockPos blockPos)
-            {
-                return getBlockState(blockPos).getFluidState();
-            }
-
-            @Override
-            public int getHeight()
-            {
-                return cachedChunks.isEmpty() ? 384 : cachedChunks.getFirst().getHeight();
-            }
-
-            @Override
-            public int getMinBuildHeight()
-            {
-                return cachedChunks.isEmpty() ? -64 : cachedChunks.getFirst().getMinBuildHeight();
-            }
-
-            @Override
-            public @Nullable BlockEntity getBlockEntity(BlockPos blockPos)
-            {
-                return null;
-            }
-        };
-
-        final BlockPos[] hitBlock = {null};
-
-        BlockGetter.traverseBlocks(from, to, blockGetter, (getter, pos) -> {
-
-            BlockState state = getter.getBlockState(pos);
-
-            if (pos.equals(source)) return null;
-            if (!state.isAir() && state.canOcclude())
-            {
-                hitBlock[0] = pos.immutable();
-                return  pos;
-            }
-
-            return null;
-        }, (getter) -> null);
-
-        return hitBlock[0];
     }
 
     private static LevelChunk findChunkInList(List<LevelChunk> chunks, BlockPos pos)
@@ -316,7 +208,7 @@ private static float calcExposure(Vec3 origin, BlockPos sourcePos, List<LevelChu
             }catch (Exception e)
             {
                 LOGGER.error("Error in async block search:", e);
-                return new BlockSearchResult(Vec3.ZERO, level.dimension(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+                return new BlockSearchResult(Vec3.ZERO, level.dimension(), new HashMap<>(), new HashMap<>());
             }
 
         }, Util.backgroundExecutor());
