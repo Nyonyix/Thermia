@@ -116,7 +116,7 @@ public class TemperatureComfortGoal extends Goal
 
         if (currentInternalTemp <= minEntityTempBeforeHurt)
         {
-            targetPos = source.getNearest();
+            targetPos = source.getNearest(mob);
             if (targetPos != null)
             {
                 if (!isAtPosition(targetPos))

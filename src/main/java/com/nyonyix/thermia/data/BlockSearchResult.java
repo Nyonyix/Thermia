@@ -291,9 +291,41 @@ public record BlockSearchResult(
 
     public BlockSearchResult withAllFluidPositions(Map<Fluid, List<BlockPos>> allFluidPositions) {return new BlockSearchResult(this.searchOrigin, this.levelID, this.allPositions, allFluidPositions);}
 
-    public BlockPos getNearest()
+    public BlockPos getNearest(Entity entity)
     {
-        return BlockPos.ZERO;
+        float closestDistance = 0f;
+        BlockPos closestPos = BlockPos.ZERO;
+        Vec3 entityPos = entity.position().add(0, entity.getBbHeight() * 0.5, 0);
+
+        for (Map.Entry<Block, List<BlockPos>> entry : this.allPositions.entrySet())
+        {
+            for (BlockPos pos : entry.getValue())
+            {
+                float distance = (float) entityPos.distanceTo(Vec3.atCenterOf(pos));
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestPos = pos;
+                }
+            }
+        }
+
+        for (Map.Entry<Fluid, List<BlockPos>> entry : this.allFluidPositions.entrySet())
+        {
+            for (BlockPos pos : entry.getValue())
+            {
+                float distance = (float) entityPos.distanceTo(Vec3.atCenterOf(pos));
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestPos = pos;
+                }
+            }
+        }
+
+        return closestPos;
     }
 
     public float parseBlockSearchResult(Level curLevel, Entity entity, boolean isMob)

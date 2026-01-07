@@ -3,6 +3,7 @@ package com.nyonyix.thermia.server;
 import com.google.common.eventbus.Subscribe;
 import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.ThermiaCommands;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datagen.*;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
@@ -27,6 +28,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
@@ -129,6 +131,9 @@ public class ThermiaServer
     public static void onServerStarted(ServerStartedEvent event) {initDataMap();}
 
     @SubscribeEvent
+    public static void onRegisterCommands(RegisterCommandsEvent event) {ThermiaCommands.register(event.getDispatcher());}
+
+    @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event)
     {
         MinecraftServer server = event.getServer();
@@ -171,18 +176,6 @@ public class ThermiaServer
 
             ChunkHumidityManager.processChunkBatch(level, 64);
         }
-    }
-
-    @SubscribeEvent
-    public static void onEntityJoinLevel(EntityJoinLevelEvent event)
-    {
-//        EntityTemperatureManager.init(event.getEntity());
-    }
-
-    @Subscribe
-    public static void onEntityLeaveLevel(EntityLeaveLevelEvent event)
-    {
-
     }
 
     @SubscribeEvent
