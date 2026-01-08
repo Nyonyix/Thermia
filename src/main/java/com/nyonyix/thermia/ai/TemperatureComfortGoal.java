@@ -18,9 +18,7 @@ public class TemperatureComfortGoal extends Goal
     private final double speedModifier;
     private BlockPos targetPos;
     private int cooldown = 0;
-    private static final int SEARCH_RANGE = 8;
-    private static final int COOLDOWN_IN_TICKS = 200;
-    private static final float MIN_MAX_BUFFER = 0.25f;
+
 
     public TemperatureComfortGoal(PathfinderMob mob, double speedModifier)
     {

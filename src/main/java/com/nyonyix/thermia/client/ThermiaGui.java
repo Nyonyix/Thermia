@@ -245,8 +245,8 @@ public class ThermiaGui
 
         float effectScale  = EntityTemperatureManager.getTemperatureEffectScale(player);
 
-        float r = effectScale;
-        float g = effectScale / 4f;
+        float r = 1f;
+        float g = 0.25f;
         float b = 0f;
         float alpha = effectScale;
 

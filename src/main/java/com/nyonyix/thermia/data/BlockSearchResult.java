@@ -185,7 +185,7 @@ public record BlockSearchResult(
         {
             Block block = entry.getKey();
             BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
-            if (dataMap == null) continue;
+            if (dataMap == null || !dataMap.isRadiative()) continue;
 
             float totalTempForBlock = 0f;
             for (BlockPos pos : entry.getValue())
@@ -213,7 +213,7 @@ public record BlockSearchResult(
         {
             Fluid fluid = entry.getKey();
             FluidTemperatureDataMap dataMap = BuiltInRegistries.FLUID.wrapAsHolder(fluid).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
-            if (dataMap == null) continue;
+            if (dataMap == null || !dataMap.isRadiative()) continue;
 
             float totalTempForFluid = 0f;
             for (BlockPos pos : entry.getValue())
@@ -248,7 +248,7 @@ public record BlockSearchResult(
             float fluidHeight = (float) entity.getFluidTypeHeight(fluid.getFluidType());
             float immersion = Math.min(fluidHeight / entity.getBbHeight(), 1f);
 
-            totalImmersionTemp = Math.max(totalImmersionTemp, dataMap.temperature() * immersion);
+            totalImmersionTemp = dataMap.temperature() * immersion;
         }
 
         return totalImmersionTemp;
@@ -256,29 +256,46 @@ public record BlockSearchResult(
 
     private float getContactTemperature(Level curLevel, Entity entity)
     {
-        AABB bb = entity.getBoundingBox();
+        AABB bb = entity.getBoundingBox().inflate(0.001);
         float totalContactTemp = 0f;
+        int contactCount = 0;
+
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
         int minX = Mth.floor(bb.minX);
         int minY = Mth.floor(bb.minY);
         int minZ = Mth.floor(bb.minZ);
-        int maxX = Mth.ceil(bb.maxX);
-        int maxY = Mth.ceil(bb.maxY);
-        int maxZ = Mth.ceil(bb.maxZ);
+        int maxX = Mth.floor(bb.maxX);
+        int maxY = Mth.floor(bb.maxY);
+        int maxZ = Mth.floor(bb.maxZ);
 
-        for (BlockPos pos : BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ))
+        for (int x = minX; x <= maxX; x++)
         {
-            if (!curLevel.hasChunkAt(pos)) continue;
+            for (int y = minY; y <= maxY; y++)
+            {
+                for (int z = minZ; z <= maxZ; z ++)
+                {
+                    mutableBlockPos.set(x, y, z);
 
-            BlockState state = curLevel.getBlockState(pos);
-            BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(state.getBlock()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
-            if (dataMap == null || dataMap.isRadiative()) continue;
+                    if (!curLevel.hasChunkAt(mutableBlockPos)) continue;
 
-            float blockTemp = parseBlockState(state, curLevel, pos, dataMap);
-            totalContactTemp = Math.max(totalContactTemp, blockTemp);
+                    BlockState state = curLevel.getBlockState(mutableBlockPos);
+                    BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(state.getBlock()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+                    if (dataMap == null || dataMap.isRadiative()) continue;
+
+                    float blockTemp = parseBlockState(state, curLevel, mutableBlockPos, dataMap);
+                    totalContactTemp += blockTemp;
+                    contactCount++;
+                }
+            }
         }
 
-        return totalContactTemp;
+        if (contactCount > 0)
+        {
+            float contactMultiplier = 1f + (float) Math.log1p(contactCount) * 0.3f;
+            return totalContactTemp * contactMultiplier;
+        }
+        return 0f;
     }
 
     public static BlockSearchResult createDefault() {return new BlockSearchResult(Vec3.ZERO, Level.OVERWORLD, new HashMap<>(), new HashMap<>());}
