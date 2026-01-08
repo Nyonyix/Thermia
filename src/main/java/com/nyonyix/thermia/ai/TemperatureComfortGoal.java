@@ -5,12 +5,16 @@ import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.ClosestSource;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
+import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TemperatureComfortGoal extends Goal
 {
@@ -19,6 +23,9 @@ public class TemperatureComfortGoal extends Goal
     private BlockPos targetPos;
     private int cooldown = 0;
 
+    private static final int SEARCH_RANGE = 12;
+    private static final int COOLDOWN_IN_TICKS = 200;
+    private static final float COMFORT_THRESHOLD = (float) ServerConfig.TEMPERATURE_BUFFER_PERCENT.getAsInt() / 100f;
 
     public TemperatureComfortGoal(PathfinderMob mob, double speedModifier)
     {
@@ -44,7 +51,12 @@ public class TemperatureComfortGoal extends Goal
     {
         BlockPos mobPos = mob.blockPosition();
         BlockPos nearest = null;
-        double nearestdist = Double.MAX_VALUE;
+        double nearestDist = Double.MAX_VALUE;
+
+        float windDirection = EnvironmentHelpers.getWindDirection(mob.level(), mobPos);
+        Direction windFrom =0f;
+
+        Map<BlockPos, Float> highestWind = new HashMap<>();
 
         for (BlockPos pos : BlockPos.betweenClosed(mobPos.offset(-SEARCH_RANGE, -3, -SEARCH_RANGE), mobPos.offset(SEARCH_RANGE, 3, SEARCH_RANGE)))
         {
@@ -61,6 +73,11 @@ public class TemperatureComfortGoal extends Goal
         return nearest;
     }
 
+    private Direction getWindDirectionCardinal(float radians)
+    {
+        
+    }
+
     @Override
     public boolean canUse()
     {
@@ -71,61 +88,37 @@ public class TemperatureComfortGoal extends Goal
         }
 
         if (!mob.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
-        EntityTemperature tempData = mob.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
 
+        EntityTemperature tempData = mob.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
         float currentInternalTemp = tempData.internalTemperature();
         float maxInternalTemperature = tempData.maxInternalTemperature();
         float minInternalTemperature = tempData.minInternalTemperature();
-        BlockSearchResult source = tempData.blockSearchResult();
+        float midPointTemperature = (maxInternalTemperature + minInternalTemperature) * 0.5f;
 
-        float maxEntityTempBeforeHurt = 0.0f;
-        float minEntityTempBeforeHurt = 0.0f;
+        float hotThreshold = midPointTemperature * (1f + COMFORT_THRESHOLD);
+        float coldThreshold = midPointTemperature * (1f - COMFORT_THRESHOLD);
 
-        if (maxInternalTemperature < 0.0f)
+        if (currentInternalTemp > hotThreshold)
         {
-            maxEntityTempBeforeHurt = maxInternalTemperature * (1f + MIN_MAX_BUFFER);
-        }
-        else
-        {
-            maxEntityTempBeforeHurt = maxInternalTemperature * (1f - MIN_MAX_BUFFER);
-        }
-
-        if (minInternalTemperature < 0.0f)
-        {
-            minEntityTempBeforeHurt = minInternalTemperature * (1f - MIN_MAX_BUFFER);
-        }
-        else
-        {
-            minEntityTempBeforeHurt = minInternalTemperature * (1f + MIN_MAX_BUFFER);
-        }
-
-        if (currentInternalTemp >= maxEntityTempBeforeHurt)
-        {
-            targetPos = findNearestShade();
-            if (targetPos != null)
+            // targetPos = findCold
+            if (targetPos != null && !isAtPosition(targetPos))
             {
-                if (!isAtPosition(targetPos))
-                {
-                    cooldown = COOLDOWN_IN_TICKS;
-                    return true;
-                }
+                cooldown = COOLDOWN_IN_TICKS;
+                return true;
             }
         }
 
-        if (currentInternalTemp <= minEntityTempBeforeHurt)
+        if (currentInternalTemp < coldThreshold)
         {
-            targetPos = source.getNearest(mob);
-            if (targetPos != null)
+            // targetPos = findHot
+            if (targetPos != null && !isAtPosition(targetPos))
             {
-                if (!isAtPosition(targetPos))
-                {
-                    cooldown = COOLDOWN_IN_TICKS;
-                    return true;
-                }
+                cooldown = COOLDOWN_IN_TICKS;
+                return true;
             }
-        }
 
-        return false;
+            return false;
+        }
     }
 
     @Override
@@ -138,10 +131,14 @@ public class TemperatureComfortGoal extends Goal
         EntityTemperature tempData = mob.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
 
         float internalTemperature = tempData.internalTemperature();
-        float maxEntityTempBeforeHurt = tempData.maxInternalTemperature() * (1f - MIN_MAX_BUFFER);
-        float minEntityTempBeforeHurt = tempData.minInternalTemperature() * (1 + MIN_MAX_BUFFER);
+        float maxInternalTemperature = tempData.maxInternalTemperature();
+        float minInternalTemperature = tempData.minInternalTemperature();
+        float midPointTemperature = (maxInternalTemperature + minInternalTemperature) * 0.5f;
 
-        if (internalTemperature > minEntityTempBeforeHurt && internalTemperature < maxEntityTempBeforeHurt) return false;
+        float hotThreshold = midPointTemperature * (1f + COMFORT_THRESHOLD);
+        float coldThreshold = midPointTemperature * (1f - COMFORT_THRESHOLD);
+
+        if (internalTemperature < hotThreshold && internalTemperature > coldThreshold) return false;
 
         return !mob.getNavigation().isDone();
     }

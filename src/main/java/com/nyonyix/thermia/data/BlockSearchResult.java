@@ -308,7 +308,7 @@ public record BlockSearchResult(
 
     public BlockSearchResult withAllFluidPositions(Map<Fluid, List<BlockPos>> allFluidPositions) {return new BlockSearchResult(this.searchOrigin, this.levelID, this.allPositions, allFluidPositions);}
 
-    public BlockPos getNearest(Entity entity)
+    public BlockPos getNearest(Entity entity, boolean isHot)
     {
         float closestDistance = 0f;
         BlockPos closestPos = BlockPos.ZERO;
@@ -316,28 +316,50 @@ public record BlockSearchResult(
 
         for (Map.Entry<Block, List<BlockPos>> entry : this.allPositions.entrySet())
         {
+            BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getKey()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+            if (blockDataMap == null) continue;
+
             for (BlockPos pos : entry.getValue())
             {
                 float distance = (float) entityPos.distanceTo(Vec3.atCenterOf(pos));
 
                 if (distance < closestDistance)
                 {
-                    closestDistance = distance;
-                    closestPos = pos;
+                    if (isHot && blockDataMap.temperature() > 0f)
+                    {
+                        closestDistance = distance;
+                        closestPos = pos;
+                    }
+                    else if (!isHot && blockDataMap.temperature() < 0f)
+                    {
+                        closestDistance = distance;
+                        closestPos = pos;
+                    }
                 }
             }
         }
 
         for (Map.Entry<Fluid, List<BlockPos>> entry : this.allFluidPositions.entrySet())
         {
+            FluidTemperatureDataMap fluidDataMap = BuiltInRegistries.FLUID.wrapAsHolder(entry.getKey()).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
+            if (fluidDataMap == null) continue;
+
             for (BlockPos pos : entry.getValue())
             {
                 float distance = (float) entityPos.distanceTo(Vec3.atCenterOf(pos));
 
                 if (distance < closestDistance)
                 {
-                    closestDistance = distance;
-                    closestPos = pos;
+                    if (isHot && fluidDataMap.temperature() > 0f)
+                    {
+                        closestDistance = distance;
+                        closestPos = pos;
+                    }
+                    else if (!isHot && fluidDataMap.temperature() < 0f)
+                    {
+                        closestDistance = distance;
+                        closestPos = pos;
+                    }
                 }
             }
         }
