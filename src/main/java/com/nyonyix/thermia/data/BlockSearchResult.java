@@ -127,31 +127,6 @@ public record BlockSearchResult(
             }
     );
 
-    private float parseBlockState(BlockState state, Level level, BlockPos pos, BlockTemperatureDataMap dataMap)
-    {
-        StateDefinition<Block, BlockState> stateDef = state.getBlock().getStateDefinition();
-        float temp = dataMap.temperature();
-
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof IHeatable heatable) return heatable.getTemperature();
-        if (blockEntity instanceof CharcoalForgeBlockEntity charcoalForge) return charcoalForge.getTemperature();
-        if (blockEntity instanceof PitKilnBlockEntity pitKiln) return pitKiln.isLit() ? dataMap.temperature() : 0.0f;
-
-        for (Map.Entry<String, Boolean> entry : dataMap.stateBools().entrySet())
-        {
-            Property<?> property = stateDef.getProperty(entry.getKey());
-
-            if (property != null)
-            {
-                Comparable<?> value = state.getValue(property);
-                if (!value.toString().equals(entry.getValue().toString())) return 0f;
-            }
-            else LOGGER.error("Property of {} was not found for block {}", entry.getKey(), state.getBlock().getDescriptionId());
-        }
-
-        return temp;
-    }
-
     private float calcTemp(BlockPos pos, float temp, Vec3 entityPos)
     {
         float distance = (float) entityPos.distanceTo(Vec3.atCenterOf(pos));
@@ -325,15 +300,15 @@ public record BlockSearchResult(
 
                 if (distance < closestDistance)
                 {
-                    if (isHot && blockDataMap.temperature() > 0f)
+                    if (isHot && blockDataMap.temperature() >= 0f)
                     {
                         closestDistance = distance;
-                        closestPos = pos;
+                        closestPos = pos.immutable();
                     }
                     else if (!isHot && blockDataMap.temperature() < 0f)
                     {
                         closestDistance = distance;
-                        closestPos = pos;
+                        closestPos = pos.immutable();
                     }
                 }
             }
@@ -350,15 +325,15 @@ public record BlockSearchResult(
 
                 if (distance < closestDistance)
                 {
-                    if (isHot && fluidDataMap.temperature() > 0f)
+                    if (isHot && fluidDataMap.temperature() >= 0f)
                     {
                         closestDistance = distance;
-                        closestPos = pos;
+                        closestPos = pos.immutable();
                     }
                     else if (!isHot && fluidDataMap.temperature() < 0f)
                     {
                         closestDistance = distance;
-                        closestPos = pos;
+                        closestPos = pos.immutable();
                     }
                 }
             }
@@ -380,5 +355,30 @@ public record BlockSearchResult(
 
         float maxRadiance = (float) ServerConfig.MAX_RADIANT_HEATING.getAsInt();
         return maxRadiance * (1f - (float) Math.exp(-totalTemperature / maxRadiance));
+    }
+
+    public static float parseBlockState(BlockState state, Level level, BlockPos pos, BlockTemperatureDataMap dataMap)
+    {
+        StateDefinition<Block, BlockState> stateDef = state.getBlock().getStateDefinition();
+        float temp = dataMap.temperature();
+
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof IHeatable heatable) return heatable.getTemperature();
+        if (blockEntity instanceof CharcoalForgeBlockEntity charcoalForge) return charcoalForge.getTemperature();
+        if (blockEntity instanceof PitKilnBlockEntity pitKiln) return pitKiln.isLit() ? dataMap.temperature() : 0.0f;
+
+        for (Map.Entry<String, Boolean> entry : dataMap.stateBools().entrySet())
+        {
+            Property<?> property = stateDef.getProperty(entry.getKey());
+
+            if (property != null)
+            {
+                Comparable<?> value = state.getValue(property);
+                if (!value.toString().equals(entry.getValue().toString())) return 0f;
+            }
+            else LOGGER.error("Property of {} was not found for block {}", entry.getKey(), state.getBlock().getDescriptionId());
+        }
+
+        return temp;
     }
 }

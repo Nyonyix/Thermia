@@ -2,6 +2,7 @@ package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
+import com.nyonyix.thermia.ai.AiHelpers;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.SolarShadeResult;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
@@ -31,6 +32,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForgeMod;
@@ -246,11 +248,17 @@ public class EntityTemperatureManager
         {
             if (entity instanceof TFCAnimalProperties tfcAnimal)
             {
-                if (tfcAnimal.getFamiliarity() >= 0.1) entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()).withInternalTemperature(defaultTemp));
+                if (tfcAnimal.getFamiliarity() >= 0.1)
+                {
+                    entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()).withInternalTemperature(defaultTemp));
+
+                    if (entity instanceof PathfinderMob mob) AiHelpers.addTemperatureGoals(mob);
+                }
             } else  LOGGER.error("Entity {} is marked 'tamable' but no tamable entity found", entity.getName());
             return;
         }
 
+        if (entity instanceof PathfinderMob mob) AiHelpers.addTemperatureGoals(mob);
         entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()).withInternalTemperature(defaultTemp));
     }
 
@@ -271,6 +279,7 @@ public class EntityTemperatureManager
                 CompletableFuture<BlockSearchResult> pending = pendingBlockSearches.remove(entity.getUUID());
                 if(pending != null && !pending.isDone()) pending.cancel(true);
                 entity.removeData(ThermiaAttachments.ENTITY_TEMPERATURE);
+                if (entity instanceof PathfinderMob mob)
                 return;
             }
 
