@@ -165,13 +165,14 @@ public class ThermiaServer
                     EntityTemperatureManager.init(entity);
                     EntityTemperatureManager.onUpdate(level, entity);
                 }
+
+                if (server.getTickCount() % 100 == entity.getId() % 100) EntityTemperatureManager.queueBlockSearch(entity);
             }
 
             if (ChunkHumidityManager.lastTickedTFCHour != Calendars.get(level).getHourOfDay())
             {
                 ChunkHumidityManager.lastTickedTFCHour = Calendars.get(level).getHourOfDay();
                 ChunkHumidityManager.refreshWorkingCache(level);
-                LOGGER.info("Refresh on tick {}", server.getTickCount());
             }
 
             ChunkHumidityManager.processChunkBatch(level, 64);

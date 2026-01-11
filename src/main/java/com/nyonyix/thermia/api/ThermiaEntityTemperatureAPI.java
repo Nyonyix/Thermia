@@ -1,5 +1,7 @@
 package com.nyonyix.thermia.api;
 
+import com.nyonyix.thermia.ai.AiHelpers;
+import com.nyonyix.thermia.ai.TemperatureComfortGoal;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.SolarShadeResult;
 import com.nyonyix.thermia.data.WindOcclusionResult;
@@ -7,6 +9,7 @@ import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PathfinderMob;
 
 public class ThermiaEntityTemperatureAPI
 {
@@ -26,6 +29,14 @@ public class ThermiaEntityTemperatureAPI
     {
         if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
         return entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE).toRemove();
+    }
+
+    public static float[] getMobComfortThresholds(Entity entity)
+    {
+        if (!(entity instanceof PathfinderMob mob)) return new float[] {0f, 0f};
+        if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return new float[] {0f, 0f};
+
+        return AiHelpers.getComfortThresholds(entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE), 0.75f);
     }
 
     public static float getInternalTemperature(Entity entity)

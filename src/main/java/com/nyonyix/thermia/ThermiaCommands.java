@@ -45,6 +45,8 @@ public class ThermiaCommands
         PROPERTIES.put("wetness", new PropertyDefinition(ThermiaEntityTemperatureAPI::getWetness, ThermiaEntityTemperatureAPI::setWetness));
         PROPERTIES.put("environment_temperature", new PropertyDefinition(ThermiaEntityTemperatureAPI::getEnvironmentTemperature, null));
         PROPERTIES.put("humidity", new PropertyDefinition(ThermiaEntityTemperatureAPI::getEnvironmentHumidity, null));
+        PROPERTIES.put("mob_comfort_threshold_hot", new PropertyDefinition(entity -> ThermiaEntityTemperatureAPI.getMobComfortThresholds(entity)[1], null));
+        PROPERTIES.put("mob_comfort_threshold_cold", new PropertyDefinition(entity -> ThermiaEntityTemperatureAPI.getMobComfortThresholds(entity)[0], null));
 
     }
 

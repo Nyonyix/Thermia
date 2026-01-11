@@ -126,6 +126,19 @@ public class EntityTemperatureManager
         return entityData;
     }
 
+    private static EntityTemperature handleWetness(Level level, BlockPos pos, ClimateModel levelModel, ICalendar levelCalender, EntityTemperature entityData, float shade)
+    {
+        boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getRainfall(level, pos));
+        if (isRaining && level.canSeeSky(pos) && entityData.wetness() <= 0.9)
+        {
+            if (levelModel.getTemperature(level, pos) > 0.0f) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.1f));
+            else if (levelModel.getTemperature(level, pos) > -5) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.05f));
+        }
+        else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos.above(), entityData.environmentTemperature(), entityData.environmentHumidity(), shade, entityData.windOcclusionResult().occlusionMultiplier())));
+
+        return entityData;
+    }
+
     private static void handlePlayerTemperatureEffect(Entity entity)
     {
         if (!(entity instanceof LivingEntity living)) return;
@@ -236,6 +249,21 @@ public class EntityTemperatureManager
         return Math.min((int) (scale * maxEffectLevels), maxEffectLevels - 1);
     }
 
+    public static void queueBlockSearch(Entity entity)
+    {
+        if (!(entity instanceof LivingEntity)) return;
+
+        EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
+        if (dataMap == null) return;
+
+        if (!pendingBlockSearches.containsKey(entity.getUUID()))
+        {
+            int searchRadius = dataMap.isMob() ? ServerConfig.ISMOB_SEARCH_RANGE.getAsInt() : ServerConfig.SEARCH_RANGE.getAsInt();
+            CompletableFuture<BlockSearchResult> future = BlockSearch.searchAllAsync(entity.level(), entity.position().add(0, (double) entity.getBbHeight() / 2, 0), searchRadius);
+            pendingBlockSearches.put(entity.getUUID(), future);
+        }
+    }
+
     public static void init(Entity entity)
     {
         EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
@@ -336,25 +364,11 @@ public class EntityTemperatureManager
             }
 
             entityData = handlePlayerSweat(entity, entityData);
-
-            boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getRainfall(level, pos));
-            if (isRaining && level.canSeeSky(pos) && entityData.wetness() <= 0.9)
-            {
-                if (levelModel.getTemperature(level, pos) > 0.0f) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.1f));
-                else if (levelModel.getTemperature(level, pos) > -5) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.05f));
-            }
-            else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos.above(), entityData.environmentTemperature(), entityData.environmentHumidity(), shade, entityData.windOcclusionResult().occlusionMultiplier())));
-
+            entityData = handleWetness(level, pos, levelModel, levelCalender, entityData, shade);
             entityData = handleTemperatureChange(entity, entityData);
 
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
 
-            if (!pendingBlockSearches.containsKey(entity.getUUID()))
-            {
-                int searchRadius = dataMap.isMob() ? ServerConfig.ISMOB_SEARCH_RANGE.getAsInt() : ServerConfig.SEARCH_RANGE.getAsInt();
-                CompletableFuture<BlockSearchResult> future = BlockSearch.searchAllAsync(level, entity.position().add(0, (double) entity.getBbHeight() / 2, 0), searchRadius);
-                pendingBlockSearches.put(entity.getUUID(), future);
-            }
         }
     }
 

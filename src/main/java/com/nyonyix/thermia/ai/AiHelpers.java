@@ -8,6 +8,7 @@ import com.nyonyix.thermia.data.map.ThermiaDataMaps;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
@@ -45,7 +46,9 @@ public class AiHelpers
     public static boolean isAtPosition(PathfinderMob mob, BlockPos pos)
     {
         if (pos == null) return true;
-        return mob.blockPosition().distSqr(pos) < 4.0;
+
+        double distSq = mob.blockPosition().distSqr(pos);
+        return distSq < 4.0;
     }
 
     public static int countAdjacentSolidBlocks(Level level, BlockPos pos)
@@ -115,11 +118,11 @@ public class AiHelpers
             for (BlockPos pos : entry.getValue())
             {
                 double distSq = mobPos.distSqr(pos);
-
                 if (distSq > maxRangeSq) continue;
-                if (!isWalkable(mob, pos.above())) continue;
 
-                if (distSq < nearestDist)
+                BlockPos walkablePos = findWalkableNearby(mob, pos);
+
+                if (walkablePos != null && distSq < nearestDist)
                 {
                     nearestDist = distSq;
                     nearest = pos.immutable();
@@ -135,11 +138,11 @@ public class AiHelpers
             for (BlockPos pos : entry.getValue())
             {
                 double distSq = mobPos.distSqr(pos);
+                if (distSq > maxRangeSq) continue;
 
-                if (distSq > maxRange) continue;
-                if (!isWalkable(mob, pos)) continue;
+                BlockPos walkablePos = findWalkableNearby(mob, pos);
 
-                if (distSq < nearestDist)
+                if (walkablePos != null && distSq < nearestDist)
                 {
                     nearestDist = distSq;
                     nearest = pos.immutable();
@@ -166,14 +169,16 @@ public class AiHelpers
             for (BlockPos pos : entry.getValue())
             {
                 double distSq = mobPos.distSqr(pos);
+                if (distSq > maxRangeSq) continue;
+
                 BlockState state = mob.level().getBlockState(pos);
                 float temp = BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
 
                 if (temp <= maxTemp) continue;
-                if (distSq > maxRangeSq) continue;
-                if (!isWalkable(mob, pos)) continue;
 
-                if (distSq < nearestDist)
+                BlockPos walkablePos = findWalkableNearby(mob, pos);
+
+                if (walkablePos != null && distSq < nearestDist)
                 {
                     maxTemp = temp;
                     strongest = pos.immutable();
@@ -189,15 +194,17 @@ public class AiHelpers
             for (BlockPos pos : entry.getValue())
             {
                 double distSq = mobPos.distSqr(pos);
+                if (distSq > maxRangeSq) continue;
+
                 BlockState state = mob.level().getBlockState(pos);
                 BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(state.getBlock()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
                 float temp = blockDataMap == null ? fluidDataMap.temperature() : BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
 
                 if (temp <= maxTemp) continue;
-                if (distSq > maxRangeSq) continue;
-                if (!isWalkable(mob, pos)) continue;
 
-                if (distSq < nearestDist)
+                BlockPos walkablePos = findWalkableNearby(mob, pos);
+
+                if (walkablePos != null && distSq < nearestDist)
                 {
                     maxTemp = temp;
                     strongest = pos.immutable();

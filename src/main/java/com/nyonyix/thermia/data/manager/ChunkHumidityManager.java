@@ -62,7 +62,7 @@ public class ChunkHumidityManager
         working.clear();
         working.addAll(loaded);
 
-        LOGGER.info("Hour {}: Refreshed workingChunkCache with {} chunks", Calendars.get(level).getHourOfDay(), working.size());
+        LOGGER.debug("Hour {}: Refreshed workingChunkCache with {} chunks", Calendars.get(level).getHourOfDay(), working.size());
     }
 
     public static void processChunkBatch(ServerLevel level, int batchSize)

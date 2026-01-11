@@ -6,15 +6,15 @@ public class ServerConfig
 {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    public static final ModConfigSpec.IntValue SEARCH_RANGE = BUILDER.comment("Max range to search for blocks from player entities").defineInRange("SearchRange", 16, 4, 32);
+    public static final ModConfigSpec.IntValue SEARCH_RANGE = BUILDER.comment("Max range to search for blocks from player entities").defineInRange("SearchRange", 32, 8, 64);
 
-    public static final ModConfigSpec.IntValue ISMOB_SEARCH_RANGE = BUILDER.comment("Max range to search for blocks from animal entities").defineInRange("isMobSearchRange", 8, 2, 16);
+    public static final ModConfigSpec.IntValue ISMOB_SEARCH_RANGE = BUILDER.comment("Max range to search for blocks from animal entities").defineInRange("isMobSearchRange", 16, 4, 32);
 
     public static final ModConfigSpec.IntValue MAX_RADIANT_HEATING = BUILDER.comment("Maximum heat by nearby sources").defineInRange("maxRadiantHeating", 128, 64, 256);
 
     public static final ModConfigSpec.IntValue MAX_BLOCKS_ABOVE = BUILDER.comment("Maximum number of blocks above for depth humidity").defineInRange("maxBlocksAbove", 24576, 8192, 65536);
 
-    public static final ModConfigSpec.IntValue TEMPERATURE_BUFFER_PERCENT = BUILDER.comment("Percent as integer for min/max temp buffer").defineInRange("temp_buffer_percent", 15, 0, 50);
+    public static final ModConfigSpec.IntValue TEMPERATURE_BUFFER_PERCENT = BUILDER.comment("Percent of delta as integer for effect levels").defineInRange("temp_buffer_percent", 15, 0, 50);
 
     public static final ModConfigSpec.IntValue MAX_TEMPERATURE_EFFECT_LEVEL = BUILDER.comment("Maximum amount of hyper/hypothermia effect levels.").defineInRange("max_temperature_effect_level", 4, 2, 8);
 

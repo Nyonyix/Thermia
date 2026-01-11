@@ -1,13 +1,13 @@
 {
-  "itemGroup.humidity": "Example Mod Tab",
-  "block.humidity.example_block": "Example Block",
-  "item.humidity.example_item": "Example Item",
-
-  "humidity.configuration.title": "Humidity Configs",
-  "humidity.configuration.section.humidity.common.toml": "Humidity Configs",
-  "humidity.configuration.section.humidity.common.toml.title": "Humidity Configs",
-  "humidity.configuration.items": "Item List",
-  "humidity.configuration.logDirtBlock": "Log Dirt Block",
-  "humidity.configuration.magicNumberIntroduction": "Magic Number Text",
-  "humidity.configuration.magicNumber": "Magic Number"
+  "thermia.jade.comfort.comfortable": "Comfortable",
+  "thermia.jade.comfort.warm": "Warm",
+  "thermia.jade.comfort.hot": "Hyperthermia",
+  "thermia.jade.comfort.cool": "Cool",
+  "thermia.jade.comfort.cold": "Hypothermia",
+  "effect.thermia.hyperthermia": "Hyperthermia",
+  "effect.thermia.hypothermia": "Hypothermia",
+  "death.attack.hyperthermia": "%1$s's brain boiled",
+  "death.attack.hyperthermia.player": "%1$s was too hot for %2$s to handle",
+  "death.attack.hypothermia": "%1$s became an icicle",
+  "death.attack.hypothermia.player": "%1$s was too cool for %2$s"
 }
