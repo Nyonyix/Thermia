@@ -1,12 +1,18 @@
 package com.nyonyix.thermia.data.datagen;
 
+import com.eerussianguy.firmalife.common.blocks.FLBlocks;
+import com.eerussianguy.firmalife.common.blocks.oven.OvenType;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
+import net.dries007.tfc.common.blocks.TFCBlocks;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.data.DataMapProvider;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,6 +57,15 @@ public class BlockTemperatureDataMapProvider extends DataMapProvider
 
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:hay_block")).orElseThrow(), new BlockTemperatureDataMap(0f, 16, false, true, true, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:nest_box")).orElseThrow(), new BlockTemperatureDataMap(0f, 16, false, true, true, Map.of(), Map.of(), Map.of()), false);
+
+        if (ModList.get().isLoaded("firmalife"))
+        {
+            for (Map.Entry<OvenType, TFCBlocks.Id<Block>> entry : FLBlocks.CURED_OVEN_BOTTOM.entrySet())
+            {
+                Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getValue().get());
+                builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(blockHolder, new BlockTemperatureDataMap(600f, 16, false, true, false, Map.of("lit", true), Map.of(), Map.of()), false);
+            }
+        }
     }
 
     @Override

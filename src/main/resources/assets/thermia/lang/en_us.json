@@ -4,6 +4,7 @@
   "thermia.jade.comfort.hot": "Hyperthermia",
   "thermia.jade.comfort.cool": "Cool",
   "thermia.jade.comfort.cold": "Hypothermia",
+  "config.jade.plugin_thermia.entity_temperature_tooltip": "Entity Temperature",
   "effect.thermia.hyperthermia": "Hyperthermia",
   "effect.thermia.hypothermia": "Hypothermia",
   "death.attack.hyperthermia": "%1$s's brain boiled",
