@@ -1,14 +1,10 @@
 package com.nyonyix.thermia.compat.jade;
 
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.ai.AiHelpers;
+import com.nyonyix.thermia.util.AiHelpers;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
-import com.nyonyix.thermia.effect.HyperThermiaEffect;
-import com.nyonyix.thermia.effect.HypoThermiaEffect;
-import com.nyonyix.thermia.effect.ThermiaEffects;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;

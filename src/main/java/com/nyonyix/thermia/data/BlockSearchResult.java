@@ -4,10 +4,9 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.data.attachment.BlockTemperature;
-import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
-import com.nyonyix.thermia.data.map.FluidTemperatureDataMap;
-import com.nyonyix.thermia.data.map.ThermiaDataMaps;
+import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
+import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
+import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.IHeatable;
 import net.dries007.tfc.common.blockentities.PitKilnBlockEntity;
@@ -27,7 +26,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -35,9 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.slf4j.Logger;
 
-import javax.swing.plaf.BorderUIResource;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public record BlockSearchResult(
         Vec3 searchOrigin,

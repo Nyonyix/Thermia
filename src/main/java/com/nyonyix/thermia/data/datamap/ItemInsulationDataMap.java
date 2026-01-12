@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.data.map;
+package com.nyonyix.thermia.data.datamap;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

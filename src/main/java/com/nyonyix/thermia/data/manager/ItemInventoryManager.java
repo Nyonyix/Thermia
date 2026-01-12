@@ -1,8 +1,8 @@
 package com.nyonyix.thermia.data.manager;
 
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.data.map.ItemInsulationDataMap;
-import com.nyonyix.thermia.data.map.ThermiaDataMaps;
+import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
+import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import net.dries007.tfc.common.component.heat.HeatCapability;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;

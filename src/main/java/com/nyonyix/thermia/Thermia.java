@@ -1,12 +1,8 @@
 package com.nyonyix.thermia;
 
-import com.google.common.eventbus.Subscribe;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
-import com.nyonyix.thermia.data.map.ThermiaDataMaps;
+import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import com.nyonyix.thermia.effect.ThermiaEffects;
-import net.dries007.tfc.config.TFCConfig;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.event.config.ModConfigEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;

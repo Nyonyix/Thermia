@@ -1,7 +1,7 @@
 package com.nyonyix.thermia.data.datagen;
 
-import com.nyonyix.thermia.data.map.FluidTemperatureDataMap;
-import com.nyonyix.thermia.data.map.ThermiaDataMaps;
+import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
+import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import net.dries007.tfc.common.fluids.FluidHolder;
 import net.dries007.tfc.common.fluids.SimpleFluid;
 import net.dries007.tfc.common.fluids.TFCFluids;

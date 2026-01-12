@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.data.map;
+package com.nyonyix.thermia.data.datamap;
 
 import com.nyonyix.thermia.Thermia;
 import net.minecraft.core.registries.Registries;

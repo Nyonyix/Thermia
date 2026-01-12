@@ -1,7 +1,7 @@
 package com.nyonyix.thermia.data.datagen;
 
-import com.nyonyix.thermia.data.map.ItemInsulationDataMap;
-import com.nyonyix.thermia.data.map.ThermiaDataMaps;
+import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
+import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import net.dries007.tfc.common.TFCTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;

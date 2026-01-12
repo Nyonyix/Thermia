@@ -1,6 +1,5 @@
 package com.nyonyix.thermia.server;
 
-import com.google.common.eventbus.Subscribe;
 import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.ThermiaCommands;
@@ -8,7 +7,7 @@ import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datagen.*;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
-import com.nyonyix.thermia.data.map.*;
+import com.nyonyix.thermia.data.datamap.*;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
@@ -29,8 +28,6 @@ import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;

@@ -1,8 +1,8 @@
 package com.nyonyix.thermia.ai;
 
-import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
+import com.nyonyix.thermia.util.AiHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -17,7 +17,7 @@ public class TemperatureComfortGoal extends Goal
     private int cooldown = 0;
 
     private static final int SEARCH_RANGE = 12;
-    private static final int COOLDOWN_IN_TICKS = 200;
+    private static final int COOLDOWN_IN_TICKS = 100;
     private static final float COMFORT_THRESHOLD = 0.75f;
 
     public TemperatureComfortGoal(PathfinderMob mob, double speedModifier)
@@ -44,7 +44,7 @@ public class TemperatureComfortGoal extends Goal
 
         if (currentInternalTemp > thresholds[1])
         {
-            targetPos = AiHelpers.findBestShade(mob, SEARCH_RANGE);
+            targetPos = AiHelpers.findNearestHomeBlock(mob, tempData.blockSearchResult());
 
             if (targetPos != null && !AiHelpers.isAtPosition(mob, targetPos))
             {
@@ -55,7 +55,7 @@ public class TemperatureComfortGoal extends Goal
 
         if (currentInternalTemp < thresholds[0])
         {
-            targetPos = AiHelpers.findNearestHeatSource(mob, tempData.blockSearchResult(), SEARCH_RANGE);
+            targetPos = AiHelpers.findNearestHeatSource(mob, tempData.blockSearchResult());
 
             if (targetPos != null && !AiHelpers.isAtPosition(mob, targetPos))
             {

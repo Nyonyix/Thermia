@@ -2,13 +2,13 @@ package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.ai.AiHelpers;
+import com.nyonyix.thermia.util.AiHelpers;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.SolarShadeResult;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
-import com.nyonyix.thermia.data.map.EntityTemperatureDataMap;
-import com.nyonyix.thermia.data.map.ThermiaDataMaps;
+import com.nyonyix.thermia.data.datamap.EntityTemperatureDataMap;
+import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import com.nyonyix.thermia.effect.ThermiaEffects;
 import com.nyonyix.thermia.util.BlockSearch;
 import com.nyonyix.thermia.util.EnvironmentHelpers;

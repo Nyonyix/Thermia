@@ -1,21 +1,28 @@
-package com.nyonyix.thermia.ai;
+package com.nyonyix.thermia.util;
 
+import com.nyonyix.thermia.ai.TemperatureComfortGoal;
 import com.nyonyix.thermia.data.BlockSearchResult;
+import com.nyonyix.thermia.data.ThermiaDamageTypes;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
-import com.nyonyix.thermia.data.map.BlockTemperatureDataMap;
-import com.nyonyix.thermia.data.map.FluidTemperatureDataMap;
-import com.nyonyix.thermia.data.map.ThermiaDataMaps;
-import com.nyonyix.thermia.util.EnvironmentHelpers;
+import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
+import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
+import com.nyonyix.thermia.data.datamap.EntityTemperatureDataMap;
+import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
+import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.pathfinder.PathFinder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -103,12 +110,37 @@ public class AiHelpers
         return null;
     }
 
-    public static BlockPos findNearestHeatSource(PathfinderMob mob, BlockSearchResult blockSearchResult, int maxRange)
+    public static BlockPos findNearestHomeBlock(PathfinderMob mob, BlockSearchResult blockSearchResult)
     {
         BlockPos mobPos = mob.blockPosition();
         BlockPos nearest = null;
         double nearestDist = Double.MAX_VALUE;
-        int maxRangeSq = maxRange * maxRange;
+
+        EntityTemperatureDataMap entityDataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(mob.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
+        if (entityDataMap == null || entityDataMap.homeBlock().equals(ResourceLocation.withDefaultNamespace("air"))) return nearest;
+
+        Block homeBlock = BuiltInRegistries.BLOCK.get(entityDataMap.homeBlock());
+        if (!blockSearchResult.allPositions().containsKey(homeBlock)) return nearest;
+
+        for (BlockPos pos : blockSearchResult.allPositions().get(homeBlock))
+        {
+            double distSq = mobPos.distSqr(pos);
+
+            if (isWalkable(mob, pos.above()) && distSq < nearestDist)
+            {
+                nearestDist = distSq;
+                nearest = pos.immutable();
+            }
+        }
+
+        return nearest;
+    }
+
+    public static BlockPos findNearestHeatSource(PathfinderMob mob, BlockSearchResult blockSearchResult)
+    {
+        BlockPos mobPos = mob.blockPosition();
+        BlockPos nearest = null;
+        double nearestDist = Double.MAX_VALUE;
 
         for (Map.Entry<Block, List<BlockPos>> entry : blockSearchResult.allPositions().entrySet())
         {
@@ -118,8 +150,6 @@ public class AiHelpers
             for (BlockPos pos : entry.getValue())
             {
                 double distSq = mobPos.distSqr(pos);
-                if (distSq > maxRangeSq) continue;
-
                 BlockPos walkablePos = findWalkableNearby(mob, pos);
 
                 if (walkablePos != null && distSq < nearestDist)
@@ -138,8 +168,6 @@ public class AiHelpers
             for (BlockPos pos : entry.getValue())
             {
                 double distSq = mobPos.distSqr(pos);
-                if (distSq > maxRangeSq) continue;
-
                 BlockPos walkablePos = findWalkableNearby(mob, pos);
 
                 if (walkablePos != null && distSq < nearestDist)
@@ -153,13 +181,12 @@ public class AiHelpers
         return nearest;
     }
 
-    public static BlockPos findStrongestHeatSource(PathfinderMob mob, BlockSearchResult blockSearchResult, int maxRange)
+    public static BlockPos findStrongestHeatSource(PathfinderMob mob, BlockSearchResult blockSearchResult)
     {
         BlockPos mobPos = mob.blockPosition();
         BlockPos strongest = null;
         float maxTemp = 0f;
         double nearestDist = Double.MAX_VALUE;
-        int maxRangeSq = maxRange * maxRange;
 
         for (Map.Entry<Block, List<BlockPos>> entry : blockSearchResult.allPositions().entrySet())
         {
@@ -169,8 +196,6 @@ public class AiHelpers
             for (BlockPos pos : entry.getValue())
             {
                 double distSq = mobPos.distSqr(pos);
-                if (distSq > maxRangeSq) continue;
-
                 BlockState state = mob.level().getBlockState(pos);
                 float temp = BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
 
@@ -194,8 +219,6 @@ public class AiHelpers
             for (BlockPos pos : entry.getValue())
             {
                 double distSq = mobPos.distSqr(pos);
-                if (distSq > maxRangeSq) continue;
-
                 BlockState state = mob.level().getBlockState(pos);
                 BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(state.getBlock()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
                 float temp = blockDataMap == null ? fluidDataMap.temperature() : BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);

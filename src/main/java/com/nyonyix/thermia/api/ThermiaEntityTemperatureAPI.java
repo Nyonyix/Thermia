@@ -1,7 +1,6 @@
 package com.nyonyix.thermia.api;
 
-import com.nyonyix.thermia.ai.AiHelpers;
-import com.nyonyix.thermia.ai.TemperatureComfortGoal;
+import com.nyonyix.thermia.util.AiHelpers;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.SolarShadeResult;
 import com.nyonyix.thermia.data.WindOcclusionResult;
