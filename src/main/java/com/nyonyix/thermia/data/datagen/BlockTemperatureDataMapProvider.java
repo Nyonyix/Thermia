@@ -24,7 +24,7 @@ public class BlockTemperatureDataMapProvider extends DataMapProvider
     public BlockTemperatureDataMapProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider) {super(packOutput, lookupProvider);}
 
     @Override
-    protected void gather()
+    protected void  gather()
     {
         builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).replace(true)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:rock/magma/granite")).orElseThrow(), new BlockTemperatureDataMap(800f, 16, false,true, false, Map.of(), Map.of(), Map.of()), false)

@@ -46,11 +46,11 @@ public class EnvironmentHelpers
 
     public static float calcForCold(float temp, float windSpeed, float solarRadiation, float humidity)
     {
-        float maxSolar = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
-        float solarRaw = solarRadiation * maxSolar;
+//        float maxSolar = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
+//        float solarRaw = solarRadiation * maxSolar;
 
         float solarTempFactor = Mth.clampedMap(temp, -30f, 12f, 0.15f, 0.5f);
-        float solarDelta = solarRaw * solarTempFactor;
+        float solarDelta = solarRadiation * solarTempFactor;
 
         float solarWindLoss = 1f / (1f + 0.25f * windSpeed);
         solarDelta *= solarWindLoss;
@@ -70,11 +70,11 @@ public class EnvironmentHelpers
 
     public static float calcForMild(float temp, float windSpeed, float solarRadiation, float humidity)
     {
-        float maxSolar = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
-        float solarRaw = solarRadiation * maxSolar;
+//        float maxSolar = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
+//        float solarRaw = solarRadiation * maxSolar;
 
         float solarTempFactor = Mth.clampedMap(temp, 12f, 22f, 0.5f, 1.0f);
-        float solarDelta = solarRaw * solarTempFactor;
+        float solarDelta = solarRadiation * solarTempFactor;
 
         float solarWindloss = 1f / (1f + 0.2f * windSpeed);
         solarDelta *= solarWindloss;
@@ -115,10 +115,11 @@ public class EnvironmentHelpers
 
     public static float calcEvaporativeCooling(float windSpeed, float humidity, float wetness)
     {
+        float multi = (float) ServerConfig.EVAP_COOLING_MULTI.getAsDouble();
         float windComponent = Mth.clampedMap(windSpeed, 0f, 32f, 0.2f, 1.0f);
         float humidityResistance = Mth.clampedMap(humidity, 0f, 0.95f, 1.0f, 0.3f);
 
-        return wetness * windComponent * humidityResistance * 8.0f;
+        return wetness * windComponent * humidityResistance * (8.0f * multi);
     }
 
     // Wind
@@ -166,7 +167,8 @@ public class EnvironmentHelpers
     {
         if (!(Climate.get(level) instanceof OverworldClimateModel overworldClimateModel)) return 0.5f;
 
-        float baseRadiation = getSolarRadiation(level, pos, shade);
+        float multi = (float) ServerConfig.SOLAR_RADIATION_MULTI.getAsDouble();
+        float baseRadiation = getSolarRadiation(level, pos, shade) * multi;
 
         long calendarTick = Calendars.get(level).getTicks();
         float rainIntensity = overworldClimateModel.getRain(calendarTick);

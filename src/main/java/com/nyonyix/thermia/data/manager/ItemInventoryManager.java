@@ -62,7 +62,7 @@ public class ItemInventoryManager
                 temperature += HeatCapability.getTemperature(stack) * stack.getCount();
             }
 
-            float maxEffect = (float) ServerConfig.MAX_INVENTORY_HEATING.getAsDouble();
+            float maxEffect = (float) ServerConfig.MAX_INVENTORY_HEATING.getAsInt();
             float scale = (float) ServerConfig.INVENTORY_HEATING_SCALE.getAsDouble();
 
             temperature = maxEffect * (temperature / (temperature + scale));

@@ -59,12 +59,12 @@ public class EntityTemperatureManager
         float effectiveDelta = medianDelta + (environmentDelta * insulation);
 
         float absDelta = Math.abs(effectiveDelta);
-        float minRate = (float) ServerConfig.TEMP_CHANGE_MIN_RATE.getAsDouble();
-        float maxRate = (float) ServerConfig.TEMP_CHANGE_MAX_RATE.getAsDouble();
-        float scale = (float) ServerConfig.TEMP_CHANGE_SCALE.getAsDouble();
 
-        float normalisedRate = 1.0f - (float) Math.exp(-scale * absDelta);
-        float baseRate = Mth.lerp(normalisedRate, minRate, maxRate);
+        float normalisedRate = 1.0f - (float) Math.exp(-0.05 * absDelta);
+        float baseRate = Mth.lerp(normalisedRate, 0.01f, 0.1f);
+        float multi  = (float) ServerConfig.ENTITY_TEMPERATURE_CHANGE_MULTI.getAsDouble();
+
+        baseRate *= multi;
 
         return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate));
     }
