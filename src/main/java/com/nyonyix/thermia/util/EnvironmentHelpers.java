@@ -170,7 +170,7 @@ public class EnvironmentHelpers
 
         long calendarTick = Calendars.get(level).getTicks();
         float rainIntensity = overworldClimateModel.getRain(calendarTick);
-        float rainfall = Climate.getRainfall(level, pos);
+        float rainfall = Climate.getAverageRainfall(level, pos);
 
         if (WeatherHelpers.isPrecipitating(rainIntensity, rainfall)) baseRadiation *= 0.5f;
 
@@ -229,7 +229,7 @@ public class EnvironmentHelpers
         boolean isNorth = SolarCalculator.getInNorthernHemisphere(pos, level);
 
         float rainIntensity = levelClimate.getRain(levelCalendar.getCalendarTicks());
-        float rainfall = levelClimate.getRainfall(level, pos);
+        float rainfall = levelClimate.getAverageRainfall(level, pos);
 
         float timeOfDay = levelCalendar.getCalendarFractionOfDay();
 

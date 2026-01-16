@@ -66,7 +66,7 @@ public class EntityTemperatureManager
         float normalisedRate = 1.0f - (float) Math.exp(-scale * absDelta);
         float baseRate = Mth.lerp(normalisedRate, minRate, maxRate);
 
-        return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate) * 0.25f);
+        return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate));
     }
 
     private static float getEntitySubmersion(Entity entity)
@@ -128,11 +128,11 @@ public class EntityTemperatureManager
 
     private static EntityTemperature handleWetness(Level level, BlockPos pos, ClimateModel levelModel, ICalendar levelCalender, EntityTemperature entityData, float shade)
     {
-        boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getRainfall(level, pos));
+        boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getAverageRainfall(level, pos));
         if (isRaining && level.canSeeSky(pos) && entityData.wetness() <= 0.9)
         {
-            if (levelModel.getTemperature(level, pos) > 0.0f) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.1f));
-            else if (levelModel.getTemperature(level, pos) > -5) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.05f));
+            if (levelModel.getInstantTemperature(level, pos) > 0.0f) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.1f));
+            else if (levelModel.getInstantTemperature(level, pos) > -5) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.05f));
         }
         else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos.above(), entityData.environmentTemperature(), entityData.environmentHumidity(), shade, entityData.windOcclusionResult().occlusionMultiplier())));
 
@@ -318,7 +318,7 @@ public class EntityTemperatureManager
             float fractionOfYear = levelCalender.getCalendarFractionOfYear();
             float fractionOfMonth = levelCalender.getCalendarFractionOfMonth();
             float hemisphereScale = levelModel.hemisphereScale();
-            float baseTemperature = levelModel.getTemperature(level, pos);
+            float baseTemperature = levelModel.getInstantTemperature(level, pos);
             float nearbyBlockTemperature = 0f;
 
             int nonEmptyAbove = 0;
@@ -368,7 +368,6 @@ public class EntityTemperatureManager
             entityData = handleTemperatureChange(entity, entityData);
 
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
-
         }
     }
 
