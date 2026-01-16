@@ -41,7 +41,7 @@ public class Thermia {
         ThermiaAttachments.ATTACHMENTS.register(modEventBus);
         ThermiaEffects.MOB_EFFECTS.register(modEventBus);
 
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SERVER_CONFIG);
+        modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CLIENT_CONFIG);
     }
 }

@@ -213,7 +213,9 @@ public class EnvironmentHelpers
         float windComponent = 1.0f + (getWindSpeed(level, pos, windOcclusion)* 0.15f);
         float solarComponent = 1.0f + (getSolarRadiationWeather(level, pos, shade) * 2.0f);
 
-        float dryingRate = 0.01f * tempComponent * humidityComponent * windComponent * solarComponent;
+        float multi = (float) ServerConfig.DRYING_MULTI.getAsDouble();
+
+        float dryingRate = (0.01f * tempComponent * humidityComponent * windComponent * solarComponent) * multi;
 
         return Mth.clamp(dryingRate, 0.001f, 0.2f);
     }

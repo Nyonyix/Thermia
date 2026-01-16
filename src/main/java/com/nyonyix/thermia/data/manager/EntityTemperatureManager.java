@@ -90,7 +90,7 @@ public class EntityTemperatureManager
         float minTemperature = entityData.minInternalTemperature();
         float maxTemperature = entityData.maxInternalTemperature();
         float delta = maxTemperature - minTemperature;
-        float bufferPercentFromConfig = (float) ServerConfig.TEMPERATURE_BUFFER_PERCENT.getAsInt() / 100;
+        float bufferPercentFromConfig = (float) ServerConfig.TEMPERATURE_SEGMENTS_PERCENT.getAsInt() / 100;
         float heatBufferZone = delta * bufferPercentFromConfig;
         float heatComfortThreshold = maxTemperature - heatBufferZone;
         float heatStress = currentTemperature - heatComfortThreshold;
@@ -107,8 +107,10 @@ public class EntityTemperatureManager
                 float actualSweatRate = baseSweatRate * sweatEfficiency;
                 float newWetness = Math.min(1.0f, entityData.wetness() + actualSweatRate);
 
+                float hydrationLossMulti = (float) ServerConfig.PLAYER_SWEAT_HYDRATION_LOSS_MULTI.getAsDouble();
+
                 entityData = entityData.withWetness(newWetness);
-                player.addThirst(-(baseSweatRate * 10));
+                player.addThirst(-((baseSweatRate * 10) * hydrationLossMulti));
             }
         }
         else
@@ -212,7 +214,7 @@ public class EntityTemperatureManager
         if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return 0f;
         EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
 
-        float bufferFromConfig = (float) ServerConfig.TEMPERATURE_BUFFER_PERCENT.getAsInt() / 100;
+        float bufferFromConfig = (float) ServerConfig.TEMPERATURE_SEGMENTS_PERCENT.getAsInt() / 100;
         int maxEffectLevels = ServerConfig.MAX_TEMPERATURE_EFFECT_LEVEL.getAsInt();
 
         float minTemperature = entityData.minInternalTemperature();

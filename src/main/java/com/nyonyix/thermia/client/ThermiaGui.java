@@ -1,8 +1,10 @@
 package com.nyonyix.thermia.client;
 
+import ca.weblite.objc.Client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import com.nyonyix.thermia.ClientConfig;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
@@ -46,9 +48,12 @@ public class ThermiaGui
     public static final ResourceLocation COLD_OVERLAY_TEXTURE = ResourceLocation.parse("minecraft:textures/misc/powder_snow_outline.png");
     public static final int COLD_OVERLAY_SIZE_X = 256;
     public static final int COLD_OVERLAY_SIZE_Y = 256;
-    private static final float SCALE = 1f;
+    private static final float SCALE = (float) ClientConfig.UI_SCALE.getAsDouble();
     private static final int WIDGET_SIZE = (int) (8 * SCALE);
     private static final int PLAYER_HEAD_SIZE = (int) (16 * SCALE);
+
+    private static final int CONFIG_X_OFFSET = ClientConfig.UI_X_OFFSET.getAsInt();
+    private static final int CONFIG_Y_OFFSET = ClientConfig.UI_Y_OFFSET.getAsInt();
 
     private static boolean setupForSurvival(GuiGraphics gui, Minecraft minecraft) {
         MultiPlayerGameMode gm = Minecraft.getInstance().gameMode;
@@ -89,7 +94,7 @@ public class ThermiaGui
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX, y, 0f);
+        poseStack.translate(centerX + CONFIG_X_OFFSET, y + CONFIG_Y_OFFSET, 0f);
 
         float playerR, playerG, playerB;
         if (playerTemperatureNormalised > 0.5)
@@ -150,7 +155,7 @@ public class ThermiaGui
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX, y, 0f);
+        poseStack.translate(centerX + CONFIG_X_OFFSET, y + CONFIG_Y_OFFSET, 0f);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -179,7 +184,7 @@ public class ThermiaGui
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX, y, 0f);
+        poseStack.translate(centerX + CONFIG_X_OFFSET, y + CONFIG_Y_OFFSET, 0f);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -213,7 +218,7 @@ public class ThermiaGui
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX, y, 0f);
+        poseStack.translate(centerX + CONFIG_X_OFFSET, y + CONFIG_Y_OFFSET, 0f);
 
         poseStack.translate(3, 3, 0);
         poseStack.mulPose(Axis.ZP.rotationDegrees(arrowRotation));
@@ -240,24 +245,29 @@ public class ThermiaGui
         Minecraft mc = Minecraft.getInstance();
         if (!setupForSurvival(graphics, mc)) return;
 
+        if (!ClientConfig.ENABLE_HYPER_RENDER.getAsBoolean()) return;
+
         LocalPlayer player = mc.player;
         if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPERTHERMIA.get()))) return;
 
         float effectScale  = EntityTemperatureManager.getTemperatureEffectScale(player);
+        float configIntensity = (float) ClientConfig.HYPER_EFFECT_INTENSITY.getAsDouble();
 
         float r = 1f;
         float g = 0.25f;
         float b = 0f;
-        float alpha = effectScale;
+        float alpha = effectScale * 0.5f;
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShaderColor(r, g, b, alpha);
+        RenderSystem.setShaderColor(r * configIntensity, g * configIntensity, b * configIntensity, alpha * configIntensity);
 
-        graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), rgbToHex(r, g, b, alpha));
+        int colourHex = (int) (rgbToHex(r, g, b, alpha) * configIntensity);
+
+        graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), colourHex);
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.disableBlend();
@@ -269,10 +279,14 @@ public class ThermiaGui
         Minecraft mc = Minecraft.getInstance();
         if (!setupForSurvival(graphics, mc)) return;
 
+        if (!ClientConfig.ENABLE_HYPO_RENDER.getAsBoolean()) return;
+
         LocalPlayer player = mc.player;
         if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPOTHERMIA.get()))) return;
 
         float effectScale = EntityTemperatureManager.getTemperatureEffectScale(player);
+        float configIntensity = (float) ClientConfig.HYPO_EFFECT_INTENSITY.getAsDouble();
+
         float r = 1f;
         float g = 1f;
         float b = 1f;
@@ -284,10 +298,12 @@ public class ThermiaGui
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(r, g, b, alpha);
+        RenderSystem.setShaderColor(r * configIntensity, g * configIntensity, b * configIntensity, alpha * configIntensity);
+
+        int colourHex = (int) (rgbToHex(r, g, b, alpha) * configIntensity);
 
         graphics.blit(COLD_OVERLAY_TEXTURE, 0, 0, 0, 0, graphics.guiWidth(), graphics.guiHeight(), graphics.guiWidth(), graphics.guiHeight());
-        graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), rgbToHex(r, g, b, alpha));
+        graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), colourHex);
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.disableBlend();
