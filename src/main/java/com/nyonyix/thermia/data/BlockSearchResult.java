@@ -137,7 +137,7 @@ public record BlockSearchResult(
         Vec3 sourcePosVec = Vec3.atCenterOf(sourcePos);
         float distance = (float) entityPos.distanceTo(sourcePosVec);
 
-        if (distance < 1.5f || distance > 5) return true;
+        if (distance < 1.5f || distance > 16) return true;
 
         ClipContext context = new ClipContext(entityPos, sourcePosVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, CollisionContext.empty());
         BlockHitResult hit = level.clip(context);

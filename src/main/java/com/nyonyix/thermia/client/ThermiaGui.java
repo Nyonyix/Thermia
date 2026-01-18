@@ -48,17 +48,19 @@ public class ThermiaGui
     public static final ResourceLocation COLD_OVERLAY_TEXTURE = ResourceLocation.parse("minecraft:textures/misc/powder_snow_outline.png");
     public static final int COLD_OVERLAY_SIZE_X = 256;
     public static final int COLD_OVERLAY_SIZE_Y = 256;
-    private static final float SCALE = (float) ClientConfig.UI_SCALE.getAsDouble();
-    private static final int WIDGET_SIZE = (int) (8 * SCALE);
-    private static final int PLAYER_HEAD_SIZE = (int) (16 * SCALE);
-
-    private static final int CONFIG_X_OFFSET = ClientConfig.UI_X_OFFSET.getAsInt();
-    private static final int CONFIG_Y_OFFSET = ClientConfig.UI_Y_OFFSET.getAsInt();
+    private static final int WIDGET_SIZE = 8;
+    private static final float SUB_WIDGET_SIZE = 0.75f;
 
     private static boolean setupForSurvival(GuiGraphics gui, Minecraft minecraft) {
         MultiPlayerGameMode gm = Minecraft.getInstance().gameMode;
         return gm != null && gm.canHurtPlayer() && setup(gui, minecraft);
     }
+
+    private static float getConfigUIScale() {return (float) ClientConfig.UI_SCALE.getAsDouble();}
+
+    private static int getConfigUIXOffset() {return ClientConfig.UI_X_OFFSET.getAsInt();}
+
+    private static int getConfigUIYOffset() {return ClientConfig.UI_Y_OFFSET.getAsInt();}
 
     private static ResourceLocation getTFCResourceLocation(IngameOverlays overlay) {return Helpers.resourceLocation(overlay.name().toLowerCase(Locale.ROOT));}
 
@@ -82,8 +84,13 @@ public class ThermiaGui
         EntityTemperature playerTemp = player.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
         Gui gui = mc.gui;
 
-        int centerX = (graphics.guiWidth() / 2) - WIDGET_SIZE / 2;
-        int y = graphics.guiHeight() - gui.leftHeight - (WIDGET_SIZE / 2) + 5;
+        float uiScale = getConfigUIScale();
+        int uiXOffset = getConfigUIXOffset();
+        int uiYOffset = getConfigUIYOffset();
+        int scaledWidgetSize = (int) (WIDGET_SIZE * uiScale);
+
+        int centerX = (graphics.guiWidth() / 2) - scaledWidgetSize / 2;
+        int y = graphics.guiHeight() - gui.leftHeight - (scaledWidgetSize / 2) + 5;
 
         float playerTemperature = playerTemp.internalTemperature();
         float environmentTemperature = playerTemp.environmentTemperature();
@@ -94,7 +101,7 @@ public class ThermiaGui
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX + CONFIG_X_OFFSET, y + CONFIG_Y_OFFSET, 0f);
+        poseStack.translate(centerX + uiXOffset, y + uiYOffset, 0f);
 
         float playerR, playerG, playerB;
         if (playerTemperatureNormalised > 0.5)
@@ -129,10 +136,10 @@ public class ThermiaGui
         }
 
         RenderSystem.setShaderColor(playerR, playerG, playerB, 1.0f);
-        graphics.blit(ICON_TEXTURE, -WIDGET_SIZE / 2, 0, WIDGET_SIZE, WIDGET_SIZE,0, 16, 8, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        graphics.blit(ICON_TEXTURE, -scaledWidgetSize / 2, 0, scaledWidgetSize, scaledWidgetSize,0, 16, 8, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
 
         RenderSystem.setShaderColor(envR, envG, envB, 1.0f);
-        graphics.blit(ICON_TEXTURE,WIDGET_SIZE / 2, 0, WIDGET_SIZE, WIDGET_SIZE, 8, 16, 8, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        graphics.blit(ICON_TEXTURE,scaledWidgetSize / 2, 0, scaledWidgetSize, scaledWidgetSize, 8, 16, 8, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
 
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
@@ -148,19 +155,25 @@ public class ThermiaGui
         EntityTemperature playerData = player.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
         Gui gui = mc.gui;
 
-        int centerX = (graphics.guiWidth() / 2) - WIDGET_SIZE / 2 - 6;
-        int y = graphics.guiHeight() - gui.leftHeight - (WIDGET_SIZE / 2) - 3;
+        float uiScale = getConfigUIScale();
+        float solarWidgetSize = WIDGET_SIZE * SUB_WIDGET_SIZE;
+        int uiXOffset = getConfigUIXOffset();
+        int uiYOffset = getConfigUIYOffset();
+        int scaledWidgetSize = (int) (solarWidgetSize * uiScale);
+
+        int centerX = (graphics.guiWidth() / 2) - scaledWidgetSize / 2 - 6;
+        int y = graphics.guiHeight() - gui.leftHeight - (scaledWidgetSize / 2) - 3;
 
         float solarIntensity = EnvironmentHelpers.getSolarRadiationWeather(player.clientLevel, player.blockPosition().above(), playerData.solarShadeResult().shade());
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX + CONFIG_X_OFFSET, y + CONFIG_Y_OFFSET, 0f);
+        poseStack.translate(centerX + uiXOffset, y + uiYOffset, 0f);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1f, 1f, 1f, solarIntensity);
-        graphics.blit(ICON_TEXTURE, 0, 0, 6, 6, 32, 16, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        graphics.blit(ICON_TEXTURE, 0, 0, scaledWidgetSize, scaledWidgetSize, 32, 16, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
         RenderSystem.disableBlend();
 
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -177,19 +190,25 @@ public class ThermiaGui
         EntityTemperature playerData = player.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
         Gui gui = mc.gui;
 
-        int centerX = (graphics.guiWidth() / 2) - WIDGET_SIZE / 2 + 6;
-        int y = graphics.guiHeight() - gui.leftHeight - (WIDGET_SIZE / 2) - 3;
+        float uiScale = getConfigUIScale();
+        float wetnessWidgetSize = WIDGET_SIZE * SUB_WIDGET_SIZE;
+        int uiXOffset = getConfigUIXOffset();
+        int uiYOffset = getConfigUIYOffset();
+        int scaledWidgetSize = (int) (wetnessWidgetSize * uiScale);
+
+        int centerX = (graphics.guiWidth() / 2) - scaledWidgetSize / 2 + 6;
+        int y = graphics.guiHeight() - gui.leftHeight - (scaledWidgetSize / 2) - 3;
 
         float wetness = playerData.wetness();
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX + CONFIG_X_OFFSET, y + CONFIG_Y_OFFSET, 0f);
+        poseStack.translate(centerX + uiXOffset, y + uiYOffset, 0f);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1f, 1f, 1f, wetness);
-        graphics.blit(ICON_TEXTURE, 0, 0, 6, 6, 16, 16, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        graphics.blit(ICON_TEXTURE, 0, 0, scaledWidgetSize, scaledWidgetSize, 16, 16, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
         RenderSystem.disableBlend();
 
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -206,8 +225,14 @@ public class ThermiaGui
         EntityTemperature playerData = player.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
         Gui gui = mc.gui;
 
-        int centerX = (graphics.guiWidth() / 2) - WIDGET_SIZE / 2;
-        int y = graphics.guiHeight() - gui.leftHeight - (WIDGET_SIZE / 2) - 3;
+        float uiScale = getConfigUIScale();
+        float windWidgetSize = WIDGET_SIZE * SUB_WIDGET_SIZE;
+        int uiXOffset = getConfigUIXOffset();
+        int uiYOffset = getConfigUIYOffset();
+        int scaledWidgetSize = (int) (windWidgetSize * uiScale);
+
+        int centerX = (graphics.guiWidth() / 2) - scaledWidgetSize / 2;
+        int y = graphics.guiHeight() - gui.leftHeight - (scaledWidgetSize / 2) - 3;
 
         float windDirection = EnvironmentHelpers.getWindDirection(player.clientLevel, player.blockPosition().above());
         float windSpeed = EnvironmentHelpers.getWindSpeed(player.clientLevel, player.blockPosition().above(), playerData.windOcclusionResult().occlusionMultiplier());
@@ -218,7 +243,7 @@ public class ThermiaGui
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX + CONFIG_X_OFFSET, y + CONFIG_Y_OFFSET, 0f);
+        poseStack.translate(centerX + uiXOffset, y + uiYOffset, 0f);
 
         poseStack.translate(3, 3, 0);
         poseStack.mulPose(Axis.ZP.rotationDegrees(arrowRotation));
@@ -232,9 +257,9 @@ public class ThermiaGui
             poseStack.popPose();
             return;
         }
-        else if (windSpeed < 5) graphics.blit(ICON_TEXTURE, 0, 0, 6, 6, 0, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
-        else if (windSpeed < 15) graphics.blit(ICON_TEXTURE, 0, 0, 6, 6, 16, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
-        else graphics.blit(ICON_TEXTURE, 0, 0, 6, 6, 32, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        else if (windSpeed < 5) graphics.blit(ICON_TEXTURE, 0, 0, scaledWidgetSize, scaledWidgetSize, 0, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        else if (windSpeed < 15) graphics.blit(ICON_TEXTURE, 0, 0, scaledWidgetSize, scaledWidgetSize, 16, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        else graphics.blit(ICON_TEXTURE, 0, 0, scaledWidgetSize, scaledWidgetSize, 32, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
 
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();

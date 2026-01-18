@@ -31,7 +31,6 @@
   "thermia.configuration.overrideTFCTempThirst": "Override TFC player temperature thirst",
   "thermia.configuration.inventoryHeatMulti": "Inventory heat multiplier",
   "thermia.configuration.ui": "UI Options",
-  "thermia.configuration.uiScale": "UI Scale",
   "thermia.configuration.effect": "Effect Options",
   "thermia.configuration.uiScale": "UI Scale",
   "thermia.configuration.uiXOffset": "UI X Offset",
