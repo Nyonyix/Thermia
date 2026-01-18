@@ -15,7 +15,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -45,64 +44,40 @@ public class ThermiaServer
 
     private static void initDataMap()
     {
-        LOGGER.info("Init Entity Data Map");
-
-        BuiltInRegistries.ENTITY_TYPE.holders().forEach(entityTypeReference ->
+        BuiltInRegistries.ENTITY_TYPE.holders().forEach(entityType ->
         {
-            EntityTemperatureDataMap entityTemp = entityTypeReference.getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
+            EntityTemperatureDataMap dataMap = entityType.getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
+            if (dataMap == null) return;
 
-            if (entityTemp != null)
-            {
-                ResourceLocation entityKey = entityTypeReference.key().location();
-                LOGGER.info("Entity: {}, maxTemp: {}, minTemp:  {}, isMob: {}, isTamed: {}", entityKey, entityTemp.maxEntityTemperature(), entityTemp.minEntityTemperature(), entityTemp.isMob(), entityTemp.isTamed());
-
-                if (!entityTemp.isMob() && entityTemp.isTamed())
-                {
-                    throw new IllegalStateException("isTamed = true while isMob = false");
-                }
-                if (entityTemp.minEntityTemperature() > entityTemp.maxEntityTemperature())
-                {
-                    throw new IllegalStateException("minEntityTemperature > maxEntityTemperature");
-                }
-            }
+            LOGGER.debug("Entity: {}, maxTemperature: {}, minTemperature: {}, isMob: {}, isTamed: {}, homeBlock: {}", entityType.value().getDescriptionId(), dataMap.maxEntityTemperature(), dataMap.minEntityTemperature(), dataMap.isMob(), dataMap.isTamed(), dataMap.homeBlock().getNamespace());
+            VerifyDataMap.isValidEntityTemperature(dataMap, entityType.value());
         });
 
-        LOGGER.info("Init Block Data Map");
-
-        BuiltInRegistries.BLOCK.holders().forEach(blockReference ->
+        BuiltInRegistries.BLOCK.holders().forEach(block ->
         {
-            BlockTemperatureDataMap blockTemp = blockReference.getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+            BlockTemperatureDataMap dataMap = block.getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+            if (dataMap == null) return;
 
-            if (blockTemp != null)
-            {
-                ResourceLocation blockKey = blockReference.key().location();
-                LOGGER.info("Block: {}, Temp: {}, searchCap: {}, hasTFCHeat: {}", blockKey, blockTemp.temperature(), blockTemp.searchCap(), blockTemp.hasTFCHeat());
-
-                if (blockTemp.temperature() != 0.0f && blockTemp.hasTFCHeat())
-                {
-                    throw new IllegalStateException("Block temperature > 0 while hasTFCHeat = true");
-                }
-                if (blockTemp.searchCap() < 0)
-                {
-                    throw new IllegalStateException("Block searchCap is < 0");
-                }
-            }
+            LOGGER.debug("Block: {}, temperature: {}, searchCap: {}, hasTFCHeat: {}, isRadiative: {}, isHomeBlock: {}, stateBools: {}, stateInts: {}, stateDoubles: {}", block.value().getDescriptionId(), dataMap.temperature(), dataMap.searchCap(), dataMap.hasTFCHeat(), dataMap.isRadiative(), dataMap.isHomeBlock(), dataMap.stateBools().toString(), dataMap.stateInts().toString(), dataMap.stateDoubles().toString());
+            VerifyDataMap.isValidBlockTemperature(dataMap, block.value());
         });
 
-        LOGGER.info("Init Item Insulation Data Map");
-
-        BuiltInRegistries.ITEM.holders().forEach(itemReference ->
+        BuiltInRegistries.FLUID.holders().forEach(fluid ->
         {
-            ItemInsulationDataMap insulation = itemReference.getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
-            INSULATING_ITEMS.clear();
+            FluidTemperatureDataMap dataMap = fluid.getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
+            if (dataMap == null) return;
 
-            if (insulation != null)
-            {
-                ResourceLocation itemKey = itemReference.key().location();
-                LOGGER.info("Item: {}, insulationModifier: {}", itemKey, insulation.insulationModifier());
+            LOGGER.debug("Fluid: {}, temperature: {}, searchCap: {}, isRadiative: {}", fluid.value().getFluidType().getDescriptionId(), dataMap.temperature(), dataMap.searchCap(), dataMap.isRadiative());
+            VerifyDataMap.isValidFluidTemperature(dataMap, fluid.value());
+        });
 
-                INSULATING_ITEMS.add(itemReference.value());
-            }
+        BuiltInRegistries.ITEM.holders().forEach(item ->
+        {
+            ItemInsulationDataMap dataMap = item.getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
+            if (dataMap == null) return;
+
+            LOGGER.debug("Item: {}, insulationModifier: {}", item.value(), dataMap.insulationModifier());
+            VerifyDataMap.isValidItemInsulation(dataMap, item.value());
         });
     }
 
