@@ -315,7 +315,7 @@ public class ThermiaGui
         float r = 1f;
         float g = 1f;
         float b = 1f;
-        float alpha = effectScale;
+        float alpha = effectScale * 0.5f;
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();

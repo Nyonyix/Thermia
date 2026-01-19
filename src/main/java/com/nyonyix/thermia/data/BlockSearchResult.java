@@ -280,17 +280,13 @@ public record BlockSearchResult(
                     if (dataMap == null || dataMap.isRadiative()) continue;
 
                     float blockTemp = parseBlockState(state, curLevel, mutableBlockPos, dataMap);
-                    totalContactTemp = Math.min(totalContactTemp += blockTemp, blockTemp);
+                    totalContactTemp += blockTemp;
                     contactCount++;
                 }
             }
         }
 
-        if (contactCount > 0)
-        {
-            float contactMultiplier = 1f + (float) Math.log1p(contactCount) * 0.3f;
-            return totalContactTemp * contactMultiplier;
-        }
+        if (contactCount > 0) return totalContactTemp;
         return 0f;
     }
 
