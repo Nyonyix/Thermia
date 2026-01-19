@@ -5,6 +5,7 @@ import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import net.dries007.tfc.common.component.heat.HeatCapability;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -55,6 +56,7 @@ public class ItemInventoryManager
     public static float getInventoryTemperature(Entity entity)
     {
         float temperature = 0.0f;
+        float maxEffect = (float) ServerConfig.PEAK_INVENTORY_TEMPERATURE.getAsInt();
         if (entity instanceof Player player)
         {
             for (ItemStack stack : player.getInventory().items)
@@ -62,12 +64,11 @@ public class ItemInventoryManager
                 temperature += HeatCapability.getTemperature(stack) * stack.getCount();
             }
 
-            float maxEffect = (float) ServerConfig.MAX_INVENTORY_HEATING.getAsInt();
             float multi = (float) ServerConfig.INVENTORY_HEAT_MULTI.getAsDouble();
 
-            temperature = (maxEffect * (temperature / (temperature + 15000))) * multi;
+            temperature = (temperature / (temperature + 15000)) * multi;
         }
 
-        return temperature;
+        return Mth.clamp(temperature, -maxEffect, maxEffect);
     }
 }

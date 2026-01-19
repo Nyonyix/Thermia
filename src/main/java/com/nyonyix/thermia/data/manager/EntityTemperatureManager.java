@@ -15,7 +15,6 @@ import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
 import net.dries007.tfc.common.entities.livestock.TFCAnimalProperties;
-import net.dries007.tfc.common.fluids.FluidHolder;
 import net.dries007.tfc.common.fluids.TFCFluids;
 import net.dries007.tfc.common.player.IPlayerInfo;
 import net.dries007.tfc.util.calendar.Calendars;
@@ -36,8 +35,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import org.slf4j.Logger;
 
@@ -348,7 +345,9 @@ public class EntityTemperatureManager
 
             entityData = entityData.withWindOcclusionResult(BlockSearch.getWindOcclusion(level, pos));
 
-            nearbyBlockTemperature = entityData.blockSearchResult().parseBlockSearchResult(level, entity, dataMap.isMob());
+            nearbyBlockTemperature = entityData.blockSearchResult().getRadiance(level, entity);
+            nearbyBlockTemperature += entityData.blockSearchResult().getImmersion(level, entity);
+            nearbyBlockTemperature += entityData.blockSearchResult().getContact(level, entity, dataMap.isMob());
             entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(pos).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
             float shade = 0.3f;
             if (dataMap.isMob())

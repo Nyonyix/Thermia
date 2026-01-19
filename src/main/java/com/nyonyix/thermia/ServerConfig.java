@@ -17,21 +17,21 @@ public class ServerConfig
     static {BUILDER.pop();}
     static {BUILDER.push("entity_temperature");}
 
-    public static final ModConfigSpec.IntValue MAX_RADIANT_HEATING = BUILDER.comment("Maximum heat by nearby sources").defineInRange("maxRadiantHeating", 128, 64, 256);
+    public static final ModConfigSpec.IntValue PEAK_BLOCK_TEMPERATURE = BUILDER.comment("Maximum heat by nearby sources").defineInRange("maxRadiantHeating", 75, 50, 150);
 
-    public static final ModConfigSpec.IntValue MAX_INVENTORY_HEATING = BUILDER.comment("Maximum heating from hot TFC items in inventory").defineInRange("maxInventoryHeating", 128, 64, 256);
+    public static final ModConfigSpec.IntValue PEAK_INVENTORY_TEMPERATURE = BUILDER.comment("Maximum heating from hot TFC items in inventory").defineInRange("maxInventoryHeating", 75, 50, 150);
 
     public static final ModConfigSpec.IntValue TEMPERATURE_SEGMENTS_PERCENT = BUILDER.comment("Percentage of delta used for effect levels").defineInRange("temperatureSegmentsPercent", 15, 0, 50);
 
     public static final ModConfigSpec.IntValue MAX_TEMPERATURE_EFFECT_LEVEL = BUILDER.comment("Maximum amount of hyper/hypothermia effect levels.").defineInRange("maxTemperatureEffectLevel", 4, 2, 8);
 
-    public static final ModConfigSpec.DoubleValue ENTITY_TEMPERATURE_CHANGE_MULTI = BUILDER.comment("Entity temperature change multiplier").defineInRange("entityTemperatureChangeMulti", 1.0, 0.1, 2.0);
+    public static final ModConfigSpec.IntValue MAX_FLUID_DEPTH_CHECK = BUILDER.comment("Maximum blocks to check for fluid depth temp modifier").defineInRange("maxFluidDepthCheck", 32, 8, 64);
 
     public static final ModConfigSpec.DoubleValue PLAYER_SWEAT_HYDRATION_LOSS_MULTI = BUILDER.comment("Hydration loss through sweat multiplier").defineInRange("playerSweatHydrationLossMulti", 1.0, 0.0, 2.0);
 
     public static final ModConfigSpec.DoubleValue INVENTORY_HEAT_MULTI = BUILDER.comment("Inventory heat multiplier").defineInRange("inventoryHeatMulti", 1.0, 0.0, 2.0);
 
-    public static final ModConfigSpec.IntValue MAX_FLUID_DEPTH_CHECK = BUILDER.comment("Maximum blocks to check for fluid depth temp modifier").defineInRange("maxFluidDepthCheck", 32, 8, 64);
+    public static final ModConfigSpec.DoubleValue ENTITY_TEMPERATURE_CHANGE_MULTI = BUILDER.comment("Entity temperature change multiplier").defineInRange("entityTemperatureChangeMulti", 1.0, 0.1, 2.0);
 
     static {BUILDER.pop();}
 

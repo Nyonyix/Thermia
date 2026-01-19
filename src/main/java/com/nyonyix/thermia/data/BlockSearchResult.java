@@ -280,7 +280,7 @@ public record BlockSearchResult(
                     if (dataMap == null || dataMap.isRadiative()) continue;
 
                     float blockTemp = parseBlockState(state, curLevel, mutableBlockPos, dataMap);
-                    totalContactTemp += blockTemp;
+                    totalContactTemp = Math.min(totalContactTemp += blockTemp, blockTemp);
                     contactCount++;
                 }
             }
@@ -363,19 +363,40 @@ public record BlockSearchResult(
         return closestPos;
     }
 
-    public float parseBlockSearchResult(Level curLevel, Entity entity, boolean isMob)
+    public float getRadiance(Level curLevel, Entity entity)
     {
         if (this.levelID != curLevel.dimension()) return 0f;
 
+        float maxValue = (float) ServerConfig.PEAK_BLOCK_TEMPERATURE.getAsInt();
         float blockTemp = parseBlocks(curLevel, entity);
         float fluidTemp = parseFluid(curLevel, entity);
+
+        float totalTemperature = blockTemp + fluidTemp;
+
+//        float maxRadiance = (float) ServerConfig.PEAK_BLOCK_TEMPERATURE.getAsInt();
+//        return maxRadiance * (1f - (float) Math.exp(-totalTemperature / maxRadiance));
+
+        return Mth.clamp(totalTemperature, -maxValue, maxValue);
+    }
+
+    public float getImmersion(Level curLevel, Entity entity)
+    {
+        if (this.levelID != curLevel.dimension()) return 0f;
+
+        float maxValue = (float) ServerConfig.PEAK_BLOCK_TEMPERATURE.getAsInt();
         float fluidImmersion = getFluidImmersionTemperature(curLevel, entity);
+
+        return Mth.clamp(fluidImmersion, -maxValue, maxValue);
+    }
+
+    public float getContact(Level curLevel, Entity entity, boolean isMob)
+    {
+        if (this.levelID != curLevel.dimension()) return 0f;
+
+        float maxValue = (float) ServerConfig.PEAK_BLOCK_TEMPERATURE.getAsInt();
         float contactTemp = isMob ? 0f : getContactTemperature(curLevel, entity);
 
-        float totalTemperature = blockTemp + fluidTemp + fluidImmersion + contactTemp;
-
-        float maxRadiance = (float) ServerConfig.MAX_RADIANT_HEATING.getAsInt();
-        return maxRadiance * (1f - (float) Math.exp(-totalTemperature / maxRadiance));
+        return Mth.clamp(contactTemp, -maxValue, maxValue);
     }
 
     public static float parseBlockState(BlockState state, Level level, BlockPos pos, BlockTemperatureDataMap dataMap)
