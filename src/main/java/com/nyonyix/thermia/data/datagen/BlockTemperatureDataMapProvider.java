@@ -50,11 +50,10 @@ public class BlockTemperatureDataMapProvider extends DataMapProvider
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:stove_pot")).orElseThrow(), new BlockTemperatureDataMap(0f, 16, true, true, false, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:firebox")).orElseThrow(), new BlockTemperatureDataMap(0f, 16, true, true, false, Map.of(), Map.of(), Map.of()), false)
 
-                .add(BlockTags.SNOW, new BlockTemperatureDataMap(-5f, 4, false, false, false, Map.of(), Map.of(), Map.of()), false)
-                .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:ice")).orElseThrow(), new BlockTemperatureDataMap(-10f, 4, false, false, false, Map.of(), Map.of(), Map.of()), false)
-                .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:packed_ice")).orElseThrow(), new BlockTemperatureDataMap(-15f, 4, false, false, false, Map.of(), Map.of(), Map.of()), false)
-                .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:blue_ice")).orElseThrow(), new BlockTemperatureDataMap(-20f, 4, false, false, false, Map.of(), Map.of(), Map.of()), false)
-                .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:dirt")).orElseThrow(), new BlockTemperatureDataMap(-20f, 4, true, false, false, Map.of(), Map.of(), Map.of()), false)
+                .add(BlockTags.SNOW, new BlockTemperatureDataMap(-3f, 4, false, false, false, Map.of(), Map.of(), Map.of()), false)
+                .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:ice")).orElseThrow(), new BlockTemperatureDataMap(-5f, 4, false, false, false, Map.of(), Map.of(), Map.of()), false)
+                .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:packed_ice")).orElseThrow(), new BlockTemperatureDataMap(-7.5f, 4, false, false, false, Map.of(), Map.of(), Map.of()), false)
+                .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:blue_ice")).orElseThrow(), new BlockTemperatureDataMap(-10f, 4, false, false, false, Map.of(), Map.of(), Map.of()), false)
 
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:hay_block")).orElseThrow(), new BlockTemperatureDataMap(0f, 16, false, true, true, Map.of(), Map.of(), Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:nest_box")).orElseThrow(), new BlockTemperatureDataMap(0f, 16, false, true, true, Map.of(), Map.of(), Map.of()), false);

@@ -15,6 +15,7 @@ import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
 import net.dries007.tfc.common.entities.livestock.TFCAnimalProperties;
+import net.dries007.tfc.common.fluids.FluidHolder;
 import net.dries007.tfc.common.fluids.TFCFluids;
 import net.dries007.tfc.common.player.IPlayerInfo;
 import net.dries007.tfc.util.calendar.Calendars;
@@ -35,6 +36,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import org.slf4j.Logger;
 
@@ -60,8 +63,8 @@ public class EntityTemperatureManager
 
         float absDelta = Math.abs(effectiveDelta);
 
-        float normalisedRate = 1.0f - (float) Math.exp(-0.05 * absDelta);
-        float baseRate = Mth.lerp(normalisedRate, 0.01f, 0.1f);
+        float normalisedRate = 1.0f - (float) Math.exp(-0.01 * absDelta);
+        float baseRate = Mth.lerp(normalisedRate, 0.01f, 0.5f);
         float multi  = (float) ServerConfig.ENTITY_TEMPERATURE_CHANGE_MULTI.getAsDouble();
 
         baseRate *= multi;
@@ -69,7 +72,7 @@ public class EntityTemperatureManager
         return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate));
     }
 
-    private static float getEntitySubmersion(Entity entity)
+    private static float getEntitySubmersion(Entity entity, Level level)
     {
         double waterHeight = entity.getFluidTypeHeight(NeoForgeMod.WATER_TYPE.value());
         double saltWaterHeight = entity.getFluidTypeHeight(TFCFluids.SALT_WATER.getType());
@@ -379,7 +382,7 @@ public class EntityTemperatureManager
         {
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
 
-            float submersion = getEntitySubmersion(entity);
+            float submersion = getEntitySubmersion(entity, entity.level());
             if (entityData.wetness() < submersion ) entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData.withWetness(submersion));
 
             handlePlayerTemperatureEffect(entity);

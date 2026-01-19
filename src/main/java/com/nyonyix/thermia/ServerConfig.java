@@ -31,10 +31,12 @@ public class ServerConfig
 
     public static final ModConfigSpec.DoubleValue INVENTORY_HEAT_MULTI = BUILDER.comment("Inventory heat multiplier").defineInRange("inventoryHeatMulti", 1.0, 0.0, 2.0);
 
-    static {BUILDER.pop();}
-    static {BUILDER.push("environment_temperature");}
+    public static final ModConfigSpec.IntValue MAX_FLUID_DEPTH_CHECK = BUILDER.comment("Maximum blocks to check for fluid depth temp modifier").defineInRange("maxFluidDepthCheck", 32, 8, 64);
 
-    public static final ModConfigSpec.DoubleValue MAX_SOLAR_HEATING = BUILDER.comment("Max heating applied by sun").defineInRange("maxSolarHeating", 18.0, 0.0, 22.0);
+    static {BUILDER.pop();}
+
+    static {BUILDER.push("environment_temperature");}
+    public static final ModConfigSpec.DoubleValue MAX_SOLAR_HEATING = BUILDER.comment("Max heating applied by sun").defineInRange("maxSolarHeating", 32.0, 0.0, 48.0);
 
     public static final ModConfigSpec.DoubleValue EVAP_COOLING_MULTI = BUILDER.comment("Evaporative cooling multiplier").defineInRange("evapCoolingMulti", 1.0, 0.0, 2.0);
 

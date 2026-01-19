@@ -20,8 +20,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class FluidTemperatureDataMapProvider extends DataMapProvider
 {
-    private final float WATER_TEMPERATURE = -10f;
-    private final float WATER_TEMPERATURE_FLOWING = -15f;
+    private final float WATER_TEMPERATURE = -5f;
+    private final float WATER_TEMPERATURE_FLOWING = -7.5f;
 
     private static float getMetalTemperature(Metal metal)
     {
@@ -86,11 +86,13 @@ public class FluidTemperatureDataMapProvider extends DataMapProvider
         }
 
         builder(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP)
-                .add(TFCFluids.SPRING_WATER.source(), new FluidTemperatureDataMap(40f, 16, false), false)
-                .add(TFCFluids.SPRING_WATER.flowing(), new FluidTemperatureDataMap(40f, 16, false), false)
                 .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.LAVA), new FluidTemperatureDataMap(1000f, 16, true), false)
                 .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.FLOWING_LAVA), new FluidTemperatureDataMap(1200f, 16, true), false)
 
+                .add(TFCFluids.SALT_WATER.source(), new FluidTemperatureDataMap(WATER_TEMPERATURE, 16, false), false)
+                .add(TFCFluids.SALT_WATER.flowing(), new FluidTemperatureDataMap(WATER_TEMPERATURE_FLOWING, 16, false), false)
+                .add(TFCFluids.SPRING_WATER.source(), new FluidTemperatureDataMap(40f, 16, false), false)
+                .add(TFCFluids.SPRING_WATER.flowing(), new FluidTemperatureDataMap(40f, 16, false), false)
                 .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.WATER), new FluidTemperatureDataMap(WATER_TEMPERATURE, 16, false), false)
                 .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.FLOWING_WATER), new FluidTemperatureDataMap(WATER_TEMPERATURE_FLOWING, 16, false), false);
     }

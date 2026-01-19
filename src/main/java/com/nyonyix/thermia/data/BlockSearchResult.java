@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -217,9 +218,33 @@ public record BlockSearchResult(
             if (dataMap == null) continue;
 
             float fluidHeight = (float) entity.getFluidTypeHeight(fluid.getFluidType());
-            float immersion = Math.min(fluidHeight / entity.getBbHeight(), 1f);
+            float baseImmersion = Math.min(fluidHeight / entity.getBbHeight(), 1f);
 
-            totalImmersionTemp = dataMap.temperature() * immersion;
+            if (baseImmersion >= 1.0f)
+            {
+                int maxDepthCheck = ServerConfig.MAX_FLUID_DEPTH_CHECK.getAsInt();
+                BlockPos entityPos = entity.blockPosition();
+                Fluid entityFluid = curLevel.getFluidState(entityPos).getType();
+
+                int fluidBlocksAbove = 0;
+
+                for (BlockPos pos : BlockPos.betweenClosed(entityPos, entityPos.above(maxDepthCheck)))
+                {
+                    FluidState fluidState = curLevel.getFluidState(pos);
+
+                    if (fluidState.getType().equals(entityFluid) && !fluidState.isEmpty())
+                    {
+                        fluidBlocksAbove++;
+                        continue;
+                    }
+                    else break;
+                }
+
+                float depthMultiplier = 1f + (fluidBlocksAbove / (float) maxDepthCheck);
+
+                totalImmersionTemp += dataMap.temperature() * depthMultiplier;
+            }
+            else totalImmersionTemp = dataMap.temperature() * baseImmersion;
         }
 
         return totalImmersionTemp;

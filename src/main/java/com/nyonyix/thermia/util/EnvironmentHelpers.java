@@ -46,11 +46,11 @@ public class EnvironmentHelpers
 
     public static float calcForCold(float temp, float windSpeed, float solarRadiation, float humidity)
     {
-//        float maxSolar = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
-//        float solarRaw = solarRadiation * maxSolar;
+        float maxSolar = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
+        float solarRaw = solarRadiation * maxSolar;
 
         float solarTempFactor = Mth.clampedMap(temp, -30f, 12f, 0.15f, 0.5f);
-        float solarDelta = solarRadiation * solarTempFactor;
+        float solarDelta = solarRaw * solarTempFactor;
 
         float solarWindLoss = 1f / (1f + 0.25f * windSpeed);
         solarDelta *= solarWindLoss;
@@ -70,11 +70,11 @@ public class EnvironmentHelpers
 
     public static float calcForMild(float temp, float windSpeed, float solarRadiation, float humidity)
     {
-//        float maxSolar = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
-//        float solarRaw = solarRadiation * maxSolar;
+        float maxSolar = (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
+        float solarRaw = solarRadiation * maxSolar;
 
         float solarTempFactor = Mth.clampedMap(temp, 12f, 22f, 0.5f, 1.0f);
-        float solarDelta = solarRadiation * solarTempFactor;
+        float solarDelta = solarRaw * solarTempFactor;
 
         float solarWindloss = 1f / (1f + 0.2f * windSpeed);
         solarDelta *= solarWindloss;
@@ -154,8 +154,8 @@ public class EnvironmentHelpers
         if (zenith >= Math.PI / 1.8f) return 0.0f;
 
         float directRadiation = (float) Math.cos(zenith);
-        float airMass = 1.0f / Math.max(0.01f, (float) Math.cos(zenith));
-        float atmosphericTransmission = (float) Math.pow(0.7, airMass - 1);
+        float airMass = 1.0f / Math.max(0.1f, (float) Math.cos(zenith));
+        float atmosphericTransmission = (float) Math.pow(0.75, airMass - 1);
         float radiation = directRadiation * atmosphericTransmission;
 
         radiation *= shade;

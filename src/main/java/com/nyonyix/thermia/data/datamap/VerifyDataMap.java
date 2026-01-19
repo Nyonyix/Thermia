@@ -38,6 +38,6 @@ public class VerifyDataMap
     {
         if (dataMap.insulationModifier() > 1f) LOGGER.error("Item: {}, Item cannot have insulationModifier exceeding 1.0", item.getDescriptionId());
 
-        if (dataMap.insulationModifier() < 0f) LOGGER.error("Item: {}, Item cannot have insulationModifier less than 0", item.getDescriptionId());
+        if (dataMap.insulationModifier() < -1f) LOGGER.error("Item: {}, Item cannot have insulationModifier less than -1.0", item.getDescriptionId());
     }
 }
