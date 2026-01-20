@@ -31,7 +31,7 @@ public class ServerConfig
 
     public static final ModConfigSpec.DoubleValue INVENTORY_HEAT_MULTI = BUILDER.comment("Inventory heat multiplier").defineInRange("inventoryHeatMulti", 1.0, 0.0, 2.0);
 
-    public static final ModConfigSpec.DoubleValue ENTITY_TEMPERATURE_CHANGE_MULTI = BUILDER.comment("Entity temperature change multiplier").defineInRange("entityTemperatureChangeMulti", 1.0, 0.1, 2.0);
+    public static final ModConfigSpec.DoubleValue ENTITY_TEMPERATURE_CHANGE_MULTI = BUILDER.comment("Entity temperature change multiplier").defineInRange("entityTemperatureChangeMulti", 0.5, 0.1, 2.0);
 
     static {BUILDER.pop();}
 

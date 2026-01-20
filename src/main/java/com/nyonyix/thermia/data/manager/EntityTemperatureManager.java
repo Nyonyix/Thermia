@@ -50,9 +50,10 @@ public class EntityTemperatureManager
 
     private static EntityTemperature handleTemperatureChange(Entity entity, EntityTemperature entityTemperature)
     {
+        float multi  = (float) ServerConfig.ENTITY_TEMPERATURE_CHANGE_MULTI.getAsDouble();
         float environmentDelta = entityTemperature.environmentTemperature() - entityTemperature.internalTemperature();
         float entityMedian = (entityTemperature.maxInternalTemperature() + entityTemperature.minInternalTemperature()) / 2f;
-        float medianDelta = (entityMedian - entityTemperature.internalTemperature()) * 0.5f;
+        float medianDelta = (entityMedian - entityTemperature.internalTemperature()) * multi;
 
         float insulation = 1f - (Mth.clamp(ItemInventoryManager.getInventoryInsulation(entity), -1.0f, 1.0f) * (1f - entityTemperature.wetness()));
 
@@ -60,11 +61,8 @@ public class EntityTemperatureManager
 
         float absDelta = Math.abs(effectiveDelta);
 
-        float normalisedRate = 1.0f - (float) Math.exp(-0.01 * absDelta);
+        float normalisedRate = 1.0f - (float) Math.exp(-0.005 * absDelta);
         float baseRate = Mth.lerp(normalisedRate, 0.01f, 0.5f);
-        float multi  = (float) ServerConfig.ENTITY_TEMPERATURE_CHANGE_MULTI.getAsDouble();
-
-        baseRate *= multi;
 
         return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate));
     }
