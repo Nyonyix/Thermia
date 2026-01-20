@@ -34,6 +34,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.slf4j.Logger;
 
+import javax.sound.sampled.Clip;
 import java.util.*;
 
 public record BlockSearchResult(
@@ -133,19 +134,54 @@ public record BlockSearchResult(
 
     }
 
-    private boolean getIsExposed(Level level, Vec3 entityPos, BlockPos sourcePos)
+    private float exposure(Level level, Entity entity, BlockPos sourcePos)
     {
         Vec3 sourcePosVec = Vec3.atCenterOf(sourcePos);
-        float distance = (float) entityPos.distanceTo(sourcePosVec);
+        float distance = (float) entity.position().distanceTo(sourcePosVec);
+        float searchRadius = (float) ServerConfig.SEARCH_RANGE.getAsInt();
+        float totalExposure = 0f;
 
-        if (distance < 1.5f || distance > 16) return true;
+        AABB entityBB = entity.getBoundingBox();
 
-        ClipContext context = new ClipContext(entityPos, sourcePosVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, CollisionContext.empty());
-        BlockHitResult hit = level.clip(context);
+        if (distance <= searchRadius * 0.25)
+        {
+            double entityCenterY = (entityBB.minY + entityBB.maxY) * 0.5;
+            double entityCenterX = (entityBB.minX + entityBB.maxX) * 0.5;
+            double entityCenterZ = (entityBB.minZ + entityBB.maxZ) * 0.5;
+            Vec3[] samplePoints = {new Vec3(entityBB.minX, entityCenterY, entityBB.minZ), new Vec3(entityBB.maxX, entityCenterY, entityBB.minZ), new Vec3(entityBB.minX, entityCenterY, entityBB.maxZ), new Vec3(entityBB.maxX, entityCenterY, entityBB.maxZ), new Vec3(entityCenterX, entityBB.maxY, entityCenterZ), new Vec3(entityCenterX, entityBB.minY, entityCenterZ)};
 
-        if (hit.getType() != HitResult.Type.MISS && !hit.getBlockPos().equals(sourcePos)) return false;
+            for (Vec3 samplePoint : samplePoints)
+            {
+                ClipContext context = new ClipContext(samplePoint, sourcePosVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, CollisionContext.empty());
+                BlockHitResult hit = level.clip(context);
 
-        return true;
+                if (hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(sourcePos)) totalExposure += 0.25f;
+            }
+        }
+        else if (distance <= searchRadius * 0.5)
+        {
+            Vec3 entityCenter = entity.position().add(0, entity.getBbHeight() * 0.5, 0);
+            Vec3[] samplePoints = {new Vec3(entityCenter.x, entityBB.minY, entityCenter.z), new Vec3(entityCenter.x, entityCenter.y, entityCenter.z), new Vec3(entityCenter.x, entityBB.maxY, entityCenter.z)};
+
+            for (Vec3 samplePoint : samplePoints)
+            {
+                ClipContext context = new ClipContext(samplePoint, sourcePosVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, CollisionContext.empty());
+                BlockHitResult hit = level.clip(context);
+
+                if (hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(sourcePos)) totalExposure += 1f / 3f;
+            }
+        }
+        else
+        {
+            Vec3 entityEyeline = entity.getEyePosition();
+
+            ClipContext context = new ClipContext(entityEyeline, sourcePosVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, CollisionContext.empty());
+            BlockHitResult hit = level.clip(context);
+
+            if (hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(sourcePos)) totalExposure = 1f;
+        }
+
+        return totalExposure;
     }
 
     private float parseBlocks(Level curLevel, Entity entity)
@@ -164,10 +200,10 @@ public record BlockSearchResult(
             {
                 if (!curLevel.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) continue;
 
-                boolean isExposed = getIsExposed(curLevel, entityPos, pos);
+                float exposure = exposure(curLevel, entity, pos);
                 BlockState state = curLevel.getBlockState(pos);
 
-                if (isExposed && dataMap.isRadiative()) totalTempForBlock += calcTemp(pos, parseBlockState(state, curLevel, pos, dataMap), entityPos);
+                if (dataMap.isRadiative()) totalTempForBlock += (calcTemp(pos, parseBlockState(state, curLevel, pos, dataMap), entityPos) * exposure);
             }
 
             totalBlockTemp += dataMap.temperature() == 0f ? totalTempForBlock : Math.min(totalTempForBlock, dataMap.temperature());
@@ -196,9 +232,9 @@ public record BlockSearchResult(
                 Block block = state.getBlock();
                 BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
                 float blockTemp = blockDataMap != null ? parseBlockState(state, curLevel, pos, blockDataMap) : 0f;
-                boolean isExposed = getIsExposed(curLevel, entityPos, pos);
+                float exposure = exposure(curLevel, entity, pos);
 
-                if (isExposed && dataMap.isRadiative()) totalTempForFluid += calcTemp(pos, blockTemp != 0f ? blockTemp : dataMap.temperature(), entityPos);
+                if (dataMap.isRadiative()) totalTempForFluid += (calcTemp(pos, blockTemp != 0f ? blockTemp : dataMap.temperature(), entityPos) * exposure);
             }
 
             totalFluidTemp += Math.min(totalTempForFluid, dataMap.temperature());

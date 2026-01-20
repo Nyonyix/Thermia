@@ -128,7 +128,7 @@ public class EntityTemperatureManager
 
     private static EntityTemperature handleWetness(Level level, BlockPos pos, ClimateModel levelModel, ICalendar levelCalender, EntityTemperature entityData, float shade)
     {
-        boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getAverageRainfall(level, pos));
+        boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getInstantRainfall(level, pos));
         if (isRaining && level.canSeeSky(pos) && entityData.wetness() <= 0.9)
         {
             if (levelModel.getInstantTemperature(level, pos) > 0.0f) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.1f));
