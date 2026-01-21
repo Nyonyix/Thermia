@@ -11,6 +11,7 @@ import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.IHeatable;
 import net.dries007.tfc.common.blockentities.PitKilnBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -41,7 +42,8 @@ public record BlockSearchResult(
         Vec3 searchOrigin,
         ResourceKey<Level> levelID,
         Map<Block, List<BlockPos>> allPositions,
-        Map<Fluid, List<BlockPos>> allFluidPositions
+        Map<Fluid, List<BlockPos>> allFluidPositions,
+        Map<BlockPos, ExposedFaces> exposedFaces
 )
 {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -50,80 +52,39 @@ public record BlockSearchResult(
             Vec3.CODEC.fieldOf("search_origin").forGetter(BlockSearchResult::searchOrigin),
             ResourceKey.codec(Registries.DIMENSION).fieldOf("level_id").forGetter(BlockSearchResult::levelID),
             Codec.unboundedMap(BuiltInRegistries.BLOCK.byNameCodec(), Codec.list(BlockPos.CODEC)).fieldOf("all_positions").forGetter(BlockSearchResult::allPositions),
-            Codec.unboundedMap(BuiltInRegistries.FLUID.byNameCodec(), Codec.list(BlockPos.CODEC)).fieldOf("all_fluid_positions").forGetter(BlockSearchResult::allFluidPositions)
+            Codec.unboundedMap(BuiltInRegistries.FLUID.byNameCodec(), Codec.list(BlockPos.CODEC)).fieldOf("all_fluid_positions").forGetter(BlockSearchResult::allFluidPositions),
+            Codec.unboundedMap(BlockPos.CODEC, ExposedFaces.CODEC).fieldOf("exposed_faces").forGetter(BlockSearchResult::exposedFaces)
     ).apply(blockSearchResultInstance, BlockSearchResult::new));
 
-    private static final StreamCodec<RegistryFriendlyByteBuf, Vec3> VEC_3_STREAM_CODEC = StreamCodec.of(
-            (buf, vec) -> {
-             buf.writeDouble(vec.x);
-             buf.writeDouble(vec.y);
-             buf.writeDouble(vec.z);
-            }, (buf) -> new Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble()));
+    private record RankedFace(Vec3 faceCenter, float weight) {}
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, BlockSearchResult> STREAM_CODEC = StreamCodec.of(
-            (buf, result) ->
+    private List<RankedFace> getBestFaces(Vec3 entityCenter, BlockPos sourcePos)
+    {
+        ExposedFaces blockExposedFaces = exposedFaces.get(sourcePos);
+        if(blockExposedFaces == null || exposedFaces.isEmpty()) return List.of(new RankedFace(Vec3.atCenterOf(sourcePos), 1f));
+
+        Vec3 blockCenter = Vec3.atCenterOf(sourcePos);
+        Vec3 toEntity = entityCenter.subtract(blockCenter).normalize();
+
+        List<RankedFace> rankedFaces = new ArrayList<>();
+
+        for (Direction dir : blockExposedFaces.directions())
+        {
+            Vec3 faceNormal = new Vec3(dir.getStepX(), dir.getStepY(), dir.getStepZ());
+            float dot = (float) faceNormal.dot(toEntity);
+
+            if (dot > 0)
             {
-                VEC_3_STREAM_CODEC.encode(buf, result.searchOrigin);
-                buf.writeResourceKey(result.levelID);
+                Vec3 faceCenter = blockCenter.add(dir.getStepX() * 0.5, dir.getStepY() * 0.5, dir.getStepZ() * 0.5);
 
-                buf.writeInt(result.allPositions.size());
-                for (Map.Entry<Block, List<BlockPos>> entry : result.allPositions.entrySet())
-                {
-                    buf.writeResourceLocation(BuiltInRegistries.BLOCK.getKey(entry.getKey()));
-                    buf.writeInt(entry.getValue().size());
-                    for (BlockPos pos : entry.getValue())
-                    {
-                        BlockPos.STREAM_CODEC.encode(buf, pos);
-                    }
-                }
-
-                buf.writeInt(result.allFluidPositions.size());
-                for (Map.Entry<Fluid, List<BlockPos>> entry : result.allFluidPositions.entrySet())
-                {
-                    buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(entry.getKey()));
-                    buf.writeInt(entry.getValue().size());
-                    for (BlockPos pos : entry.getValue())
-                    {
-                        BlockPos.STREAM_CODEC.encode(buf, pos);
-                    }
-                }
-            },
-            (buf) ->
-            {
-                Vec3 searchOrigin = VEC_3_STREAM_CODEC.decode(buf);
-                ResourceKey<Level> levelID = buf.readResourceKey(Registries.DIMENSION);
-
-                int allPositionSize = buf.readInt();
-                Map<Block, List<BlockPos>> allPositions = new HashMap<>();
-                for (int i = 0; i < allPositionSize; i++)
-                {
-                    Block block = BuiltInRegistries.BLOCK.get(buf.readResourceLocation());
-                    int listSize = buf.readInt();
-                    List<BlockPos> positions = new ArrayList<>();
-                    for (int o = 0; o < listSize; o++)
-                    {
-                        positions.add(BlockPos.STREAM_CODEC.decode(buf));
-                    }
-                    allPositions.put(block, positions);
-                }
-
-                int allFluidPositionSize = buf.readInt();
-                Map<Fluid, List<BlockPos>> allFluidPositions = new HashMap<>();
-                for (int i = 0; i < allFluidPositionSize; i++)
-                {
-                    Fluid fluid = BuiltInRegistries.FLUID.get(buf.readResourceLocation());
-                    int listSize = buf.readInt();
-                    List<BlockPos> positions = new ArrayList<>();
-                    for (int o = 0; o < listSize; o++)
-                    {
-                        positions.add(BlockPos.STREAM_CODEC.decode(buf));
-                    }
-                    allFluidPositions.put(fluid, positions);
-                }
-
-                return new BlockSearchResult(searchOrigin, levelID, allPositions, allFluidPositions);
+                rankedFaces.add(new RankedFace(faceCenter, dot));
             }
-    );
+        }
+
+        rankedFaces.sort((a, b) -> Float.compare(b.weight, a.weight));
+
+        return rankedFaces.stream().limit(2).toList();
+    }
 
     private float calcTemp(BlockPos pos, float temp, Vec3 entityPos)
     {
@@ -142,34 +103,42 @@ public record BlockSearchResult(
         float totalExposure = 0f;
 
         AABB entityBB = entity.getBoundingBox();
+        Vec3 entityCenter = new Vec3((entityBB.minX + entityBB.maxX) * 0.5, (entityBB.minY + entityBB.maxY) * 0.5, (entityBB.minZ + entityBB.maxZ) * 0.5);
+        List<RankedFace> bestFaces = getBestFaces(entityCenter, sourcePos);
 
         if (distance <= searchRadius * 0.25)
         {
-            double entityCenterY = (entityBB.minY + entityBB.maxY) * 0.5;
-            double entityCenterX = (entityBB.minX + entityBB.maxX) * 0.5;
-            double entityCenterZ = (entityBB.minZ + entityBB.maxZ) * 0.5;
-            Vec3[] samplePoints = {new Vec3(entityBB.minX, entityCenterY, entityBB.minZ), new Vec3(entityBB.maxX, entityCenterY, entityBB.minZ), new Vec3(entityBB.minX, entityCenterY, entityBB.maxZ), new Vec3(entityBB.maxX, entityCenterY, entityBB.maxZ), new Vec3(entityCenterX, entityBB.maxY, entityCenterZ), new Vec3(entityCenterX, entityBB.minY, entityCenterZ)};
+            Vec3[] samplePoints = {new Vec3(entityBB.minX, entityCenter.y, entityBB.minZ), new Vec3(entityBB.maxX, entityCenter.y, entityBB.minZ), new Vec3(entityBB.minX, entityCenter.y, entityBB.maxZ), new Vec3(entityBB.maxX, entityCenter.y, entityBB.maxZ), new Vec3(entityCenter.x, entityBB.maxY, entityCenter.z), new Vec3(entityCenter.x, entityBB.minY, entityCenter.z)};
 
-            for (Vec3 samplePoint : samplePoints)
+            for (RankedFace face : bestFaces)
             {
-                ClipContext context = new ClipContext(samplePoint, sourcePosVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, CollisionContext.empty());
-                BlockHitResult hit = level.clip(context);
+                for (Vec3 samplePoint : samplePoints)
+                {
+                    ClipContext context = new ClipContext(samplePoint, face.faceCenter, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, CollisionContext.empty());
+                    BlockHitResult hit = level.clip(context);
 
-                if (hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(sourcePos)) totalExposure += 0.25f;
+                    if (hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(sourcePos)) totalExposure += face.weight;
+                }
             }
+
+            totalExposure /= samplePoints.length;
         }
         else if (distance <= searchRadius * 0.5)
         {
-            Vec3 entityCenter = entity.position().add(0, entity.getBbHeight() * 0.5, 0);
             Vec3[] samplePoints = {new Vec3(entityCenter.x, entityBB.minY, entityCenter.z), new Vec3(entityCenter.x, entityCenter.y, entityCenter.z), new Vec3(entityCenter.x, entityBB.maxY, entityCenter.z)};
 
-            for (Vec3 samplePoint : samplePoints)
+            for (RankedFace face : bestFaces)
             {
-                ClipContext context = new ClipContext(samplePoint, sourcePosVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, CollisionContext.empty());
-                BlockHitResult hit = level.clip(context);
+                for (Vec3 samplePoint : samplePoints)
+                {
+                    ClipContext context = new ClipContext(samplePoint, face.faceCenter, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, CollisionContext.empty());
+                    BlockHitResult hit = level.clip(context);
 
-                if (hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(sourcePos)) totalExposure += 1f / 3f;
+                    if (hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(sourcePos)) totalExposure += face.weight;
+                }
             }
+
+            totalExposure /= samplePoints.length;
         }
         else
         {
@@ -326,15 +295,17 @@ public record BlockSearchResult(
         return 0f;
     }
 
-    public static BlockSearchResult createDefault() {return new BlockSearchResult(Vec3.ZERO, Level.OVERWORLD, new HashMap<>(), new HashMap<>());}
+    public static BlockSearchResult createDefault() {return new BlockSearchResult(Vec3.ZERO, Level.OVERWORLD, new HashMap<>(), new HashMap<>(), new HashMap<>());}
 
-    public BlockSearchResult withSearchOrigin(Vec3 searchOrigin) {return new BlockSearchResult(searchOrigin, this.levelID, this.allPositions, this.allFluidPositions);}
+    public BlockSearchResult withSearchOrigin(Vec3 searchOrigin) {return new BlockSearchResult(searchOrigin, this.levelID, this.allPositions, this.allFluidPositions, this.exposedFaces);}
 
-    public BlockSearchResult withLevelID(ResourceKey<Level> levelID) {return new BlockSearchResult(this.searchOrigin, levelID, this.allPositions, this.allFluidPositions);}
+    public BlockSearchResult withLevelID(ResourceKey<Level> levelID) {return new BlockSearchResult(this.searchOrigin, levelID, this.allPositions, this.allFluidPositions, this.exposedFaces);}
 
-    public BlockSearchResult withAllPositions(Map<Block, List<BlockPos>> allPositions) {return new BlockSearchResult(this.searchOrigin, this.levelID, allPositions, this.allFluidPositions);}
+    public BlockSearchResult withAllPositions(Map<Block, List<BlockPos>> allPositions) {return new BlockSearchResult(this.searchOrigin, this.levelID, allPositions, this.allFluidPositions, this.exposedFaces);}
 
-    public BlockSearchResult withAllFluidPositions(Map<Fluid, List<BlockPos>> allFluidPositions) {return new BlockSearchResult(this.searchOrigin, this.levelID, this.allPositions, allFluidPositions);}
+    public BlockSearchResult withAllFluidPositions(Map<Fluid, List<BlockPos>> allFluidPositions) {return new BlockSearchResult(this.searchOrigin, this.levelID, this.allPositions, allFluidPositions, this.exposedFaces);}
+
+    public BlockSearchResult withExposedFaces(Map<BlockPos, ExposedFaces> exposedFaces) {return new BlockSearchResult(this.searchOrigin, this.levelID, this.allPositions, this.allFluidPositions, exposedFaces);}
 
     public BlockPos getNearest(Entity entity, boolean isHot)
     {

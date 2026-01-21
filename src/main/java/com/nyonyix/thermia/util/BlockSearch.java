@@ -1,6 +1,7 @@
 package com.nyonyix.thermia.util;
 
 import com.mojang.logging.LogUtils;
+import com.nyonyix.thermia.data.ExposedFaces;
 import com.nyonyix.thermia.data.SolarShadeResult;
 import com.nyonyix.thermia.data.WindOcclusionResult;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
@@ -45,6 +46,7 @@ public class BlockSearch
         private Map<Fluid, List<BlockPos>> allFluidPositions = new HashMap<>();
         private List<BlockPositionsWithDistance> allFound = new ArrayList<>();
         private List<FluidPositionsWithDistance> allFoundFluid = new ArrayList<>();
+        private Map<BlockPos, ExposedFaces> exposedFaces = new HashMap<>();
 
         record BlockPositionsWithDistance(BlockPos pos, Block block, double distSq) {}
         record FluidPositionsWithDistance(BlockPos pos, Fluid fluid, double distSq) {}
@@ -52,6 +54,8 @@ public class BlockSearch
         void addBlockCandidate(BlockPos pos, Block block, double distSq) {allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq));}
 
         void addFluidCandidate(BlockPos pos, Fluid fluid, double distSq) {allFoundFluid.add(new FluidPositionsWithDistance(pos.immutable(), fluid, distSq));}
+
+        void addExposedFaces(BlockPos pos, ExposedFaces faces) {exposedFaces.put(pos.immutable(), faces);}
 
         BlockSearchResult build(Level level)
         {
@@ -84,7 +88,7 @@ public class BlockSearch
                 allFluidPositions.computeIfAbsent(entry.fluid(), k -> new ArrayList<>()).add(entry.pos());
             }
 
-            return new BlockSearchResult(origin, levelID, allPositions, allFluidPositions);
+            return new BlockSearchResult(origin, levelID, allPositions, allFluidPositions, exposedFaces);
         }
     }
 
@@ -116,9 +120,13 @@ public class BlockSearch
 
                         if (dataMap != null)
                         {
-                            if (isEncased(pos.immutable(), chunks)) continue;
+                            ExposedFaces exposedFaces = getExposedFaces(pos.immutable(), chunks);
 
-                            builder.addBlockCandidate(pos.immutable(), block, distSq);
+                            if (!exposedFaces.isEmpty())
+                            {
+                                builder.addBlockCandidate(pos.immutable(), block, distSq);
+                                builder.addExposedFaces(pos.immutable(), exposedFaces);
+                            }
                         }
 
                         FluidState fluidState = state.getFluidState();
@@ -151,8 +159,10 @@ public class BlockSearch
         return null;
     }
 
-    private static boolean isEncased(BlockPos pos, List<LevelChunk> cachedChunks)
+    private static ExposedFaces getExposedFaces(BlockPos pos, List<LevelChunk> cachedChunks)
     {
+        List<Direction> exposedDirections = new ArrayList<>();
+
         for (Direction dir : Direction.values())
         {
             BlockPos adjacentPos = pos.relative(dir);
@@ -160,10 +170,10 @@ public class BlockSearch
             if (chunk == null) continue;
 
             BlockState state = chunk.getBlockState(adjacentPos);
-            if (!state.canOcclude()) return false;
+            if (!state.canOcclude())  exposedDirections.add(dir);
         }
 
-        return true;
+        return new ExposedFaces(exposedDirections);
     }
 
     public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, Vec3 origin, int radius)
@@ -203,7 +213,7 @@ public class BlockSearch
             }catch (Exception e)
             {
                 LOGGER.error("Error in async block search:", e);
-                return new BlockSearchResult(Vec3.ZERO, level.dimension(), new HashMap<>(), new HashMap<>());
+                return new BlockSearchResult(Vec3.ZERO, level.dimension(), new HashMap<>(), new HashMap<>(), new HashMap<>());
             }
 
         }, Util.backgroundExecutor());
