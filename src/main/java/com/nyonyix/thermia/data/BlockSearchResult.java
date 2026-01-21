@@ -117,6 +117,8 @@ public record BlockSearchResult(
                     ClipContext context = new ClipContext(samplePoint, face.faceCenter, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, CollisionContext.empty());
                     BlockHitResult hit = level.clip(context);
 
+                    Block hitBlock = level.getBlockState(hit.getBlockPos()).getBlock();
+
                     if (hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(sourcePos)) totalExposure += face.weight;
                 }
             }

@@ -24,6 +24,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.level.GameType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -56,6 +57,11 @@ public class ThermiaGui
         return gm != null && gm.canHurtPlayer() && setup(gui, minecraft);
     }
 
+    private static boolean setupForNotSpectator(GuiGraphics gui, Minecraft minecraft) {
+        MultiPlayerGameMode gm = Minecraft.getInstance().gameMode;
+        return gm != null && gm.getPlayerMode() != GameType.SPECTATOR && setup(gui, minecraft);
+    }
+
     private static float getConfigUIScale() {return (float) ClientConfig.UI_SCALE.getAsDouble();}
 
     private static int getConfigUIXOffset() {return ClientConfig.UI_X_OFFSET.getAsInt();}
@@ -77,7 +83,7 @@ public class ThermiaGui
     private static void renderPlayerTemp(GuiGraphics graphics, DeltaTracker delta)
     {
         Minecraft mc = Minecraft.getInstance();
-        if (!setupForSurvival(graphics, mc)) return;
+        if (!setupForNotSpectator(graphics, mc)) return;
 
         LocalPlayer player = mc.player;
         if (!player.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
@@ -148,7 +154,7 @@ public class ThermiaGui
     private static void renderSolarIntensity(GuiGraphics graphics, DeltaTracker delta)
     {
         Minecraft mc = Minecraft.getInstance();
-        if (!setupForSurvival(graphics, mc)) return;
+        if (!setupForNotSpectator(graphics, mc)) return;
 
         LocalPlayer player = mc.player;
         if (!player.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
@@ -183,7 +189,7 @@ public class ThermiaGui
     private static void renderWetness(GuiGraphics graphics, DeltaTracker delta)
     {
         Minecraft mc = Minecraft.getInstance();
-        if (!setupForSurvival(graphics, mc)) return;
+        if (!setupForNotSpectator(graphics, mc)) return;
 
         LocalPlayer player = mc.player;
         if (!player.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
@@ -218,7 +224,7 @@ public class ThermiaGui
     private static void renderWind(GuiGraphics graphics, DeltaTracker delta)
     {
         Minecraft mc = Minecraft.getInstance();
-        if (!setupForSurvival(graphics, mc)) return;
+        if (!setupForNotSpectator(graphics, mc)) return;
 
         LocalPlayer player = mc.player;
         if (!player.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;

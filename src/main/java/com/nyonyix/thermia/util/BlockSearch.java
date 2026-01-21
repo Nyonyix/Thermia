@@ -120,13 +120,17 @@ public class BlockSearch
 
                         if (dataMap != null)
                         {
-                            ExposedFaces exposedFaces = getExposedFaces(pos.immutable(), chunks);
-
-                            if (!exposedFaces.isEmpty())
+                            if (dataMap.isRadiative())
                             {
-                                builder.addBlockCandidate(pos.immutable(), block, distSq);
-                                builder.addExposedFaces(pos.immutable(), exposedFaces);
+                                ExposedFaces exposedFaces = getExposedFaces(pos.immutable(), chunks);
+
+                                if (!exposedFaces.isEmpty())
+                                {
+                                    builder.addBlockCandidate(pos.immutable(), block, distSq);
+                                    builder.addExposedFaces(pos.immutable(), exposedFaces);
+                                }
                             }
+                            else builder.addBlockCandidate(pos.immutable(), block, distSq);
                         }
 
                         FluidState fluidState = state.getFluidState();
@@ -137,7 +141,17 @@ public class BlockSearch
 
                             if (fluidDataMap != null)
                             {
-                                builder.addFluidCandidate(pos.immutable(), fluid, distSq);
+                                if (fluidDataMap.isRadiative())
+                                {
+                                    ExposedFaces exposedFaces = getExposedFaces(pos.immutable(), chunks);
+
+                                    if (!exposedFaces.isEmpty())
+                                    {
+                                        builder.addFluidCandidate(pos.immutable(), fluid, distSq);
+                                        builder.addExposedFaces(pos.immutable(), exposedFaces);
+                                    }
+                                }
+                                else builder.addFluidCandidate(pos.immutable(), fluid, distSq);
                             }
                         }
                     }

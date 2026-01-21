@@ -15,8 +15,9 @@
   "thermia.configuration.entity_temperature": "Entity Temperature Options",
   "thermia.configuration.environment_temperature": "Environment Temperature Options",
   "thermia.configuration.server_misc": "Misc Options",
-  "thermia.configuration.searchRange": "Heatsource search range",
-  "thermia.configuration.isMobSearchRange": "Mob heatsource search range",
+  "thermia.configuration.searchRange": "Heat source search range",
+  "thermia.configuration.isMobSearchRange": "Mob heat source search range",
+  "thermia.configuration.maxFluidDepthCheck": "Max Fluid Depth Check",
   "thermia.configuration.maxBlocksAbove": "Maximum blocks above",
   "thermia.configuration.maxRadiantHeating": "Maximum radiant heat",
   "thermia.configuration.maxInventoryHeating": "Maximum inventory heat",
@@ -32,11 +33,13 @@
   "thermia.configuration.inventoryHeatMulti": "Inventory heat multiplier",
   "thermia.configuration.ui": "UI Options",
   "thermia.configuration.effect": "Effect Options",
+  "thermia.configuration.client_misc": "Misc Options",
   "thermia.configuration.uiScale": "UI Scale",
   "thermia.configuration.uiXOffset": "UI X Offset",
   "thermia.configuration.uiYOffset": "UI Y Offset",
   "thermia.configuration.enableHyperRender": "Toggle Hyperthermia Render",
   "thermia.configuration.enableHypoRender": "Toggle Hypothermia Render",
   "thermia.configuration.hyperEffectIntensity": "Hyperthermia effect intensity",
-  "thermia.configuration.hypoEffectIntensity": "Hypothermia effect intensity"
+  "thermia.configuration.hypoEffectIntensity": "Hypothermia effect intensity",
+  "thermia.configuration.enableDebug": "Enable Debug"
 }

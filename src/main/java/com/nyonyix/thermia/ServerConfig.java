@@ -8,11 +8,13 @@ public class ServerConfig
 
     static {BUILDER.push("search_and_range");}
 
-    public static final ModConfigSpec.IntValue SEARCH_RANGE = BUILDER.comment("Max range to search for blocks from player entities").defineInRange("SearchRange", 32, 8, 64);
+    public static final ModConfigSpec.IntValue SEARCH_RANGE = BUILDER.comment("Max range to search for blocks from player entities").defineInRange("searchRange", 32, 8, 64);
 
     public static final ModConfigSpec.IntValue ISMOB_SEARCH_RANGE = BUILDER.comment("Max range to search for blocks from animal entities").defineInRange("isMobSearchRange", 16, 4, 32);
 
     public static final ModConfigSpec.IntValue MAX_BLOCKS_ABOVE = BUILDER.comment("Number of blocks above to be considered underground").defineInRange("maxBlocksAbove", 24576, 8192, 65536);
+
+    public static final ModConfigSpec.IntValue MAX_FLUID_DEPTH_CHECK = BUILDER.comment("Maximum blocks to check for fluid depth temp modifier").defineInRange("maxFluidDepthCheck", 32, 8, 64);
 
     static {BUILDER.pop();}
     static {BUILDER.push("entity_temperature");}
@@ -24,8 +26,6 @@ public class ServerConfig
     public static final ModConfigSpec.IntValue TEMPERATURE_SEGMENTS_PERCENT = BUILDER.comment("Percentage of delta used for effect levels").defineInRange("temperatureSegmentsPercent", 15, 0, 50);
 
     public static final ModConfigSpec.IntValue MAX_TEMPERATURE_EFFECT_LEVEL = BUILDER.comment("Maximum amount of hyper/hypothermia effect levels.").defineInRange("maxTemperatureEffectLevel", 4, 2, 8);
-
-    public static final ModConfigSpec.IntValue MAX_FLUID_DEPTH_CHECK = BUILDER.comment("Maximum blocks to check for fluid depth temp modifier").defineInRange("maxFluidDepthCheck", 32, 8, 64);
 
     public static final ModConfigSpec.DoubleValue PLAYER_SWEAT_HYDRATION_LOSS_MULTI = BUILDER.comment("Hydration loss through sweat multiplier").defineInRange("playerSweatHydrationLossMulti", 1.0, 0.0, 2.0);
 

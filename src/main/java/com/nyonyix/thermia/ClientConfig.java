@@ -26,6 +26,11 @@ public class ClientConfig
     public static final ModConfigSpec.DoubleValue HYPO_EFFECT_INTENSITY = BUILDER.comment("Hypothermia effect intensity").defineInRange("hypoEffectIntensity", 1.0, 0.5, 1.5);
 
     static {BUILDER.pop();}
+    static {BUILDER.push("client_misc");}
+
+    public static final ModConfigSpec.BooleanValue ENABLE_DEBUG = BUILDER.comment("Enable debug information").define("enableDebug", false);
+
+    static {BUILDER.pop();}
 
     static final ModConfigSpec CLIENT_CONFIG = BUILDER.build();
 }

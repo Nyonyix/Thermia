@@ -3,11 +3,14 @@ package com.nyonyix.thermia.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
+import com.nyonyix.thermia.ClientConfig;
+import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
+import net.dries007.tfc.client.ClimateRenderCache;
 import net.dries007.tfc.client.overworld.SolarCalculator;
 import net.dries007.tfc.util.climate.Climate;
 import net.dries007.tfc.util.climate.ClimateModel;
@@ -64,6 +67,8 @@ public class ThermiaClient {
     @SubscribeEvent
     public static void onRenderGameOverlayText(CustomizeGuiOverlayEvent.DebugText event)
     {
+        if (!ClientConfig.ENABLE_DEBUG.getAsBoolean()) return;
+
         Minecraft minecraft = Minecraft.getInstance();
         Player clientPlayer = minecraft.player;
 
@@ -80,16 +85,24 @@ public class ThermiaClient {
 
                 text.add(colourDarkGreen + "Thermia");
                 text.add("Entity:");
-                text.add(String.format("    Environment Temperature: %.2f", playerData.environmentTemperature()));
-                text.add(String.format("    Environment Humidity: %.2f", playerData.environmentHumidity()));
-                text.add(String.format("    Player internal Temp: %.2f", playerData.internalTemperature()));
-                text.add(String.format("    Wetness: %.2f", playerData.wetness()));
+                text.add(String.format("Environment Temperature: %.2f", playerData.environmentTemperature()));
+                text.add(String.format("Environment Humidity: %.2f", playerData.environmentHumidity()));
+                text.add(String.format("Player Internal Temperature: %.2f", playerData.internalTemperature()));
+                text.add(String.format("Wetness: %.2f", playerData.wetness()));
 
-                text.add("Chunk:");
                 Level level = clientPlayer.level();
-                ClimateModel model = Climate.get(level);
-                text.add(String.format("    Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(model.getAverageTemperature(level, pos), model.getAverageRainfall(level, pos), model.getRainfallVariance(level, pos), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
-                text.add(String.format("    Solar Intensity: %.2f", EnvironmentHelpers.getSolarRadiationWeather(level, pos, playerData.solarShadeResult().shade())));
+                ClimateRenderCache climate = ClimateRenderCache.INSTANCE;
+                float solarRadiation = EnvironmentHelpers.getSolarRadiationWeather(level, pos, playerData.solarShadeResult().shade());
+                float windSpeed = EnvironmentHelpers.getWindSpeed(level, pos, playerData.windOcclusionResult().occlusionMultiplier());
+                float effectiveTemp = EnvironmentHelpers.calcEffectiveTemperature(level, pos, climate.getInstantTemperature(), playerData.environmentHumidity(), playerData.solarShadeResult().shade(), playerData.wetness(), playerData.windOcclusionResult().occlusionMultiplier());
+
+                text.add("Environment:");
+                text.add(String.format("Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(climate.getAverageTemperature(), climate.getAverageRainfall(), climate.getRainVariance(), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
+                text.add(String.format("Solar Intensity: %.2f, Raw Solar Heating: %.2f", solarRadiation, solarRadiation * (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble()));
+                text.add(String.format("Drying Rate: %.2f", EnvironmentHelpers.calcDryingRate(level, pos, effectiveTemp, playerData.environmentHumidity(), playerData.solarShadeResult().shade(), playerData.windOcclusionResult().occlusionMultiplier())));
+                text.add(String.format("Evaporative Cooling: %.2f", EnvironmentHelpers.calcEvaporativeCooling(windSpeed, playerData.environmentHumidity(), playerData.wetness())));
+                text.add(String.format("Wet Bulb: %.2f, Globe: %.2f, WetBulbGlobe(WBGT): %.2f", EnvironmentHelpers.calcWetBulbTemperature(climate.getInstantTemperature(), playerData.environmentHumidity()), EnvironmentHelpers.calcGlobeTemperature(climate.getInstantTemperature(), solarRadiation), EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, climate.getInstantTemperature(), playerData.environmentHumidity(), solarRadiation)));
+                text.add(String.format("Cold: %.2f, Mild: %.2f, Effective: %.2f", EnvironmentHelpers.calcForCold(climate.getInstantTemperature(), windSpeed, solarRadiation, playerData.environmentHumidity()),  EnvironmentHelpers.calcForMild(climate.getInstantTemperature(), windSpeed, solarRadiation, playerData.environmentHumidity()), effectiveTemp));
             }
         }
     }
@@ -99,6 +112,7 @@ public class ThermiaClient {
     {
         if (!Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) return;
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
+        if (!ClientConfig.ENABLE_DEBUG.getAsBoolean()) return;
 
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null) return;
