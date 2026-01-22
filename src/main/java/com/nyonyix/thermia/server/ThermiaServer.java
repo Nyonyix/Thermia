@@ -8,6 +8,7 @@ import com.nyonyix.thermia.data.datagen.*;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import com.nyonyix.thermia.data.datamap.*;
+import com.nyonyix.thermia.util.AiHelpers;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
@@ -18,6 +19,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -27,6 +29,7 @@ import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -39,8 +42,6 @@ import java.util.concurrent.CompletableFuture;
 public class ThermiaServer
 {
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    public static final Set<Item> INSULATING_ITEMS = new HashSet<>();
 
     private static void initDataMap()
     {
@@ -106,6 +107,14 @@ public class ThermiaServer
     public static void onRegisterCommands(RegisterCommandsEvent event) {ThermiaCommands.register(event.getDispatcher());}
 
     @SubscribeEvent
+    public static void onEntityLeave(EntityLeaveLevelEvent event)
+    {
+        Entity entity = event.getEntity();
+
+        if (entity instanceof PathfinderMob mob) AiHelpers.clearTarget(mob);
+    }
+
+    @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event)
     {
         MinecraftServer server = event.getServer();
@@ -148,6 +157,8 @@ public class ThermiaServer
             }
 
             ChunkHumidityManager.processChunkBatch(level, 64);
+
+            AiHelpers.cleanupExpiredTargets(level.getGameTime());
         }
     }
 

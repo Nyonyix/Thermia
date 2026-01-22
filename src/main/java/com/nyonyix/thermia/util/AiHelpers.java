@@ -99,7 +99,7 @@ public class AiHelpers
         if (pos == null) return true;
 
         double distSq = mob.blockPosition().distSqr(pos);
-        return distSq < 4.0;
+        return distSq < 2.0;
     }
 
     public static BlockPos findWalkableNearby(PathfinderMob mob, BlockPos pos)

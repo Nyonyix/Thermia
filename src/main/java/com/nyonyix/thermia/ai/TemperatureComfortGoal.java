@@ -69,18 +69,21 @@ public class TemperatureComfortGoal extends Goal
                         targetPos = AiHelpers.findNearestColdOrWater(mob, tempData.blockSearchResult());
                         if (targetPos != null) AiHelpers.shareTarget(mob, targetPos, false);
                     }
-                    else return false;
+                    else
+                    {
+                        cooldown = COOLDOWN_IN_TICKS / 2;
+                        return false;
+                    }
                 }
                 else
                 {
-                    targetPos = AiHelpers.findBestWarmOrCool(mob.level(), mob, true, SEARCH_RANGE);
+                    targetPos = AiHelpers.findBestWarmOrCool(mob.level(), mob, false, SEARCH_RANGE);
                     if (targetPos != null) AiHelpers.shareTarget(mob, targetPos, false);
                 }
             }
 
             if (targetPos != null && !AiHelpers.isAtPosition(mob, targetPos))
             {
-                cooldown = COOLDOWN_IN_TICKS;
                 return true;
             }
         }
@@ -100,22 +103,26 @@ public class TemperatureComfortGoal extends Goal
                         targetPos = AiHelpers.findNearestHeatSource(mob, tempData.blockSearchResult());
                         if (targetPos != null) AiHelpers.shareTarget(mob, targetPos, true);
                     }
-                    else return false;
+                    else
+                    {
+                        cooldown = COOLDOWN_IN_TICKS / 2;
+                        return false;
+                    }
                 }
                 else
                 {
-                    targetPos = AiHelpers.findBestWarmOrCool(mob.level(), mob, false, SEARCH_RANGE);
+                    targetPos = AiHelpers.findBestWarmOrCool(mob.level(), mob, true, SEARCH_RANGE);
                     if (targetPos != null) AiHelpers.shareTarget(mob, targetPos, true);
                 }
             }
 
             if (targetPos != null && !AiHelpers.isAtPosition(mob, targetPos))
             {
-                cooldown = COOLDOWN_IN_TICKS;
                 return true;
             }
         }
 
+        cooldown = COOLDOWN_IN_TICKS / 2;
         return false;
     }
 
@@ -123,17 +130,17 @@ public class TemperatureComfortGoal extends Goal
     public boolean canContinueToUse()
     {
         if (targetPos == null) return false;
-        if (AiHelpers.isAtPosition(mob, targetPos)) return false;
         if (!mob.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
 
         EntityTemperature tempData = mob.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
-
         float internalTemperature = tempData.internalTemperature();
         float[] thresholds = AiHelpers.getComfortThresholds(tempData, COMFORT_THRESHOLD);
 
         if (internalTemperature < thresholds[1] && internalTemperature > thresholds[0]) return false;
 
-        return !mob.getNavigation().isDone();
+        if (AiHelpers.isAtPosition(mob, targetPos)) return false;
+
+        return mob.getNavigation().isDone();
     }
 
     @Override
@@ -149,6 +156,8 @@ public class TemperatureComfortGoal extends Goal
     public void stop()
     {
         targetPos = null;
+        cooldown = COOLDOWN_IN_TICKS;
         mob.getNavigation().stop();
+        AiHelpers.clearTarget(mob);
     }
 }
