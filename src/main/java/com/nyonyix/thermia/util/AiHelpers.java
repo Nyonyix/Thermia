@@ -1,5 +1,6 @@
 package com.nyonyix.thermia.util;
 
+import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.ai.TemperatureComfortGoal;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.ThermiaDamageTypes;
@@ -19,6 +20,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.PathFinder;
 
@@ -28,17 +30,6 @@ import java.util.Map;
 
 public class AiHelpers
 {
-    public static Direction getWindDirectionCardinal(Level level, BlockPos pos)
-    {
-        float windAngle = EnvironmentHelpers.getWindDirection(level, pos);
-        float degrees = (float) Math.toDegrees(windAngle);
-
-        if (degrees >= 315 || degrees < 45) return Direction.EAST;
-        if (degrees >= 45 && degrees < 135) return Direction.SOUTH;
-        if (degrees >= 135 && degrees < 225) return Direction.WEST;
-        return Direction.NORTH;
-    }
-
     public static boolean isWalkable(PathfinderMob mob, BlockPos pos)
     {
         BlockState below = mob.level().getBlockState(pos.below());
@@ -58,45 +49,6 @@ public class AiHelpers
         return distSq < 4.0;
     }
 
-    public static int countAdjacentSolidBlocks(Level level, BlockPos pos)
-    {
-        int count = 0;
-        for (Direction dir : Direction.Plane.HORIZONTAL)
-        {
-            BlockPos adjacent = pos.relative(dir);
-
-            if (level.getBlockState(adjacent).isSolidRender(level, adjacent)) count++;
-        }
-
-        return count;
-    }
-
-    public static int countBlocksAbove(Level level, BlockPos pos)
-    {
-        int count = 0;
-        for (int y = 1; y <= 3; y++)
-        {
-            if (!level.getBlockState(pos.above(y)).isAir()) count++;
-        }
-
-        return count;
-    }
-
-    public static int evaluateShelter(Level level, BlockPos pos, Direction windFrom)
-    {
-        int score = 0;
-
-        for (Direction dir : Direction.Plane.HORIZONTAL)
-        {
-            BlockPos adjacent = pos.relative(dir);
-            if (level.getBlockState(adjacent).isSolidRender(level, adjacent)) score += dir == windFrom ? 4 : 1;
-        }
-
-        score += countBlocksAbove(level, pos);
-
-        return score;
-    }
-
     public static BlockPos findWalkableNearby(PathfinderMob mob, BlockPos pos)
     {
         if (isWalkable(mob, pos)) return pos.immutable();
@@ -110,30 +62,44 @@ public class AiHelpers
         return null;
     }
 
-    public static BlockPos findNearestHomeBlock(PathfinderMob mob, BlockSearchResult blockSearchResult)
+    public static BlockPos findBestWarmOrCool(Level level, PathfinderMob mob,boolean isWarm, int radius)
     {
-        BlockPos mobPos = mob.blockPosition();
-        BlockPos nearest = null;
-        double nearestDist = Double.MAX_VALUE;
+        BlockPos bestPos = null;
+        BlockPos origin = mob.blockPosition();
+        float bestOcclusion = isWarm ? 0f : 1f;
 
-        EntityTemperatureDataMap entityDataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(mob.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
-        if (entityDataMap == null || entityDataMap.homeBlock().equals(ResourceLocation.withDefaultNamespace("air"))) return nearest;
+        int height = (int) (radius * 2) / 3;
 
-        Block homeBlock = BuiltInRegistries.BLOCK.get(entityDataMap.homeBlock());
-        if (!blockSearchResult.allPositions().containsKey(homeBlock)) return nearest;
-
-        for (BlockPos pos : blockSearchResult.allPositions().get(homeBlock))
+        for (BlockPos pos : BlockPos.withinManhattan(origin, radius, height, radius))
         {
-            double distSq = mobPos.distSqr(pos);
+            if (!isWalkable(mob, pos)) continue;
 
-            if (isWalkable(mob, pos.above()) && distSq < nearestDist)
+            float windOcclusion = BlockSearch.getWindOcclusion(level, pos).occlusionMultiplier();
+            boolean canSeeSky = level.canSeeSky(pos);
+
+            if  (isWarm)
             {
-                nearestDist = distSq;
-                nearest = pos.immutable();
+                if (canSeeSky && windOcclusion > 0.75f) return pos.immutable();
+
+                if (canSeeSky && windOcclusion > bestOcclusion)
+                {
+                    bestOcclusion = windOcclusion;
+                    bestPos = pos.immutable();
+                }
+            }
+            else
+            {
+                if (!canSeeSky && windOcclusion < 0.25f) return pos.immutable();
+
+                if (!canSeeSky && windOcclusion < bestOcclusion)
+                {
+                    bestOcclusion = windOcclusion;
+                    bestPos = pos.immutable();
+                }
             }
         }
 
-        return nearest;
+        return bestPos;
     }
 
     public static BlockPos findNearestHeatSource(PathfinderMob mob, BlockSearchResult blockSearchResult)
@@ -183,10 +149,8 @@ public class AiHelpers
 
     public static BlockPos findStrongestHeatSource(PathfinderMob mob, BlockSearchResult blockSearchResult)
     {
-        BlockPos mobPos = mob.blockPosition();
         BlockPos strongest = null;
         float maxTemp = 0f;
-        double nearestDist = Double.MAX_VALUE;
 
         for (Map.Entry<Block, List<BlockPos>> entry : blockSearchResult.allPositions().entrySet())
         {
@@ -195,7 +159,6 @@ public class AiHelpers
 
             for (BlockPos pos : entry.getValue())
             {
-                double distSq = mobPos.distSqr(pos);
                 BlockState state = mob.level().getBlockState(pos);
                 float temp = BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
 
@@ -203,7 +166,7 @@ public class AiHelpers
 
                 BlockPos walkablePos = findWalkableNearby(mob, pos);
 
-                if (walkablePos != null && distSq < nearestDist)
+                if (walkablePos != null)
                 {
                     maxTemp = temp;
                     strongest = pos.immutable();
@@ -218,7 +181,6 @@ public class AiHelpers
 
             for (BlockPos pos : entry.getValue())
             {
-                double distSq = mobPos.distSqr(pos);
                 BlockState state = mob.level().getBlockState(pos);
                 BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(state.getBlock()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
                 float temp = blockDataMap == null ? fluidDataMap.temperature() : BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
@@ -227,7 +189,7 @@ public class AiHelpers
 
                 BlockPos walkablePos = findWalkableNearby(mob, pos);
 
-                if (walkablePos != null && distSq < nearestDist)
+                if (walkablePos != null)
                 {
                     maxTemp = temp;
                     strongest = pos.immutable();
@@ -238,80 +200,109 @@ public class AiHelpers
         return strongest;
     }
 
-    public static BlockPos findBestShade(PathfinderMob mob, int searchRange)
+    public static BlockPos findNearestColdOrWater(PathfinderMob mob, BlockSearchResult blockSearchResult)
     {
         BlockPos mobPos = mob.blockPosition();
-        Direction windFrom = getWindDirectionCardinal(mob.level(), mobPos);
-        BlockPos bestShade = null;
-        double bestScore = Double.MAX_VALUE;
+        BlockPos nearest = null;
+        double nearestDist = Double.MAX_VALUE;
 
-        for (BlockPos pos : BlockPos.betweenClosed(mobPos.offset(-searchRange, -3, -searchRange), mobPos.offset(searchRange, 3, searchRange)))
+        for (Map.Entry<Block, List<BlockPos>> entry : blockSearchResult.allPositions().entrySet())
         {
-            if (mob.level().canSeeSky(pos)) continue;
-            if (!isWalkable(mob, pos)) continue;
+            BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getKey()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+            if (blockDataMap == null || blockDataMap.temperature() > 0f) continue;
 
-            int shelterQuality = evaluateShelter(mob.level(), pos, windFrom);
-            double distSq = mobPos.distSqr(pos);
-            double score = distSq / (1.0 + shelterQuality * 0.3);
-
-            if (score < bestScore)
+            for (BlockPos pos : entry.getValue())
             {
-                bestScore = score;
-                bestShade = pos.immutable();
+                if (!isWalkable(mob, pos)) continue;
+                double dist = mobPos.distSqr(pos);
+
+                if (dist < nearestDist)
+                {
+                    nearestDist = dist;
+                    nearest = pos.immutable();
+                }
             }
         }
 
-        return bestShade;
+        for (Map.Entry<Fluid, List<BlockPos>> entry : blockSearchResult.allFluidPositions().entrySet())
+        {
+            FluidTemperatureDataMap fluidDataMap = BuiltInRegistries.FLUID.wrapAsHolder(entry.getKey()).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
+            if (fluidDataMap == null || fluidDataMap.temperature() > 0f) continue;
+
+            for (BlockPos pos : entry.getValue())
+            {
+                if (!isWalkable(mob, pos)) continue;
+                double dist = mobPos.distSqr(pos);
+
+                if (dist < nearestDist)
+                {
+                    nearestDist = dist;
+                    nearest = pos.immutable();
+                }
+            }
+        }
+
+        return nearest;
     }
 
-    public static BlockPos findWaterOrShade(PathfinderMob mob, int searchRange)
+    public static BlockPos findStrongestColdOrWater(PathfinderMob mob, BlockSearchResult blockSearchResult)
     {
-        BlockPos mobPos = mob.blockPosition();
-        BlockPos bestWater = null;
-        BlockPos bestShade = null;
-        double waterDist = Double.MAX_VALUE;
-        double shadeDist = Double.MAX_VALUE;
-        Direction windFrom = getWindDirectionCardinal(mob.level(), mobPos);
+        BlockPos strongest = null;
+        float minTemp = 0f;
 
-        for (BlockPos pos : BlockPos.betweenClosed(mobPos.offset(-searchRange, -3, -searchRange), mobPos.offset(searchRange, 3, searchRange)))
+        for (Map.Entry<Block, List<BlockPos>> entry : blockSearchResult.allPositions().entrySet())
         {
-            double distSq = mobPos.distSqr(pos);
-            BlockState state = mob.level().getBlockState(pos);
-            if (!state.getFluidState().isEmpty() && isWalkable(mob, pos))
-            {
-                if (distSq < waterDist)
-                {
-                    waterDist = distSq;
-                    bestWater = pos.immutable();
-                }
-            }
+            BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getKey()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+            if (blockDataMap == null || blockDataMap.temperature() > 0f) continue;
 
-            if (!mob.level().canSeeSky(pos) && isWalkable(mob, pos))
+            for (BlockPos pos : entry.getValue())
             {
-                int shelterQuality = evaluateShelter(mob.level(), pos, windFrom);
-                double adjustedDist = distSq / (1.0 + shelterQuality * 0.5);
+                if (!isWalkable(mob, pos)) continue;
 
-                if (adjustedDist < shadeDist)
+                BlockState state = mob.level().getBlockState(pos);
+                float temp = BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
+
+                if (temp < minTemp)
                 {
-                    shadeDist = adjustedDist;
-                    bestShade = pos.immutable();
+                    strongest = pos.immutable();
+                    minTemp = temp;
                 }
             }
         }
 
-        if (bestWater != null && waterDist < shadeDist * 1.5) return bestWater;
-        return bestShade;
+        for (Map.Entry<Fluid, List<BlockPos>> entry : blockSearchResult.allFluidPositions().entrySet())
+        {
+            FluidTemperatureDataMap fluidDataMap = BuiltInRegistries.FLUID.wrapAsHolder(entry.getKey()).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
+            if (fluidDataMap == null || fluidDataMap.temperature() > 0f) continue;
+
+            for (BlockPos pos : entry.getValue())
+            {
+                if (!isWalkable(mob, pos)) continue;
+
+                BlockState state = mob.level().getBlockState(pos);
+                BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(state.getBlock()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+                float temp = blockDataMap == null ? fluidDataMap.temperature() : BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
+
+                if (temp < minTemp)
+                {
+                    strongest = pos.immutable();
+                    minTemp = temp;
+                }
+            }
+        }
+
+        return strongest;
     }
 
     public static float[] getComfortThresholds(EntityTemperature temperatureData, float comfortThreshold)
     {
         float maxInternalTemperature = temperatureData.maxInternalTemperature();
         float minInternalTemperature = temperatureData.minInternalTemperature();
-        float midPoint = (maxInternalTemperature + minInternalTemperature) * 0.5f;;
+        float midPoint = (maxInternalTemperature + minInternalTemperature) * 0.5f;
 
         float hotRange = maxInternalTemperature - midPoint;
         float coldRange = midPoint - minInternalTemperature;
-        
+
         float hotThreshold = midPoint + (hotRange * (1f - comfortThreshold));
         float coldThreshold = midPoint - (coldRange * (1f - comfortThreshold));
 
