@@ -10,12 +10,16 @@ import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.EntityTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
+import net.dries007.tfc.util.calendar.Calendar;
+import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -23,13 +27,62 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AiHelpers
 {
+    private static final Map<UUID, TargetCache> SHARED_TARGETS = new ConcurrentHashMap<>();
+    private static final int CACHE_LIFETIME_TICKS = 200;
+
+    private record TargetCache(BlockPos pos, long timeStamp, boolean isWarm) {}
+
+    public static BlockPos getSharedTarget(PathfinderMob mob, boolean seekWarm, int maxDistance)
+    {
+        AABB searchBox = mob.getBoundingBox().inflate(maxDistance);
+        long currentTime = mob.level().getGameTime();
+        BlockPos mobPos = mob.blockPosition();
+
+        BlockPos bestTarget = null;
+        double closestDist = Double.MAX_VALUE;
+
+        for (Entity nearby : mob.level().getEntities(mob, searchBox))
+        {
+            if (nearby.getType() != mob.getType()) continue;
+
+            TargetCache cached = SHARED_TARGETS.get(nearby.getUUID());
+            if (cached == null) continue;
+
+            if (cached.isWarm != seekWarm) continue;
+
+            if (currentTime - cached.timeStamp > CACHE_LIFETIME_TICKS)
+            {
+                SHARED_TARGETS.remove(nearby.getUUID());
+                continue;
+            }
+
+            double dist = mobPos.distSqr(cached.pos);
+            if(dist < closestDist)
+            {
+                closestDist = dist;
+                bestTarget = cached.pos;
+            }
+        }
+
+        return bestTarget;
+    }
+
+    public static void shareTarget(PathfinderMob mob, BlockPos target, boolean isWarm) {SHARED_TARGETS.put(mob.getUUID(), new TargetCache(target, mob.level().getGameTime(), isWarm));}
+
+    public static void clearTarget(PathfinderMob mob) {SHARED_TARGETS.remove(mob.getUUID());}
+
+    public static void cleanupExpiredTargets(long currentTime) {SHARED_TARGETS.entrySet().removeIf(e -> currentTime - e.getValue().timeStamp > CACHE_LIFETIME_TICKS);}
+
     public static boolean isWalkable(PathfinderMob mob, BlockPos pos)
     {
         BlockState below = mob.level().getBlockState(pos.below());
