@@ -140,7 +140,7 @@ public class TemperatureComfortGoal extends Goal
 
         if (AiHelpers.isAtPosition(mob, targetPos)) return false;
 
-        return mob.getNavigation().isDone();
+        return !mob.getNavigation().isDone();
     }
 
     @Override

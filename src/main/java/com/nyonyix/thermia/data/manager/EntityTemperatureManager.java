@@ -279,14 +279,11 @@ public class EntityTemperatureManager
                 if (tfcAnimal.getFamiliarity() >= 0.1)
                 {
                     entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()).withInternalTemperature(defaultTemp));
-
-                    if (entity instanceof PathfinderMob mob) AiHelpers.addTemperatureGoals(mob);
                 }
             } else  LOGGER.error("Entity {} is marked 'tamable' but no tamable entity found", entity.getName());
             return;
         }
 
-        if (entity instanceof PathfinderMob mob) AiHelpers.addTemperatureGoals(mob);
         entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, EntityTemperature.createDefault().withMinInternalTemperature(dataMap.minEntityTemperature()).withMaxInternalTemperature(dataMap.maxEntityTemperature()).withInternalTemperature(defaultTemp));
     }
 
@@ -294,7 +291,6 @@ public class EntityTemperatureManager
     {
         if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE) && entity.isAlive() && entity instanceof LivingEntity living)
         {
-
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
             EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
             CompletableFuture<BlockSearchResult> pendingBlockSearch = pendingBlockSearches.get(entity.getUUID());
