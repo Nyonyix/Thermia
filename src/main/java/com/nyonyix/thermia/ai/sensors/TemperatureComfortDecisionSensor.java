@@ -1,19 +1,80 @@
 package com.nyonyix.thermia.ai.sensors;
 
-import com.nyonyix.thermia.ai.ThermiaMemoryModules;
+import com.mojang.logging.LogUtils;
+import com.nyonyix.thermia.ai.behaviours.ThermiaActivities;
+import com.nyonyix.thermia.ai.memories.ThermiaMemoryModules;
+import com.nyonyix.thermia.data.attachment.EntityTemperature;
+import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
+import com.nyonyix.thermia.util.AiHelpers;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.sensing.Sensor;
+import org.slf4j.Logger;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class TemperatureComfortDecisionSensor extends Sensor<PathfinderMob>
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final int SCAN_RATE = 40;
+    private static final float TEMPERATURE_THRESHOLD = 5f;
+    private static final float COMFORT_THRESHOLD = AiHelpers.COMFORT_THRESHOLD;
+
+    public TemperatureComfortDecisionSensor() {super(SCAN_RATE)}
+
     @Override
     protected void doTick(ServerLevel level, PathfinderMob mob)
     {
+        if (!mob.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
 
+        Brain<?> brain = mob.getBrain();
+        EntityTemperature tempData = mob.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
+        float[] thresholds = AiHelpers.getComfortThresholds(tempData, COMFORT_THRESHOLD);
+        float currentInternalTemperature = tempData.internalTemperature();
+        float currentEnvironmentTemperature = tempData.environmentTemperature();
+
+        boolean isTooHot = currentInternalTemperature > thresholds[1];
+        boolean isTooCold = currentInternalTemperature < thresholds[0];
+        boolean isUncomfortable = isTooCold || isTooHot;
+
+        if (isUncomfortable)
+        {
+            boolean seekingWarmth = isTooCold;
+            brain.setMemory(ThermiaMemoryModules.IS_SEEKING_WARM.get(), seekingWarmth);
+
+            Optional<BlockPos> targetPos = seekingWarmth ? brain.getMemory(ThermiaMemoryModules.WARMEST_SPOT_BLOCK_POS.get()) : brain.getMemory(ThermiaMemoryModules.COOLEST_SPOT_BLOCK_POS.get());
+            Optional<Float> targetTemperature = seekingWarmth ? brain.getMemory(ThermiaMemoryModules.WARMEST_SPOT_TEMPERATURE.get()) : brain.getMemory(ThermiaMemoryModules.COOLEST_SPOT_TEMPERATURE.get());
+
+            if (targetPos.isPresent() && targetTemperature.isPresent())
+            {
+                float temperatureDiff = seekingWarmth ? targetTemperature.get() - currentEnvironmentTemperature : currentEnvironmentTemperature - targetTemperature.get();
+
+                if (temperatureDiff > TEMPERATURE_THRESHOLD)
+                {
+                    brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(targetPos.get(), 1.0f, 1));
+                    brain.setActiveActivityIfPossible(ThermiaActivities.SEEK_COMFORT.get());
+
+                    LOGGER.debug("Entity {}: Seeking {} at {} with a temperature difference of {}", mob.getType().getDescriptionId(), seekingWarmth ? "warmth" : "cooling", targetPos.get().toString(), temperatureDiff);
+                }
+                else
+                {
+                    BlockPos foundPos = seekingWarmth ? AiHelpers.findNearestHeatSource(mob, tempData.blockSearchResult()) : AiHelpers.findNearestColdOrWater(mob, tempData.blockSearchResult());
+
+                    if (foundPos != null)
+                    {
+                        if (seekingWarmth)
+                        {
+                            brain.setMemoryWithExpiry(ThermiaMemoryModules.WARMEST_SPOT_BLOCK_POS.get());
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override

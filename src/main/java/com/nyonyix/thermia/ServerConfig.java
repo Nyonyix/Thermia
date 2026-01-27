@@ -1,5 +1,6 @@
 package com.nyonyix.thermia;
 
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ServerConfig
@@ -34,8 +35,15 @@ public class ServerConfig
     public static final ModConfigSpec.DoubleValue ENTITY_TEMPERATURE_CHANGE_MULTI = BUILDER.comment("Entity temperature change multiplier").defineInRange("entityTemperatureChangeMulti", 0.5, 0.1, 2.0);
 
     static {BUILDER.pop();}
+    static {BUILDER.push("ai_and_memory");}
 
+    public static final ModConfigSpec.IntValue MEMORY_DECAY_DAYS = BUILDER.comment("Number of days animal remembers warm and cold locations").defineInRange("memoryDecayDays", 7, 1, 96);
+
+    public static final ModConfigSpec.IntValue MAX_STAY_TIME_MINUTES = BUILDER.comment("Maximum time (in TFC minutes) an animal will stay at a comfortable location").defineInRange("maxStayTimeMinutes", 60, 5, 240);
+
+    static {BUILDER.pop();}
     static {BUILDER.push("environment_temperature");}
+
     public static final ModConfigSpec.DoubleValue MAX_SOLAR_HEATING = BUILDER.comment("Max heating applied by sun").defineInRange("maxSolarHeating", 32.0, 0.0, 48.0);
 
     public static final ModConfigSpec.DoubleValue EVAP_COOLING_MULTI = BUILDER.comment("Evaporative cooling multiplier").defineInRange("evapCoolingMulti", 1.0, 0.0, 2.0);

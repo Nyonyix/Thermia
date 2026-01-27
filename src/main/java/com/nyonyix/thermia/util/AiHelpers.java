@@ -40,6 +40,8 @@ public class AiHelpers
     private static final Map<UUID, TargetCache> SHARED_TARGETS = new ConcurrentHashMap<>();
     private static final int CACHE_LIFETIME_TICKS = 200;
 
+    public static final float COMFORT_THRESHOLD = 0.75f;
+
     private record TargetCache(BlockPos pos, long timeStamp, boolean isWarm) {}
 
     public static BlockPos getSharedTarget(PathfinderMob mob, boolean seekWarm, int maxDistance)

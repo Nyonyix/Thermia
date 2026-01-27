@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.ai;
+package com.nyonyix.thermia.ai.memories;
 
 import com.mojang.serialization.Codec;
 import com.nyonyix.thermia.Thermia;
