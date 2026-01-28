@@ -1,11 +1,14 @@
 package com.nyonyix.thermia.ai.sensors;
 
 import com.mojang.logging.LogUtils;
+import com.nyonyix.thermia.ServerConfig;
+import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.ai.behaviours.ThermiaActivities;
 import com.nyonyix.thermia.ai.memories.ThermiaMemoryModules;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.util.AiHelpers;
+import net.dries007.tfc.util.calendar.Calendar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.PathfinderMob;
@@ -13,6 +16,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.schedule.Activity;
 import org.slf4j.Logger;
 
 import java.util.Optional;
@@ -25,7 +29,7 @@ public class TemperatureComfortDecisionSensor extends Sensor<PathfinderMob>
     private static final float TEMPERATURE_THRESHOLD = 5f;
     private static final float COMFORT_THRESHOLD = AiHelpers.COMFORT_THRESHOLD;
 
-    public TemperatureComfortDecisionSensor() {super(SCAN_RATE)}
+    public TemperatureComfortDecisionSensor() {super(SCAN_RATE);}
 
     @Override
     protected void doTick(ServerLevel level, PathfinderMob mob)
@@ -61,18 +65,44 @@ public class TemperatureComfortDecisionSensor extends Sensor<PathfinderMob>
 
                     LOGGER.debug("Entity {}: Seeking {} at {} with a temperature difference of {}", mob.getType().getDescriptionId(), seekingWarmth ? "warmth" : "cooling", targetPos.get().toString(), temperatureDiff);
                 }
-                else
-                {
-                    BlockPos foundPos = seekingWarmth ? AiHelpers.findNearestHeatSource(mob, tempData.blockSearchResult()) : AiHelpers.findNearestColdOrWater(mob, tempData.blockSearchResult());
+            }
+            else
+            {
+                BlockPos foundPos = seekingWarmth ? AiHelpers.findNearestHeatSource(mob, tempData.blockSearchResult()) : AiHelpers.findNearestColdOrWater(mob, tempData.blockSearchResult());
 
-                    if (foundPos != null)
+                if (foundPos != null)
+                {
+                    long decayTicks = (long) Calendar.CALENDAR_TICKS_IN_DAY * ServerConfig.MEMORY_DECAY_DAYS.getAsInt();
+
+                    if (seekingWarmth)
                     {
-                        if (seekingWarmth)
-                        {
-                            brain.setMemoryWithExpiry(ThermiaMemoryModules.WARMEST_SPOT_BLOCK_POS.get());
-                        }
+                        brain.setMemoryWithExpiry(ThermiaMemoryModules.WARMEST_SPOT_BLOCK_POS.get(), foundPos, decayTicks);
+                        brain.setMemoryWithExpiry(ThermiaMemoryModules.WARMEST_SPOT_TEMPERATURE.get(), currentEnvironmentTemperature, decayTicks);
                     }
+                    else
+                    {
+                        brain.setMemoryWithExpiry(ThermiaMemoryModules.COOLEST_SPOT_BLOCK_POS.get(), foundPos, decayTicks);
+                        brain.setMemoryWithExpiry(ThermiaMemoryModules.WARMEST_SPOT_TEMPERATURE.get(), currentEnvironmentTemperature, decayTicks);
+                    }
+
+                    brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(foundPos, 1.0f, 1));
+                    brain.setActiveActivityIfPossible(ThermiaActivities.SEEK_COMFORT.get());
+
+                    LOGGER.debug("Entity {}: Found new location via search {}", mob.getType().getDescriptionId(), foundPos);
                 }
+            }
+        }
+        else
+        {
+            brain.eraseMemory(ThermiaMemoryModules.IS_SEEKING_WARM.get());
+
+            Activity currentActivity = brain.getActiveNonCoreActivity().orElse(Activity.IDLE);
+            if (currentActivity == ThermiaActivities.SEEK_COMFORT.get())
+            {
+                brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+                brain.setActiveActivityIfPossible(Activity.IDLE);
+
+                LOGGER.debug("Entity {}: Is comfortable, Going to idle", mob.getType().getDescriptionId());
             }
         }
     }
@@ -81,12 +111,8 @@ public class TemperatureComfortDecisionSensor extends Sensor<PathfinderMob>
     public Set<MemoryModuleType<?>> requires()
     {
         return Set.of(
-                ThermiaMemoryModules.WARMEST_SPOT_BLOCK_POS.get(),
-                ThermiaMemoryModules.WARMEST_SPOT_TEMPERATURE.get(),
-                ThermiaMemoryModules.WARMEST_SPOT_TIME.get(),
-                ThermiaMemoryModules.COOLEST_SPOT_BLOCK_POS.get(),
-                ThermiaMemoryModules.COOLEST_SPOT_TEMPERATURE.get(),
-                ThermiaMemoryModules.COOLEST_SPOT_TIME.get()
+                ThermiaMemoryModules.IS_SEEKING_WARM.get(),
+                MemoryModuleType.WALK_TARGET
         );
     }
 }

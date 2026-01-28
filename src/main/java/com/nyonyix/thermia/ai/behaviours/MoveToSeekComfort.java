@@ -3,6 +3,7 @@ package com.nyonyix.thermia.ai.behaviours;
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ai.memories.ThermiaMemoryModules;
 import com.nyonyix.thermia.util.AiHelpers;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -34,5 +35,41 @@ public class MoveToSeekComfort extends Behavior<PathfinderMob>
         return !AiHelpers.isAtPosition(mob, target.get().getTarget().currentBlockPosition());
     }
 
+    @Override
+    protected void start(ServerLevel level, PathfinderMob mob, long gameTime)
+    {
+        mob.getBrain().getMemory(MemoryModuleType.WALK_TARGET).ifPresent(target ->
+        {
+            BlockPos targetPos = target.getTarget().currentBlockPosition();
+            mob.getNavigation().moveTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, speedModifier);
 
+            LOGGER.debug("Entity {}: Seeking comfort at: {}", mob.getType().getDescriptionId(), targetPos);
+        });
+    }
+
+    @Override
+    protected boolean canStillUse(ServerLevel level, PathfinderMob mob, long gameTime)
+    {
+        Optional<WalkTarget> target = mob.getBrain().getMemory(MemoryModuleType.WALK_TARGET);
+        if (target.isEmpty()) return false;
+
+        BlockPos targetPos = target.get().getTarget().currentBlockPosition();
+
+        if (AiHelpers.isAtPosition(mob, targetPos))
+        {
+            LOGGER.debug("Entity {}: Arrived at destination", mob.getType().getDescriptionId());
+            return false;
+        }
+
+        if (mob.getNavigation().isDone())
+        {
+            LOGGER.debug("Entity {}: Failed navigation", mob.getType().getDescriptionId());
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    protected void stop(ServerLevel level, PathfinderMob mob, long gameTime) {}
 }

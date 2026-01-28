@@ -39,7 +39,7 @@ public class ServerConfig
 
     public static final ModConfigSpec.IntValue MEMORY_DECAY_DAYS = BUILDER.comment("Number of days animal remembers warm and cold locations").defineInRange("memoryDecayDays", 7, 1, 96);
 
-    public static final ModConfigSpec.IntValue MAX_STAY_TIME_MINUTES = BUILDER.comment("Maximum time (in TFC minutes) an animal will stay at a comfortable location").defineInRange("maxStayTimeMinutes", 60, 5, 240);
+    public static final ModConfigSpec.IntValue MAX_STAY_TIME_MINUTES = BUILDER.comment("Maximum time (in TFC minutes) an animal will stay at a comfortable location").defineInRange("maxStayTimeMinutes", 120, 5, 480);
 
     static {BUILDER.pop();}
     static {BUILDER.push("environment_temperature");}
