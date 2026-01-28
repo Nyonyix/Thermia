@@ -82,7 +82,7 @@ public class TemperatureComfortDecisionSensor extends Sensor<PathfinderMob>
                     else
                     {
                         brain.setMemoryWithExpiry(ThermiaMemoryModules.COOLEST_SPOT_BLOCK_POS.get(), foundPos, decayTicks);
-                        brain.setMemoryWithExpiry(ThermiaMemoryModules.WARMEST_SPOT_TEMPERATURE.get(), currentEnvironmentTemperature, decayTicks);
+                        brain.setMemoryWithExpiry(ThermiaMemoryModules.COOLEST_SPOT_TEMPERATURE.get(), currentEnvironmentTemperature, decayTicks);
                     }
 
                     brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(foundPos, 1.0f, 1));
@@ -95,15 +95,6 @@ public class TemperatureComfortDecisionSensor extends Sensor<PathfinderMob>
         else
         {
             brain.eraseMemory(ThermiaMemoryModules.IS_SEEKING_WARM.get());
-
-            Activity currentActivity = brain.getActiveNonCoreActivity().orElse(Activity.IDLE);
-            if (currentActivity == ThermiaActivities.SEEK_COMFORT.get())
-            {
-                brain.eraseMemory(MemoryModuleType.WALK_TARGET);
-                brain.setActiveActivityIfPossible(Activity.IDLE);
-
-                LOGGER.debug("Entity {}: Is comfortable, Going to idle", mob.getType().getDescriptionId());
-            }
         }
     }
 
@@ -111,8 +102,10 @@ public class TemperatureComfortDecisionSensor extends Sensor<PathfinderMob>
     public Set<MemoryModuleType<?>> requires()
     {
         return Set.of(
-                ThermiaMemoryModules.IS_SEEKING_WARM.get(),
-                MemoryModuleType.WALK_TARGET
+                ThermiaMemoryModules.WARMEST_SPOT_TEMPERATURE.get(),
+                ThermiaMemoryModules.WARMEST_SPOT_BLOCK_POS.get(),
+                ThermiaMemoryModules.COOLEST_SPOT_TEMPERATURE.get(),
+                ThermiaMemoryModules.COOLEST_SPOT_BLOCK_POS.get()
         );
     }
 }

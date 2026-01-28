@@ -56,10 +56,8 @@ public class PassiveTemperatureSensor extends Sensor<PathfinderMob>
         return Set.of(
                 ThermiaMemoryModules.WARMEST_SPOT_BLOCK_POS.get(),
                 ThermiaMemoryModules.WARMEST_SPOT_TEMPERATURE.get(),
-                ThermiaMemoryModules.WARMEST_SPOT_TIME.get(),
                 ThermiaMemoryModules.COOLEST_SPOT_BLOCK_POS.get(),
-                ThermiaMemoryModules.COOLEST_SPOT_TEMPERATURE.get(),
-                ThermiaMemoryModules.COOLEST_SPOT_TIME.get()
+                ThermiaMemoryModules.COOLEST_SPOT_TEMPERATURE.get()
         );
     }
 }

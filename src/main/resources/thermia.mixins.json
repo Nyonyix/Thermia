@@ -3,7 +3,8 @@
   "package": "com.nyonyix.thermia.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "TFCPlayerOverride"
+    "TFCPlayerOverride",
+    "LivestockAiMixin"
   ],
   "injectors": {
     "defaultRequire": 1
