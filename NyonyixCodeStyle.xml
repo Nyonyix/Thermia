@@ -1,1 +1,9 @@
-<code_scheme name="Project" version="173" />
+<code_scheme name="Project" version="173">
+  <option name="AUTODETECT_INDENTS" value="false" />
+  <codeStyleSettings language="JAVA">
+    <option name="BRACE_STYLE" value="2" />
+    <option name="CLASS_BRACE_STYLE" value="2" />
+    <option name="METHOD_BRACE_STYLE" value="2" />
+    <option name="LAMBDA_BRACE_STYLE" value="2" />
+  </codeStyleSettings>
+</code_scheme>
