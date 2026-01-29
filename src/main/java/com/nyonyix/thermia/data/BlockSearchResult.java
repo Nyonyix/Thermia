@@ -53,7 +53,11 @@ public record BlockSearchResult(
             ResourceKey.codec(Registries.DIMENSION).fieldOf("level_id").forGetter(BlockSearchResult::levelID),
             Codec.unboundedMap(BuiltInRegistries.BLOCK.byNameCodec(), Codec.list(BlockPos.CODEC)).fieldOf("all_positions").forGetter(BlockSearchResult::allPositions),
             Codec.unboundedMap(BuiltInRegistries.FLUID.byNameCodec(), Codec.list(BlockPos.CODEC)).fieldOf("all_fluid_positions").forGetter(BlockSearchResult::allFluidPositions),
-            Codec.unboundedMap(BlockPos.CODEC, ExposedFaces.CODEC).fieldOf("exposed_faces").forGetter(BlockSearchResult::exposedFaces)
+            Codec.unboundedMap(
+                    Codec.STRING.xmap(
+                            str -> BlockPos.of(Long.parseLong(str)),
+                            pos -> String.valueOf(pos.asLong())
+                    ), ExposedFaces.CODEC).fieldOf("exposed_faces").forGetter(BlockSearchResult::exposedFaces)
     ).apply(blockSearchResultInstance, BlockSearchResult::new));
 
     private record RankedFace(Vec3 faceCenter, float weight) {}
