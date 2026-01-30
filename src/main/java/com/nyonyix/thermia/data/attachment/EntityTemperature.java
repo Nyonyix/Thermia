@@ -17,6 +17,7 @@ public record EntityTemperature(
         float wetness,
         float maxInternalTemperature,
         float minInternalTemperature,
+        float acclimatization,
         boolean toRemove,
         BlockSearchResult blockSearchResult,
         SolarShadeResult solarShadeResult,
@@ -30,6 +31,7 @@ public record EntityTemperature(
         Codec.FLOAT.fieldOf("wetness").forGetter(EntityTemperature::wetness),
         Codec.FLOAT.fieldOf("max_internal_temperature").forGetter(EntityTemperature::maxInternalTemperature),
         Codec.FLOAT.fieldOf("min_internal_temperature").forGetter(EntityTemperature::minInternalTemperature),
+        Codec.FLOAT.fieldOf("acclimatization").forGetter(EntityTemperature::acclimatization),
         Codec.BOOL.fieldOf("to_remove").forGetter(EntityTemperature::toRemove),
         BlockSearchResult.CODEC.fieldOf("block_search_result").forGetter(EntityTemperature::blockSearchResult),
         SolarShadeResult.CODEC.fieldOf("solar_shade_result").forGetter(EntityTemperature::solarShadeResult),
@@ -45,10 +47,12 @@ public record EntityTemperature(
                 buf.writeFloat(temp.wetness);
                 buf.writeFloat(temp.maxInternalTemperature);
                 buf.writeFloat(temp.minInternalTemperature);
+                buf.writeFloat(temp.acclimatization);
                 buf.writeBoolean(temp.toRemove);
                 SolarShadeResult.STREAM_CODEC.encode(buf, temp.solarShadeResult);
                 WindOcclusionResult.STREAM_CODEC.encode(buf, temp.windOcclusionResult);
             }, (buf) -> new EntityTemperature(
+                    buf.readFloat(),
                     buf.readFloat(),
                     buf.readFloat(),
                     buf.readFloat(),
@@ -62,25 +66,27 @@ public record EntityTemperature(
             )
     );
 
-    public static EntityTemperature createDefault() {return new EntityTemperature(20f, 13f, 0.5f, 0f, 40, 0, false, BlockSearchResult.createDefault(), SolarShadeResult.createDefault(), WindOcclusionResult.createDefault());}
+    public static EntityTemperature createDefault() {return new EntityTemperature(20f, 13f, 0.5f, 0f, 40, 0, 0,false, BlockSearchResult.createDefault(), SolarShadeResult.createDefault(), WindOcclusionResult.createDefault());}
 
-    public EntityTemperature withInternalTemperature(float internalTemperature) {return new EntityTemperature(internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
+    public EntityTemperature withInternalTemperature(float internalTemperature) {return new EntityTemperature(internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.acclimatization, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
 
-    public EntityTemperature withEnvironmentTemperature(float environmentTemperature) {return new EntityTemperature(this.internalTemperature, environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
+    public EntityTemperature withEnvironmentTemperature(float environmentTemperature) {return new EntityTemperature(this.internalTemperature, environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.acclimatization, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
 
-    public EntityTemperature withEnvironmentHumidity(float environmentHumidity) {return new EntityTemperature(this.internalTemperature, this.environmentTemperature, environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
+    public EntityTemperature withEnvironmentHumidity(float environmentHumidity) {return new EntityTemperature(this.internalTemperature, this.environmentTemperature, environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.acclimatization, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
 
-    public EntityTemperature withWetness(float wetness) {return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, wetness, this.maxInternalTemperature, this.minInternalTemperature, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
+    public EntityTemperature withWetness(float wetness) {return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, wetness, this.maxInternalTemperature, this.minInternalTemperature, this.acclimatization, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
 
-    public EntityTemperature withMaxInternalTemperature(float maxInternalTemperature) {return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, maxInternalTemperature, this.minInternalTemperature, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
+    public EntityTemperature withMaxInternalTemperature(float maxInternalTemperature) {return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, maxInternalTemperature, this.minInternalTemperature, this.acclimatization, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
 
-    public EntityTemperature withMinInternalTemperature(float minInternalTemperature) {return  new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, minInternalTemperature, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
+    public EntityTemperature withMinInternalTemperature(float minInternalTemperature) {return  new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, minInternalTemperature, this.acclimatization, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
 
-    public EntityTemperature withToRemove(boolean toRemove) {return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
+    public EntityTemperature withAcclimatization(float acclimatization) {return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, acclimatization, this.toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
 
-    public EntityTemperature withBlockSearchResult(BlockSearchResult blockSearchResult) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.toRemove, blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
+    public EntityTemperature withToRemove(boolean toRemove) {return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.acclimatization, toRemove, this.blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
 
-    public EntityTemperature withSolarShadeResult(SolarShadeResult solarShadeResult) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.toRemove, this.blockSearchResult, solarShadeResult, this.windOcclusionResult);}
+    public EntityTemperature withBlockSearchResult(BlockSearchResult blockSearchResult) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.acclimatization, this.toRemove, blockSearchResult, this.solarShadeResult, this.windOcclusionResult);}
 
-    public EntityTemperature withWindOcclusionResult(WindOcclusionResult windOcclusionResult) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.toRemove, this.blockSearchResult, this.solarShadeResult, windOcclusionResult);}
+    public EntityTemperature withSolarShadeResult(SolarShadeResult solarShadeResult) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.acclimatization, this.toRemove, this.blockSearchResult, solarShadeResult, this.windOcclusionResult);}
+
+    public EntityTemperature withWindOcclusionResult(WindOcclusionResult windOcclusionResult) { return new EntityTemperature(this.internalTemperature, this.environmentTemperature, this.environmentHumidity, this.wetness, this.maxInternalTemperature, this.minInternalTemperature, this.acclimatization, this.toRemove, this.blockSearchResult, this.solarShadeResult, windOcclusionResult);}
 }

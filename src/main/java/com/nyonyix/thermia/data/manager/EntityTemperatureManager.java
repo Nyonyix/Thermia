@@ -2,7 +2,6 @@ package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.util.AiHelpers;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.SolarShadeResult;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
@@ -22,6 +21,7 @@ import net.dries007.tfc.util.calendar.ICalendar;
 import net.dries007.tfc.util.climate.Climate;
 import net.dries007.tfc.util.climate.ClimateModel;
 import net.dries007.tfc.util.tracker.WeatherHelpers;
+import net.dries007.tfc.world.volcano.CenteredFeatureBlendType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -36,6 +36,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import org.slf4j.Logger;
 
 import java.util.Map;
@@ -82,7 +83,7 @@ public class EntityTemperatureManager
         return Mth.clamp((float) (fluidHeight / entityHeight), 0.0f, 1.0f);
     }
 
-    private static EntityTemperature handlePlayerSweat(Entity entity, EntityTemperature entityData)
+    private static EntityTemperature handleEntitySweat(Entity entity, EntityTemperature entityData)
     {
         float currentTemperature = entityData.internalTemperature();
         float minTemperature = entityData.minInternalTemperature();
@@ -139,7 +140,7 @@ public class EntityTemperatureManager
         return entityData;
     }
 
-    private static void handlePlayerTemperatureEffect(Entity entity)
+    private static void handleEntityTemperatureEffect(Entity entity)
     {
         if (!(entity instanceof LivingEntity living)) return;
         if (living instanceof Player player)
@@ -205,6 +206,35 @@ public class EntityTemperatureManager
         }
 
         return;
+    }
+
+    public static void handleEntityAcclimatization(Entity entity)
+    {
+        if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
+        EntityTemperature tempData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
+
+        float maximumInternalTemperature = tempData.maxInternalTemperature();
+        float minimumInternalTemperature = tempData.minInternalTemperature();
+        float midPoint = (maximumInternalTemperature + minimumInternalTemperature) / 2f;
+        float averageTemperature = Climate.get(entity.level()).getAverageTemperature(entity.level(), entity.blockPosition());
+        float acclimatization = (averageTemperature - midPoint) / 10E4f;
+
+        float buffer = (float) ServerConfig.TEMPERATURE_SEGMENTS_PERCENT.getAsInt() / 100f;
+
+        float highMaximumInternalTemperature = maximumInternalTemperature * (1f + buffer);
+        float lowMaximumInternalTemperature = maximumInternalTemperature * (1f - buffer);
+
+        float highMinimumInternalTemperature = minimumInternalTemperature * (1f + buffer);
+        float lowMinimumInternalTemperature = minimumInternalTemperature * (1f - buffer);
+
+        float acclimatizedMaxTemperature = Mth.clamp(maximumInternalTemperature + acclimatization, lowMaximumInternalTemperature, highMaximumInternalTemperature);
+        float acclimatizedMinTemperature = Mth.clamp(minimumInternalTemperature + acclimatization, lowMinimumInternalTemperature, highMinimumInternalTemperature);
+
+        tempData = tempData.withAcclimatization(acclimatization);
+        tempData = tempData.withMaxInternalTemperature(acclimatizedMaxTemperature);
+        tempData = tempData.withMinInternalTemperature(acclimatizedMinTemperature);
+
+        entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, tempData);
     }
 
     public static float getTemperatureEffectScale(Entity entity)
@@ -361,7 +391,7 @@ public class EntityTemperatureManager
                 entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature + inventoryHeat);
             }
 
-            entityData = handlePlayerSweat(entity, entityData);
+            entityData = handleEntitySweat(entity, entityData);
             entityData = handleWetness(level, pos, levelModel, levelCalender, entityData, shade);
             entityData = handleTemperatureChange(entity, entityData);
 
@@ -378,7 +408,7 @@ public class EntityTemperatureManager
             float submersion = getEntitySubmersion(entity, entity.level());
             if (entityData.wetness() < submersion ) entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData.withWetness(submersion));
 
-            handlePlayerTemperatureEffect(entity);
+            handleEntityTemperatureEffect(entity);
         }
     }
 }

@@ -109,9 +109,6 @@ public class ThermiaServer
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveLevelEvent event)
     {
-        Entity entity = event.getEntity();
-
-        if (entity instanceof PathfinderMob mob) AiHelpers.clearTarget(mob);
     }
 
     @SubscribeEvent
