@@ -9,6 +9,7 @@ import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import com.nyonyix.thermia.data.datamap.*;
 import com.nyonyix.thermia.util.AiHelpers;
+import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
@@ -145,6 +146,11 @@ public class ThermiaServer
                 }
 
                 if (server.getTickCount() % 100 == entity.getId() % 100) EntityTemperatureManager.queueBlockSearch(entity);
+
+                int ticksInHour = Calendar.CALENDAR_TICKS_IN_HOUR;
+                int refreshTicks = 12 * ticksInHour;
+
+                if (Calendars.get(level).getCalendarTicks() % refreshTicks == 0) EntityTemperatureManager.handleEntityAcclimatization(entity);
             }
 
             if (ChunkHumidityManager.lastTickedTFCHour != Calendars.get(level).getHourOfDay())
