@@ -96,6 +96,8 @@ public class ThermiaServer
         gen.addProvider(event.includeServer(), new FluidTemperatureDataMapProvider(packOutput, lookupProvider));
 
         gen.addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(packOutput, lookupProvider, new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, ThermiaDamageTypesDataGen::bootstrap), Set.of(Thermia.MODID)));
+
+        gen.addProvider(event.includeServer(), new ThermiaPatchouliProvider(packOutput, Thermia.MODID));
     }
 
     @SubscribeEvent
