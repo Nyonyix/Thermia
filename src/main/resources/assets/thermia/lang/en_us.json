@@ -11,6 +11,7 @@
   "death.attack.hyperthermia.player": "%1$s was too hot for %2$s to handle",
   "death.attack.hypothermia": "%1$s became an icicle",
   "death.attack.hypothermia.player": "%1$s was too cool for %2$s",
+  "tooltip.thermia.insulation": "Insulation Value: %1$f",
   "thermia.configuration.search_and_range": "Search and Range Options",
   "thermia.configuration.entity_temperature": "Entity Temperature Options",
   "thermia.configuration.environment_temperature": "Environment Temperature Options",

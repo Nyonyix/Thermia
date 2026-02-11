@@ -24,7 +24,7 @@ public class ServerConfig
 
     public static final ModConfigSpec.IntValue PEAK_INVENTORY_TEMPERATURE = BUILDER.comment("Maximum heating from hot TFC items in inventory").defineInRange("maxInventoryHeating", 75, 50, 150);
 
-    public static final ModConfigSpec.IntValue TEMPERATURE_SEGMENTS_PERCENT = BUILDER.comment("Percentage of delta used for effect levels").defineInRange("temperatureSegmentsPercent", 15, 0, 50);
+    public static final ModConfigSpec.IntValue TEMPERATURE_SEGMENTS_PERCENT = BUILDER.comment("Percentage used for various calculations that use buffers or segments").defineInRange("temperatureSegmentsPercent", 15, 0, 50);
 
     public static final ModConfigSpec.IntValue MAX_TEMPERATURE_EFFECT_LEVEL = BUILDER.comment("Maximum amount of hyper/hypothermia effect levels.").defineInRange("maxTemperatureEffectLevel", 4, 2, 8);
 
