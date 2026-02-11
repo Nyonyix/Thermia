@@ -93,6 +93,7 @@ public class FluidTemperatureDataMapProvider extends DataMapProvider
                 .add(TFCFluids.SALT_WATER.flowing(), new FluidTemperatureDataMap(WATER_TEMPERATURE_FLOWING, 16, false), false)
                 .add(TFCFluids.SPRING_WATER.source(), new FluidTemperatureDataMap(40f, 16, false), false)
                 .add(TFCFluids.SPRING_WATER.flowing(), new FluidTemperatureDataMap(40f, 16, false), false)
+                .add(TFCFluids.RIVER_WATER, new FluidTemperatureDataMap(WATER_TEMPERATURE_FLOWING, 16, false), false)
                 .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.WATER), new FluidTemperatureDataMap(WATER_TEMPERATURE, 16, false), false)
                 .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.FLOWING_WATER), new FluidTemperatureDataMap(WATER_TEMPERATURE_FLOWING, 16, false), false);
     }

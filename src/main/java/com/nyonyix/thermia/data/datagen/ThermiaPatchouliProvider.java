@@ -17,16 +17,16 @@ public class ThermiaPatchouliProvider implements DataProvider
 
     private CompletableFuture<?> createEntry(CachedOutput cache, String id, String name, String desc, String icon, int sortNum)
     {
-        JsonObject category = new JsonObject();
+        JsonObject entry = new JsonObject();
 
-        category.addProperty("name", name);
-        category.addProperty("description", desc);
-        category.addProperty("icon", icon);
-        category.addProperty("sortnum", sortNum);
+        entry.addProperty("name", name);
+        entry.addProperty("description", desc);
+        entry.addProperty("icon", icon);
+        entry.addProperty("sortnum", sortNum);
 
-        Path categoryPath = output.getOutputFolder().resolve("assets/tfc/patchouli_books/field_guide/en_us/entires/" + id + ".json");
+        Path entryPath = output.getOutputFolder().resolve("assets/tfc/patchouli_books/field_guide/en_us/entires/" + id + ".json");
 
-        return DataProvider.saveStable(cache, category, categoryPath);
+        return DataProvider.saveStable(cache, entry, entryPath);
     }
 
     private CompletableFuture<?> generateEntries(CachedOutput cache)
@@ -50,7 +50,9 @@ public class ThermiaPatchouliProvider implements DataProvider
         category.addProperty("description", "patchouli.thermia.category.thermia.desc");
         category.addProperty("icon", "thermia:textures/logo.png");
 
-        Path categoryPath = output.getOutputFolder().resolve("assets/tfc//patchouli_books/field_guide/en_us/category/thermia.json");
+        Path categoryPath = output.getOutputFolder().resolve("assets/tfc/patchouli_books/field_guide/en_us/category/thermia.json");
+
+        return DataProvider.saveStable(cache, category, categoryPath);
     }
 
     public ThermiaPatchouliProvider(PackOutput output, String modId)
@@ -60,7 +62,7 @@ public class ThermiaPatchouliProvider implements DataProvider
     }
 
     @Override
-    public CompletableFuture<?> run(CachedOutput cache) {return CompletableFuture.allOf(generateEntries(cache));}
+    public CompletableFuture<?> run(CachedOutput cache) {return CompletableFuture.allOf(generateCategory(cache), generateEntries(cache));}
 
     @Override
     public String getName() {return "thermia_patchouli_provider";}
