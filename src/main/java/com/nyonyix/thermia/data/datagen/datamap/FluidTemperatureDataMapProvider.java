@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.data.datagen;
+package com.nyonyix.thermia.data.datagen.datamap;
 
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;

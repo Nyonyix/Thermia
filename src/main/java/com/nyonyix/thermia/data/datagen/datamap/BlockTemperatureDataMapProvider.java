@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.data.datagen;
+package com.nyonyix.thermia.data.datagen.datamap;
 
 import com.eerussianguy.firmalife.common.blocks.FLBlocks;
 import com.eerussianguy.firmalife.common.blocks.oven.OvenType;

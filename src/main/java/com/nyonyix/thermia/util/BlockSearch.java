@@ -224,7 +224,8 @@ public class BlockSearch
                 }
 
                 return builder.build(level);
-            }catch (Exception e)
+            }
+            catch (Exception e)
             {
                 LOGGER.error("Error in async block search:", e);
                 return new BlockSearchResult(Vec3.ZERO, level.dimension(), new HashMap<>(), new HashMap<>(), new HashMap<>());

@@ -3,26 +3,39 @@ package com.nyonyix.thermia.server;
 import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.ThermiaCommands;
+import com.nyonyix.thermia.data.ThermiaTags;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
-import com.nyonyix.thermia.data.datagen.*;
+import com.nyonyix.thermia.data.datagen.damage.ThermiaDamageTypesDataGen;
+import com.nyonyix.thermia.data.datagen.datamap.BlockTemperatureDataMapProvider;
+import com.nyonyix.thermia.data.datagen.datamap.EntityTemperatureDataMapProvider;
+import com.nyonyix.thermia.data.datagen.datamap.FluidTemperatureDataMapProvider;
+import com.nyonyix.thermia.data.datagen.datamap.ItemInsulationDataMapProvider;
+import com.nyonyix.thermia.data.datagen.tags.ThermiaBlockTagProvider;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import com.nyonyix.thermia.data.datamap.*;
+import com.nyonyix.thermia.data.manager.InteriorManager;
 import com.nyonyix.thermia.util.AiHelpers;
 import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -31,6 +44,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -51,7 +65,7 @@ public class ThermiaServer
             EntityTemperatureDataMap dataMap = entityType.getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
             if (dataMap == null) return;
 
-            LOGGER.debug("Entity: {}, maxTemperature: {}, minTemperature: {}, isMob: {}, isTamed: {}, homeBlock: {}", entityType.value().getDescriptionId(), dataMap.maxEntityTemperature(), dataMap.minEntityTemperature(), dataMap.isMob(), dataMap.isTamed(), dataMap.homeBlock().getNamespace());
+            LOGGER.debug("Entity: {}, maxTemperature: {}, minTemperature: {}, isMob: {}, isTamed: {}}", entityType.value().getDescriptionId(), dataMap.maxEntityTemperature(), dataMap.minEntityTemperature(), dataMap.isMob(), dataMap.isTamed());
             VerifyDataMap.isValidEntityTemperature(dataMap, entityType.value());
         });
 
@@ -89,6 +103,8 @@ public class ThermiaServer
         DataGenerator gen = event.getGenerator();
         PackOutput packOutput = gen.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
+
+        gen.addProvider(event.includeServer(), new ThermiaBlockTagProvider(packOutput, lookupProvider, event.getExistingFileHelper()));
 
         gen.addProvider(event.includeServer(), new BlockTemperatureDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new EntityTemperatureDataMapProvider(packOutput, lookupProvider));
@@ -161,6 +177,8 @@ public class ThermiaServer
                 ChunkHumidityManager.refreshWorkingCache(level);
             }
 
+            InteriorManager.onTick(level, server.getTickCount());
+
             ChunkHumidityManager.processChunkBatch(level, 64);
 
             AiHelpers.cleanupExpiredTargets(level.getGameTime());
@@ -193,5 +211,27 @@ public class ThermiaServer
 
         Set<ChunkPos> workingChunks = ChunkHumidityManager.workingChunkCache.get(level);
         if (workingChunks != null) workingChunks.remove(pos);
+    }
+
+    @SubscribeEvent
+    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event)
+    {
+        if (!event.getEntity().isShiftKeyDown()) return;
+        if (event.getLevel().isClientSide()) return;
+
+        Player player = event.getEntity();
+        if (!player.getMainHandItem().isEmpty()) return;
+
+        Level level = event.getLevel();
+        BlockPos startPos = event.getPos().relative(Direction.UP, 1);
+        BlockPos pos = event.getPos();
+        BlockState state = level.getBlockState(pos);
+
+        if (state.is(ThermiaTags.Blocks.INTERIOR_TRIGGERS))
+        {
+            InteriorManager.onCreateEvent(level, startPos);
+            player.sendSystemMessage(Component.literal("Right clicked: ").append(state.getBlock().getName().withStyle(ChatFormatting.DARK_GREEN)));
+            event.setCanceled(true);
+        }
     }
 }

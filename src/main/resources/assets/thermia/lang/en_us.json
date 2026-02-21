@@ -42,5 +42,9 @@
   "thermia.configuration.enableHypoRender": "Toggle Hypothermia Render",
   "thermia.configuration.hyperEffectIntensity": "Hyperthermia effect intensity",
   "thermia.configuration.hypoEffectIntensity": "Hypothermia effect intensity",
-  "thermia.configuration.enableDebug": "Enable Debug"
+  "thermia.configuration.enableDebug": "Enable Debug",
+  "thermia.configuration.maxInteriorVolume": "Maximum Interior Volume",
+  "thermia.configuration.maxOpeningDepth": "Maximum Interior Wall Depth",
+  "thermia.configuration.ai_and_memory": "AI and AI Memory",
+  "thermia.configuration.maxOpeningSize": "Maximum Opening Area"
 }

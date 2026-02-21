@@ -1,5 +1,6 @@
 package com.nyonyix.thermia;
 
+import net.minecraft.commands.execution.tasks.BuildContexts;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -16,6 +17,10 @@ public class ServerConfig
     public static final ModConfigSpec.IntValue MAX_BLOCKS_ABOVE = BUILDER.comment("Number of blocks above to be considered underground").defineInRange("maxBlocksAbove", 24576, 8192, 65536);
 
     public static final ModConfigSpec.IntValue MAX_FLUID_DEPTH_CHECK = BUILDER.comment("Maximum blocks to check for fluid depth temp modifier").defineInRange("maxFluidDepthCheck", 32, 8, 64);
+
+    public static final ModConfigSpec.IntValue MAX_INTERIOR_VOLUME = BUILDER.comment("Maximum volume or number of blocks an interior can have").defineInRange("maxInteriorVolume", 262144, 4096, 2097152);
+
+    public static final ModConfigSpec.DoubleValue MAX_PERCENTAGE_OPEN_ALLOWED = BUILDER.comment("Maximum percent of edge to allowed to be air").defineInRange("maxPercentageOpenAllowed", 0.25, 0.0, 0.5);
 
     static {BUILDER.pop();}
     static {BUILDER.push("entity_temperature");}

@@ -63,7 +63,7 @@ public class TemperatureComfortDecisionSensor extends Sensor<PathfinderMob>
                     brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(targetPos.get(), 1.0f, 1));
                     brain.setActiveActivityIfPossible(ThermiaActivities.SEEK_COMFORT.get());
 
-                    LOGGER.debug("Entity {}: Seeking {} at {} with a temperature difference of {}", mob.getType().getDescriptionId(), seekingWarmth ? "warmth" : "cooling", targetPos.get().toString(), temperatureDiff);
+                    //LOGGER.debug("Entity {}: Seeking {} at {} with a temperature difference of {}", mob.getType().getDescriptionId(), seekingWarmth ? "warmth" : "cooling", targetPos.get().toString(), temperatureDiff);
                 }
             }
             else
