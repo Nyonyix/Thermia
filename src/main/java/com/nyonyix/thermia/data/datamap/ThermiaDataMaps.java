@@ -21,6 +21,8 @@ public class ThermiaDataMaps
 
     public static final DataMapType<Fluid, FluidTemperatureDataMap> FLUID_TEMPERATURE_DATA_MAP = DataMapType.builder(ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "fluid_temperature"), Registries.FLUID, FluidTemperatureDataMap.CODEC).synced(FluidTemperatureDataMap.CODEC, true).build();
 
+    public static final DataMapType<Block, BlockPorosityDataMap> BLOCK_POROSITY_DATA_MAP = DataMapType.builder(ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "block_porosity"), Registries.BLOCK, BlockPorosityDataMap.CODEC).synced(BlockPorosityDataMap.CODEC, true).build();
+
     @SubscribeEvent
     public static void registerDataMapTypes(RegisterDataMapTypesEvent event)
     {
@@ -28,5 +30,6 @@ public class ThermiaDataMaps
         event.register(BLOCK_TEMPERATURE_DATA_MAP);
         event.register(ITEM_INSULATION_DATA_MAP);
         event.register(FLUID_TEMPERATURE_DATA_MAP);
+        event.register(BLOCK_POROSITY_DATA_MAP);
     }
 }

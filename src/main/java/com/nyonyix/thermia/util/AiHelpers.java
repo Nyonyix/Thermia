@@ -215,7 +215,7 @@ public class AiHelpers
             for (BlockPos pos : entry.getValue())
             {
                 BlockState state = mob.level().getBlockState(pos);
-                float temp = BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
+                float temp = BlockSearchResult.parseBlockState(state, blockDataMap);
 
                 if (temp <= maxTemp) continue;
 
@@ -238,7 +238,7 @@ public class AiHelpers
             {
                 BlockState state = mob.level().getBlockState(pos);
                 BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(state.getBlock()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
-                float temp = blockDataMap == null ? fluidDataMap.temperature() : BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
+                float temp = blockDataMap == null ? fluidDataMap.temperature() : BlockSearchResult.parseBlockState(state, blockDataMap);
 
                 if (temp <= maxTemp) continue;
 
@@ -315,7 +315,7 @@ public class AiHelpers
                 if (!isWalkable(mob, pos)) continue;
 
                 BlockState state = mob.level().getBlockState(pos);
-                float temp = BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
+                float temp = BlockSearchResult.parseBlockState(state, blockDataMap);
 
                 if (temp < minTemp)
                 {
@@ -336,7 +336,7 @@ public class AiHelpers
 
                 BlockState state = mob.level().getBlockState(pos);
                 BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(state.getBlock()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
-                float temp = blockDataMap == null ? fluidDataMap.temperature() : BlockSearchResult.parseBlockState(state, mob.level(), pos, blockDataMap);
+                float temp = blockDataMap == null ? fluidDataMap.temperature() : BlockSearchResult.parseBlockState(state, blockDataMap);
 
                 if (temp < minTemp)
                 {

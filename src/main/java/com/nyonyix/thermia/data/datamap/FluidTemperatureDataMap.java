@@ -22,10 +22,4 @@ public record FluidTemperatureDataMap(float temperature, int searchCap, boolean 
     );
 
     public static FluidTemperatureDataMap createDefault() {return new FluidTemperatureDataMap(0f, 16, true);}
-
-    public FluidTemperatureDataMap withTemperature(float temperature) {return new FluidTemperatureDataMap(temperature, this.searchCap, this.isRadiative);}
-
-    public FluidTemperatureDataMap withSearchCap(int searchCap) {return new FluidTemperatureDataMap(this.temperature, searchCap, this.isRadiative);}
-
-    public FluidTemperatureDataMap withIsRadiative(boolean isRadiative) {return new FluidTemperatureDataMap(this.temperature, this.searchCap, isRadiative);}
 }

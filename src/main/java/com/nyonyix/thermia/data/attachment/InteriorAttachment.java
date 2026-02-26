@@ -10,7 +10,10 @@ import java.util.Map;
 public record InteriorAttachment(Map<BlockPos, Interior> activeInteriors)
 {
     public static final Codec<InteriorAttachment> CODEC = RecordCodecBuilder.create(interiorAttachmentInstance -> interiorAttachmentInstance.group(
-            Codec.unboundedMap(BlockPos.CODEC, Interior.CODEC).fieldOf("active_interiors").forGetter(InteriorAttachment::activeInteriors)
+            Codec.unboundedMap(Codec.STRING.xmap(
+                    str -> BlockPos.of(Long.parseLong(str)),
+                    pos -> String.valueOf(pos.asLong())
+            ), Interior.CODEC).fieldOf("active_interiors").forGetter(InteriorAttachment::activeInteriors)
     ).apply(interiorAttachmentInstance, InteriorAttachment::new));
 
     public static InteriorAttachment createDefault() {return new InteriorAttachment(Map.of(BlockPos.ZERO, Interior.createDefault()));}

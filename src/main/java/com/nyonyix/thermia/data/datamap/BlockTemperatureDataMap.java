@@ -2,6 +2,8 @@ package com.nyonyix.thermia.data.datamap;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 
 import java.util.Map;
 
@@ -11,14 +13,10 @@ public record BlockTemperatureDataMap(
         boolean hasTFCHeat,
         boolean isRadiative,
         boolean isHomeBlock,
-        Map<String, Boolean> stateBools,
-        Map<String, Integer> stateInts,
-        Map<String, Double> stateDoubles
+        Map<String, Float> stateTemps
 )
 {
-    private static final Codec<Map<String, Boolean>> STATE_BOOLS_CODEC = Codec.unboundedMap(Codec.STRING, Codec.BOOL);
-    private static final Codec<Map<String, Integer>> STATE_INTS_CODEC = Codec.unboundedMap(Codec.STRING, Codec.INT);
-    private static final Codec<Map<String, Double>> STATE_DOUBLES_CODEC = Codec.unboundedMap(Codec.STRING, Codec.DOUBLE);
+    private static final Codec<Map<String, Float>> STATE_TEMPS = Codec.unboundedMap(Codec.STRING, Codec.FLOAT);
 
     public static final Codec<BlockTemperatureDataMap> CODEC = RecordCodecBuilder.create(blockTemperatureDataMapInstance -> blockTemperatureDataMapInstance.group(
             Codec.FLOAT.fieldOf("temperature").forGetter(BlockTemperatureDataMap::temperature),
@@ -26,10 +24,22 @@ public record BlockTemperatureDataMap(
             Codec.BOOL.fieldOf("has_tfc_heat").forGetter(BlockTemperatureDataMap::hasTFCHeat),
             Codec.BOOL.fieldOf("is_radiative").forGetter(BlockTemperatureDataMap::isRadiative),
             Codec.BOOL.fieldOf("is_home_block").forGetter(BlockTemperatureDataMap::isHomeBlock),
-            STATE_BOOLS_CODEC.optionalFieldOf("state_bools", Map.of()).forGetter(BlockTemperatureDataMap::stateBools),
-            STATE_INTS_CODEC.optionalFieldOf("state_ints", Map.of()).forGetter(BlockTemperatureDataMap::stateInts),
-            STATE_DOUBLES_CODEC.optionalFieldOf("state_doubles", Map.of()).forGetter(BlockTemperatureDataMap::stateDoubles)
+            STATE_TEMPS.optionalFieldOf("state_temps", Map.of()).forGetter(BlockTemperatureDataMap::stateTemps)
     ).apply(blockTemperatureDataMapInstance, BlockTemperatureDataMap::new));
 
-    public static BlockTemperatureDataMap createDefault() {return new BlockTemperatureDataMap(256f, 32, false, true, false, Map.of(), Map.of(), Map.of());}
+    public static BlockTemperatureDataMap createDefault() {return new BlockTemperatureDataMap(256f, 32, false, true, false, Map.of());}
+
+    public float resolveForState(BlockState state)
+    {
+        float temperature = this.temperature;
+
+        for (Map.Entry<Property<?>, Comparable<?>> entry : state.getValues().entrySet())
+        {
+            String key = entry.getKey().getName() + "=" + entry.getValue().toString();
+
+            if (this.stateTemps.containsKey(key)) temperature = Math.max(temperature, this.stateTemps.get(key));
+        }
+
+        return temperature;
+    }
 }

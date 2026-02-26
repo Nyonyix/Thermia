@@ -6,14 +6,21 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.nyonyix.thermia.api.ThermiaEntityTemperatureAPI;
+import com.nyonyix.thermia.api.ThermiaInteriorAPI;
+import com.nyonyix.thermia.data.Interior;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
-import net.minecraft.commands.CommandSource;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -68,7 +75,7 @@ public class ThermiaCommands
             }
 
             float value = propertyDefinition.getter.apply(entity);
-            context.getSource().sendSuccess(() -> Component.literal(String.format("%s: %.2f", formatPropertyName(propertyName), value)), false);
+            context.getSource().sendSuccess(() -> Component.literal(String.format("%s: %.2f", formatPropertyName(propertyName), value)), true);
             return 1;
         }
         catch (Exception e)
@@ -94,7 +101,7 @@ public class ThermiaCommands
             boolean success = propertyDefinition.setter.apply(entity, value);
             if (success)
             {
-                context.getSource().sendSuccess(() -> Component.literal(String.format("Set %s: %.2f", formatPropertyName(propertyName), value)), false);
+                context.getSource().sendSuccess(() -> Component.literal(String.format("Set %s: %.2f", formatPropertyName(propertyName), value)), true);
                 return 1;
             }
             else
@@ -110,11 +117,123 @@ public class ThermiaCommands
         }
     }
 
+    private static int executeRemoveInterior(CommandContext<CommandSourceStack> context)
+    {
+        try
+        {
+            BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
+
+            if (!ThermiaInteriorAPI.isInInterior(context.getSource().getLevel(), pos))
+            {
+                context.getSource().sendFailure(Component.literal("No valid interior found at: " + pos.toShortString()));
+                return 0;
+            }
+
+            Interior interior = ThermiaInteriorAPI.getInteriorByPos(context.getSource().getLevel(), pos);
+
+            if (!interior.isValid())
+            {
+                context.getSource().sendFailure(Component.literal("No valid interior found at: " + pos.toShortString()));
+                return 0;
+            }
+
+            ThermiaInteriorAPI.removeInterior(context.getSource().getLevel(), interior.homePos());
+            context.getSource().sendSuccess(() -> Component.literal("Removed interior at: " + pos.toShortString()), true);
+            return 1;
+        }
+        catch (Exception e)
+        {
+            context.getSource().sendFailure(Component.literal("Error: " + e.getLocalizedMessage()));
+            return 0;
+        }
+    }
+
+    public static int executeListInteriors(CommandContext<CommandSourceStack> context)
+    {
+        try
+        {
+            Map<BlockPos, Interior> levelInteriors = ThermiaInteriorAPI.getAllInteriors(context.getSource().getLevel());
+
+            if (levelInteriors.isEmpty())
+            {
+                 context.getSource().sendFailure(Component.literal("No Interiors for current level"));
+                return 0;
+            }
+
+            for (Map.Entry<BlockPos, Interior> entry : levelInteriors.entrySet())
+            {
+                BlockPos pos = entry.getKey();
+                Interior interior = entry.getValue();
+
+                Component posComponent = Component.literal(String.format("[%d, %d, %d], ", pos.getX(), pos.getY(), pos.getZ()))
+                        .withStyle(style -> style
+                                .withColor(ChatFormatting.GREEN)
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/tp @s %d %d %d", pos.getX(), pos.getY(), pos.getZ())))
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click To Teleport"))));
+
+                Component message = Component.literal("Interior: ")
+                        .append(Component.literal("homePos: ").withStyle(ChatFormatting.AQUA)
+                        .append(posComponent)
+                        .append(Component.literal("edgeBlocks: ").withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(String.format("%d, ", interior.edgeBlocks().size())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal("heatSourceBlocks: ").withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(String.format("%d, ", interior.heatSourceBlocks().size())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal("heatSourceFluids: ").withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(String.format("%d, ", interior.heatSourceFluids().size())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal("heatSinkBlocks: ").withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(String.format("%d, ", interior.heatSinkBlocks().size())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal("heatSinkFluids: ").withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(String.format("%d, ", interior.heatSinkFluids().size())).withStyle(ChatFormatting.GREEN)
+                        )))))))))));
+
+                context.getSource().sendSuccess(() -> message, true);
+            }
+
+            return 1;
+        }
+        catch (Exception e)
+        {
+            context.getSource().sendFailure(Component.literal("Error: " + e.getLocalizedMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeDebugInterior(CommandContext<CommandSourceStack> context)
+    {
+        try
+        {
+            BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
+            Interior interior = ThermiaInteriorAPI.getInterior(context.getSource().getLevel(), pos);
+
+            if (!interior.isValid())
+            {
+                context.getSource().sendFailure(Component.literal("No valid interior found at: " + pos.toShortString()));
+                return 0;
+            }
+
+            int count = interior.internalAirBlocks().size();
+
+            for (BlockPos airPos : interior.internalAirBlocks())
+            {
+                context.getSource().getLevel().setBlock(airPos, Blocks.GLASS.defaultBlockState(), 3);
+            }
+
+            context.getSource().sendSuccess(() -> Component.literal(String.format("Replaced %d air blocks with glass for interior at %s", count, pos.toShortString())), true);
+            return 1;
+        }
+        catch (Exception e)
+        {
+            context.getSource().sendFailure(Component.literal("Error: " + e.getLocalizedMessage()));
+            return 0;
+        }
+    }
+
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher)
     {
         LiteralArgumentBuilder<CommandSourceStack> baseCommand = Commands.literal("thermia").requires(source -> source.hasPermission(2));
         LiteralArgumentBuilder<CommandSourceStack> getCommand = Commands.literal("get");
         LiteralArgumentBuilder<CommandSourceStack> setCommand = Commands.literal("set");
+        LiteralArgumentBuilder<CommandSourceStack> interiorCommand = Commands.literal("interior");
 
         for (Map.Entry<String, PropertyDefinition> entry : PROPERTIES.entrySet())
         {
@@ -136,8 +255,13 @@ public class ThermiaCommands
             }
         }
 
+        interiorCommand.then(Commands.literal("remove").then(Commands.argument("pos", BlockPosArgument.blockPos()).executes(ThermiaCommands::executeRemoveInterior)));
+        interiorCommand.then(Commands.literal("debug_glass").then(Commands.argument("pos", BlockPosArgument.blockPos()).executes(ThermiaCommands::executeDebugInterior)));
+        interiorCommand.then(Commands.literal("list_interiors").executes(ThermiaCommands::executeListInteriors));
+
         baseCommand.then(getCommand);
         baseCommand.then(setCommand);
+        baseCommand.then(interiorCommand);
         dispatcher.register(baseCommand);
     }
 }

@@ -3,19 +3,20 @@ package com.nyonyix.thermia.server;
 import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.ThermiaCommands;
+import com.nyonyix.thermia.data.Interior;
 import com.nyonyix.thermia.data.ThermiaTags;
+import com.nyonyix.thermia.data.attachment.BlockTemperature;
+import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datagen.damage.ThermiaDamageTypesDataGen;
-import com.nyonyix.thermia.data.datagen.datamap.BlockTemperatureDataMapProvider;
-import com.nyonyix.thermia.data.datagen.datamap.EntityTemperatureDataMapProvider;
-import com.nyonyix.thermia.data.datagen.datamap.FluidTemperatureDataMapProvider;
-import com.nyonyix.thermia.data.datagen.datamap.ItemInsulationDataMapProvider;
+import com.nyonyix.thermia.data.datagen.datamap.*;
 import com.nyonyix.thermia.data.datagen.tags.ThermiaBlockTagProvider;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import com.nyonyix.thermia.data.datamap.*;
 import com.nyonyix.thermia.data.manager.InteriorManager;
 import com.nyonyix.thermia.util.AiHelpers;
+import com.nyonyix.thermia.util.InteriorScanner;
 import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.ChatFormatting;
@@ -35,6 +36,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -45,7 +48,10 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockDropsEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
@@ -74,7 +80,7 @@ public class ThermiaServer
             BlockTemperatureDataMap dataMap = block.getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
             if (dataMap == null) return;
 
-            LOGGER.debug("Block: {}, temperature: {}, searchCap: {}, hasTFCHeat: {}, isRadiative: {}, isHomeBlock: {}, stateBools: {}, stateInts: {}, stateDoubles: {}", block.value().getDescriptionId(), dataMap.temperature(), dataMap.searchCap(), dataMap.hasTFCHeat(), dataMap.isRadiative(), dataMap.isHomeBlock(), dataMap.stateBools().toString(), dataMap.stateInts().toString(), dataMap.stateDoubles().toString());
+            LOGGER.debug("Block: {}, temperature: {}, searchCap: {}, hasTFCHeat: {}, isRadiative: {}, isHomeBlock: {}, stateTemps: {}", block.value().getDescriptionId(), dataMap.temperature(), dataMap.searchCap(), dataMap.hasTFCHeat(), dataMap.isRadiative(), dataMap.isHomeBlock(), dataMap.stateTemps().toString());
             VerifyDataMap.isValidBlockTemperature(dataMap, block.value());
         });
 
@@ -95,6 +101,14 @@ public class ThermiaServer
             LOGGER.debug("Item: {}, insulationModifier: {}", item.value(), dataMap.insulationModifier());
             VerifyDataMap.isValidItemInsulation(dataMap, item.value());
         });
+
+        BuiltInRegistries.BLOCK.holders().forEach( block ->
+        {
+            BlockPorosityDataMap dataMap = block.getData(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP);
+            if (dataMap == null) return;
+
+            LOGGER.debug("Block: {}, statePorosity: {}, defaultPorosity: {}", block.value().getDescriptionId(), dataMap.statePorosity().toString(), dataMap.defaultPorosity());
+        });
     }
 
     @SubscribeEvent
@@ -110,6 +124,7 @@ public class ThermiaServer
         gen.addProvider(event.includeServer(), new EntityTemperatureDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new ItemInsulationDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new FluidTemperatureDataMapProvider(packOutput, lookupProvider));
+        gen.addProvider(event.includeServer(), new BlockPorosityDataMapProvider(packOutput, lookupProvider));
 
         gen.addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(packOutput, lookupProvider, new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, ThermiaDamageTypesDataGen::bootstrap), Set.of(Thermia.MODID)));
 
@@ -161,6 +176,8 @@ public class ThermiaServer
                 {
                     EntityTemperatureManager.init(entity);
                     EntityTemperatureManager.onUpdate(level, entity);
+
+                    if (entity instanceof Player player) LOGGER.debug("Player: {}, inside interior {}", player.getDisplayName().getString(), InteriorManager.getInteriorByPos(level, player.getOnPos().relative(Direction.UP)).homePos());
                 }
 
                 if (server.getTickCount() % 100 == entity.getId() % 100) EntityTemperatureManager.queueBlockSearch(entity);
@@ -233,5 +250,47 @@ public class ThermiaServer
             player.sendSystemMessage(Component.literal("Right clicked: ").append(state.getBlock().getName().withStyle(ChatFormatting.DARK_GREEN)));
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public static void onBlockBreak(BlockEvent.BreakEvent event)
+    {
+        if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
+
+        InteriorManager.invalidateAndRescan(serverLevel, event.getPos());
+    }
+
+    @SubscribeEvent
+    public static void onBlockDrops(BlockDropsEvent event)
+    {
+        if (event.getLevel().isClientSide) return;
+
+        InteriorManager.invalidateAndRescan(event.getLevel(), event.getPos());
+    }
+
+    @SubscribeEvent
+    public static void onExplosionDetonate(ExplosionEvent.Detonate event)
+    {
+        if (event.getLevel().isClientSide) return;
+
+        for (BlockPos pos : event.getAffectedBlocks())
+        {
+            InteriorManager.invalidateAndRescan(event.getLevel(), pos);        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityPlace(BlockEvent.EntityPlaceEvent event)
+    {
+        if (!(event.getLevel() instanceof ServerLevel serverLEvel)) return;
+
+        InteriorManager.invalidateAndRescan(serverLEvel, event.getPos());
+    }
+
+    @SubscribeEvent
+    public static void onEntityMuliPlace(BlockEvent.EntityMultiPlaceEvent event)
+    {
+        if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
+
+        InteriorManager.invalidateAndRescan(serverLevel, event.getPos());
     }
 }

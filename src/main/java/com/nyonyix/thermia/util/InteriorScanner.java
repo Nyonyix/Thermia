@@ -3,13 +3,18 @@ package com.nyonyix.thermia.util;
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.Interior;
+import com.nyonyix.thermia.data.datamap.BlockPorosityDataMap;
+import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
+import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
+import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.units.qual.A;
+import net.minecraft.world.level.material.Fluid;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -17,14 +22,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class InteriorScanner
 {
-    private static final int SOLID_CHECK_DISTANCE = 2;
+    private static final int SOLID_CHECK_DISTANCE = 3;
     private static final float MAX_PERCENTAGE_OPEN_ALLOWED = (float) ServerConfig.MAX_PERCENTAGE_OPEN_ALLOWED.getAsDouble();
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    private static boolean isSolid(Level level, BlockPos pos)
-    {
-        return level.getBlockState(pos).isSolidRender(level, pos);
-    }
 
 //    private static List<Direction> getPlaneDirections(Direction.Axis axis)
 //    {
@@ -84,33 +84,75 @@ public class InteriorScanner
 //        return cluster;
 //    }
 
-    private static boolean isOpening(Level level, BlockPos pos)
-    {
-        for (Direction dir : List.of(Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST))
-        {
-            if (isSolid(level, pos.relative(dir)))
-            {
-                Direction opposite = dir.getOpposite();
+//    private static boolean isOpening(Level level, BlockPos pos)
+//    {
+//        for (Direction dir : List.of(Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST))
+//        {
+//            if (isSolid(level, pos.relative(dir)))
+//            {
+//                Direction opposite = dir.getOpposite();
+//
+//                for (int i = 1; i <= SOLID_CHECK_DISTANCE; i++)
+//                {
+//                    if (isSolid(level, pos.relative(opposite, i))) return true;
+//                }
+//            }
+//        }
+//
+//        return false;
+//    }
 
-                for (int i = 1; i <= SOLID_CHECK_DISTANCE; i++)
-                {
-                    if (isSolid(level, pos.relative(opposite, i))) return true;
-                }
-            }
-        }
+    private static boolean isSolid(Level level, BlockPos pos)
+    {
+        BlockPorosityDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(level.getBlockState(pos).getBlock()).getData(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP);
+
+        if (level.getBlockState(pos).isSolidRender(level, pos) || dataMap != null) return true;
 
         return false;
     }
 
+    private static boolean isHeatSource(Block block)
+    {
+        BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+        if (dataMap == null) return false;
+
+        return dataMap.temperature() > 0f;
+    }
+
+    private static boolean isHeatSource(Fluid fluid)
+    {
+        FluidTemperatureDataMap dataMap = BuiltInRegistries.FLUID.wrapAsHolder(fluid).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
+        if (dataMap == null) return false;
+
+        return dataMap.temperature() > 0f;
+    }
+
+    private static boolean isHeatSink(Block block)
+    {
+        BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
+        if (dataMap == null) return false;
+
+        return dataMap.temperature() < 0f;
+    }
+
+    private static boolean isHeatSink(Fluid fluid)
+    {
+        FluidTemperatureDataMap dataMap = BuiltInRegistries.FLUID.wrapAsHolder(fluid).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
+        if (dataMap == null) return false;
+
+        return dataMap.temperature() < 0f;
+    }
+
     public static Interior scan(Level level, BlockPos startPos, int maxSize)
     {
-        Map<BlockPos, BlockState> edgeBlocks = new HashMap<>();
-        Map<BlockPos, BlockState> heatSources = new HashMap<>();
+        Map<BlockPos, Block> edgeBlocks = new HashMap<>();
+        Map<BlockPos, Block> heatSourceBlocks = new HashMap<>();
+        Map<BlockPos, Fluid> heatSourceFluids = new HashMap<>();
+        Map<BlockPos, Block> heatSinkBlocks = new HashMap<>();
+        Map<BlockPos, Fluid> heatSinkFluids = new HashMap<>();
         Set<BlockPos> internalAirBlocks = new HashSet<>();
-        Set<BlockPos> openings = new HashSet<>();
         Set<BlockPos> visited = new HashSet<>();
         Queue<BlockPos> queue = new ArrayDeque<>();
-        int edgeAirCount = 0;
 
         queue.add(startPos);
         visited.add(startPos);
@@ -119,36 +161,49 @@ public class InteriorScanner
         {
             if (internalAirBlocks.size() >= maxSize)
             {
-                LOGGER.debug("Interior scan failed, exceeded size {}", maxSize);
+                LOGGER.info("Interior scan failed, exceeded size {}", maxSize);
                 return Interior.createDefault();
             }
 
             BlockPos current = queue.poll();
 
-            if (isOpening(level, current))
-            {
-                edgeBlocks.put(current, level.getBlockState(current));
-                openings.add(current);
-                edgeAirCount++;
-                continue;
-            }
+//            if (isOpening(level, current))
+//            {
+//                edgeBlocks.put(current, level.getBlockState(current));
+//                openings.add(current);
+//                edgeAirCount++;
+//                continue;
+//            }
 
             internalAirBlocks.add(current);
 
             for (Direction dir : Direction.values())
             {
                 BlockPos neighbour = current.relative(dir);
+                BlockState state = level.getBlockState(neighbour);
+                Block block = state.getBlock();
 
-                if (visited.contains(neighbour) || openings.contains(neighbour)) continue;
+                if (visited.contains(neighbour)) continue;
+
+                if (!state.getFluidState().isEmpty())
+                {
+                    Fluid fluid = state.getFluidState().getType();
+
+                    if (isHeatSource(fluid)) heatSourceFluids.put(neighbour, fluid);
+                    else if (isHeatSink(fluid)) heatSinkFluids.put(neighbour, fluid);
+                }
+
+                if (isHeatSource(state.getBlock())) heatSourceBlocks.put(neighbour, block);
+                else if (isHeatSink(state.getBlock())) heatSinkBlocks.put(neighbour, block);
 
                 if (isSolid(level, neighbour))
                 {
-                    edgeBlocks.put(neighbour, level.getBlockState(neighbour));
+                    edgeBlocks.put(neighbour, block);
                     visited.add(neighbour);
                 }
                 else if (level.canSeeSky(neighbour))
                 {
-                    LOGGER.debug("Interior scan failed, Reached sky at {}", neighbour);
+                    LOGGER.info("Interior scan failed, Reached sky at {}", neighbour);
                     return Interior.createDefault();
                 }
                 else
@@ -158,14 +213,14 @@ public class InteriorScanner
             }
         }
 
-        float airRatio = edgeBlocks.isEmpty() ? 1f : (float) edgeAirCount / edgeBlocks.size();
-        if (airRatio > MAX_PERCENTAGE_OPEN_ALLOWED)
-        {
-            LOGGER.debug("Interior scan failed, structure is too open ({}% air in edges)", airRatio * 100);
-            return Interior.createDefault();
-        }
+//        float airRatio = edgeBlocks.isEmpty() ? 1f : (float) edgeAirCount / edgeBlocks.size();
+//        if (airRatio > MAX_PERCENTAGE_OPEN_ALLOWED)
+//        {
+//            LOGGER.info("Interior scan failed, structure is too open ({}% air in edges)", airRatio * 100);
+//            return Interior.createDefault();
+//        }
 
-        return new Interior(edgeBlocks, heatSources, internalAirBlocks, edgeAirCount, true);
+        return new Interior(edgeBlocks, heatSourceBlocks, heatSourceFluids, heatSinkBlocks, heatSinkFluids, internalAirBlocks, startPos, true, 0f, 0f, 0f, 0f);
     }
 
     public static CompletableFuture<Interior> scanAsync(Level level, BlockPos startPos, int maxSize)

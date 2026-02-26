@@ -42,4 +42,8 @@ public class VerifyDataMap
 
         if (dataMap.insulationModifier() < -1f) LOGGER.error("Item: {}, Item cannot have insulationModifier less than -1.0", item.getDescriptionId());
     }
+
+    public static void isValidBlockPorosity(BlockPorosityDataMap dataMap, Block block)
+    {
+    }
 }
