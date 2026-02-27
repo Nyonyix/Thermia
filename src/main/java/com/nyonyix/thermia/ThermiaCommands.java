@@ -174,17 +174,27 @@ public class ThermiaCommands
                 Component message = Component.literal("Interior: ")
                         .append(Component.literal("homePos: ").withStyle(ChatFormatting.AQUA)
                         .append(posComponent)
+                        .append(Component.literal("internalAirBlocks: ").withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(String.format("%d, ", interior.internalAirBlocks().size())).withStyle(ChatFormatting.GREEN)
                         .append(Component.literal("edgeBlocks: ").withStyle(ChatFormatting.AQUA)
-                        .append(Component.literal(String.format("%d, ", interior.edgeBlocks().size())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal(String.format("%d, ", interior.interiorBlocks().edgeBlocks.size())).withStyle(ChatFormatting.GREEN)
                         .append(Component.literal("heatSourceBlocks: ").withStyle(ChatFormatting.AQUA)
-                        .append(Component.literal(String.format("%d, ", interior.heatSourceBlocks().size())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal(String.format("%d, ", interior.interiorBlocks().heatSourceBlocks.size())).withStyle(ChatFormatting.GREEN)
                         .append(Component.literal("heatSourceFluids: ").withStyle(ChatFormatting.AQUA)
-                        .append(Component.literal(String.format("%d, ", interior.heatSourceFluids().size())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal(String.format("%d, ", interior.interiorBlocks().heatSourceFluids.size())).withStyle(ChatFormatting.GREEN)
                         .append(Component.literal("heatSinkBlocks: ").withStyle(ChatFormatting.AQUA)
-                        .append(Component.literal(String.format("%d, ", interior.heatSinkBlocks().size())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal(String.format("%d, ", interior.interiorBlocks().heatSinkBlocks.size())).withStyle(ChatFormatting.GREEN)
                         .append(Component.literal("heatSinkFluids: ").withStyle(ChatFormatting.AQUA)
-                        .append(Component.literal(String.format("%d, ", interior.heatSinkFluids().size())).withStyle(ChatFormatting.GREEN)
-                        )))))))))));
+                        .append(Component.literal(String.format("%d, ", interior.interiorBlocks().heatSinkFluids.size())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal("internalHumidity: ").withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(String.format("%.2f, ", interior.internalHumidity())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal("externalHumidity: ").withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(String.format("%.2f, ", interior.externalHumidity())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal("internalTemperature: ").withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(String.format("%.2f, ", interior.internalTemperature())).withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal("externalTemperature: ").withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(String.format("%.2f, ", interior.externalTemperature())).withStyle(ChatFormatting.GREEN)
+                        )))))))))))))))))))));
 
                 context.getSource().sendSuccess(() -> message, true);
             }

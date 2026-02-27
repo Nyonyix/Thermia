@@ -3,10 +3,13 @@ package com.nyonyix.thermia.util;
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.Interior;
+import com.nyonyix.thermia.data.InteriorBlocks;
 import com.nyonyix.thermia.data.datamap.BlockPorosityDataMap;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
+import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -143,6 +146,7 @@ public class InteriorScanner
         return dataMap.temperature() < 0f;
     }
 
+    @SuppressWarnings("deprecation")
     public static Interior scan(Level level, BlockPos startPos, int maxSize)
     {
         Map<BlockPos, Block> edgeBlocks = new HashMap<>();
@@ -151,11 +155,12 @@ public class InteriorScanner
         Map<BlockPos, Block> heatSinkBlocks = new HashMap<>();
         Map<BlockPos, Fluid> heatSinkFluids = new HashMap<>();
         Set<BlockPos> internalAirBlocks = new HashSet<>();
-        Set<BlockPos> visited = new HashSet<>();
-        Queue<BlockPos> queue = new ArrayDeque<>();
+        LongOpenHashSet visited = new LongOpenHashSet();
+        LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
+        Long startPosLong = startPos.asLong();
 
-        queue.add(startPos);
-        visited.add(startPos);
+        queue.enqueue(startPosLong);
+        visited.add(startPosLong);
 
         while (!queue.isEmpty())
         {
@@ -165,7 +170,7 @@ public class InteriorScanner
                 return Interior.createDefault();
             }
 
-            BlockPos current = queue.poll();
+            BlockPos current = BlockPos.of(queue.dequeueLong());
 
 //            if (isOpening(level, current))
 //            {
@@ -180,10 +185,11 @@ public class InteriorScanner
             for (Direction dir : Direction.values())
             {
                 BlockPos neighbour = current.relative(dir);
+                long neighbourLong = neighbour.asLong();
                 BlockState state = level.getBlockState(neighbour);
                 Block block = state.getBlock();
 
-                if (visited.contains(neighbour)) continue;
+                if (visited.contains(neighbourLong)) continue;
 
                 if (!state.getFluidState().isEmpty())
                 {
@@ -199,7 +205,7 @@ public class InteriorScanner
                 if (isSolid(level, neighbour))
                 {
                     edgeBlocks.put(neighbour, block);
-                    visited.add(neighbour);
+                    visited.add(neighbourLong);
                 }
                 else if (level.canSeeSky(neighbour))
                 {
@@ -208,7 +214,7 @@ public class InteriorScanner
                 }
                 else
                 {
-                    if (visited.add(neighbour)) queue.add(neighbour);
+                    if (visited.add(neighbourLong)) queue.enqueue(neighbourLong);
                 }
             }
         }
@@ -220,7 +226,7 @@ public class InteriorScanner
 //            return Interior.createDefault();
 //        }
 
-        return new Interior(edgeBlocks, heatSourceBlocks, heatSourceFluids, heatSinkBlocks, heatSinkFluids, internalAirBlocks, startPos, true, 0f, 0f, 0f, 0f);
+        return new Interior(new InteriorBlocks(edgeBlocks, heatSourceBlocks, heatSourceFluids, heatSinkBlocks, heatSinkFluids), internalAirBlocks, startPos, true, 0f, 0f, 0f, 0f);
     }
 
     public static CompletableFuture<Interior> scanAsync(Level level, BlockPos startPos, int maxSize)

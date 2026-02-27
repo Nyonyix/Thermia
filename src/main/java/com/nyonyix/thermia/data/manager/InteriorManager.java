@@ -3,6 +3,7 @@ package com.nyonyix.thermia.data.manager;
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.Interior;
+import com.nyonyix.thermia.data.InteriorBlocks;
 import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.util.InteriorScanner;
@@ -51,7 +52,6 @@ public class InteriorManager
         }
 
         toRemove.forEach(pendingMap::remove);
-        toRemove.clear();
 
         return interiors;
     }
@@ -63,9 +63,23 @@ public class InteriorManager
         return temperature;
     }
 
+    private static void interiorCleanUp(List<BlockPos> toRemove, Map<BlockPos, Interior> interiors)
+    {
+        for (BlockPos id : toRemove)
+        {
+            Interior interior = interiors.get(id);
+            InteriorBlocks blocks = interior.interiorBlocks();
+
+            if (interior.isValid()) continue;
+
+
+            if (blocks.edgeBlocks != null) {}
+        }
+    }
+
     public static boolean isInInterior(Level level, BlockPos pos) {return getInteriorByPos(level, pos).isValid();}
 
-    public static boolean isInInterior(BlockPos pos, Interior interior) {return interior.internalAirBlocks().contains(pos) || interior.edgeBlocks().containsKey(pos) || interior.heatSourceBlocks().containsKey(pos) || interior.heatSinkBlocks().containsKey(pos) || interior.heatSourceFluids().containsKey(pos) || interior.heatSinkFluids().containsKey(pos);}
+    public static boolean isInInterior(BlockPos pos, Interior interior) {return interior.internalAirBlocks().contains(pos) || interior.interiorBlocks().edgeBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceFluids.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkFluids.containsKey(pos.asLong());}
 
     public static void onCreateEvent(Level level, BlockPos startPos)
     {
@@ -84,7 +98,7 @@ public class InteriorManager
         {
             if (!interior.isValid()) continue;
 
-            if (interior.internalAirBlocks().contains(pos) || interior.edgeBlocks().containsKey(pos) || interior.heatSourceBlocks().containsKey(pos) || interior.heatSinkBlocks().containsKey(pos) || interior.heatSourceFluids().containsKey(pos) || interior.heatSinkFluids().containsKey(pos)) return interior;
+            if (interior.internalAirBlocks().contains(pos) || interior.interiorBlocks().edgeBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceFluids.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkFluids.containsKey(pos.asLong())) return interior;
         }
 
         return Interior.createDefault();
