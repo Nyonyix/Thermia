@@ -57,6 +57,8 @@ public class ServerConfig
 
     public static final ModConfigSpec.DoubleValue DRYING_MULTI = BUILDER.comment("Drying multiplier").defineInRange("dryingMulti", 1.0, 0.0, 2.0);
 
+    public static final ModConfigSpec.DoubleValue INTERIOR_SOURCE_MULTI = BUILDER.comment("Interior source pull multiplier").defineInRange("interiorSourceMulti", 1, 0.5, 10);
+
     static {BUILDER.pop();}
     static {BUILDER.push("server_misc");}
 

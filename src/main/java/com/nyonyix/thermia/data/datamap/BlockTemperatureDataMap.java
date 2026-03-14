@@ -2,6 +2,12 @@ package com.nyonyix.thermia.data.datamap;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
+import net.dries007.tfc.common.blockentities.IHeatable;
+import net.dries007.tfc.common.blockentities.PitKilnBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 
@@ -29,9 +35,16 @@ public record BlockTemperatureDataMap(
 
     public static BlockTemperatureDataMap createDefault() {return new BlockTemperatureDataMap(256f, 32, false, true, false, Map.of());}
 
-    public float resolveForState(BlockState state)
+    public float resolveForState(Level level, BlockPos pos)
     {
         float temperature = this.temperature;
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+
+        if (blockEntity instanceof IHeatable heatable) return heatable.getTemperature();
+        if (blockEntity instanceof CharcoalForgeBlockEntity charcoalForge) return charcoalForge.getTemperature();
+        if (blockEntity instanceof PitKilnBlockEntity pitKiln) return pitKiln.isLit() ? this.temperature() : 0.0f;
+
+        BlockState state = level.getBlockState(pos);
 
         for (Map.Entry<Property<?>, Comparable<?>> entry : state.getValues().entrySet())
         {

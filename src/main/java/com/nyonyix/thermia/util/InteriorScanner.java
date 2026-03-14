@@ -8,6 +8,7 @@ import com.nyonyix.thermia.data.datamap.BlockPorosityDataMap;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.Util;
@@ -25,8 +26,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class InteriorScanner
 {
-    private static final int SOLID_CHECK_DISTANCE = 3;
-    private static final float MAX_PERCENTAGE_OPEN_ALLOWED = (float) ServerConfig.MAX_PERCENTAGE_OPEN_ALLOWED.getAsDouble();
     private static final Logger LOGGER = LogUtils.getLogger();
 
 //    private static List<Direction> getPlaneDirections(Direction.Axis axis)
@@ -119,7 +118,7 @@ public class InteriorScanner
         BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
         if (dataMap == null) return false;
 
-        return dataMap.temperature() > 0f;
+        return dataMap.temperature() >= 0f;
     }
 
     private static boolean isHeatSource(Fluid fluid)
@@ -127,7 +126,7 @@ public class InteriorScanner
         FluidTemperatureDataMap dataMap = BuiltInRegistries.FLUID.wrapAsHolder(fluid).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
         if (dataMap == null) return false;
 
-        return dataMap.temperature() > 0f;
+        return dataMap.temperature() >= 0f;
     }
 
     private static boolean isHeatSink(Block block)
@@ -149,12 +148,14 @@ public class InteriorScanner
     @SuppressWarnings("deprecation")
     public static Interior scan(Level level, BlockPos startPos, int maxSize)
     {
-        Map<BlockPos, Block> edgeBlocks = new HashMap<>();
-        Map<BlockPos, Block> heatSourceBlocks = new HashMap<>();
-        Map<BlockPos, Fluid> heatSourceFluids = new HashMap<>();
-        Map<BlockPos, Block> heatSinkBlocks = new HashMap<>();
-        Map<BlockPos, Fluid> heatSinkFluids = new HashMap<>();
+        Long2ObjectOpenHashMap<Block> edgeBlocks = new Long2ObjectOpenHashMap<>(maxSize);
+        Long2ObjectOpenHashMap<Block> heatSourceBlocks = new Long2ObjectOpenHashMap<>(maxSize);
+        Long2ObjectOpenHashMap<Fluid> heatSourceFluids = new Long2ObjectOpenHashMap<>(maxSize);
+        Long2ObjectOpenHashMap<Block> heatSinkBlocks = new Long2ObjectOpenHashMap<>(maxSize);
+        Long2ObjectOpenHashMap<Fluid> heatSinkFluids = new Long2ObjectOpenHashMap<>(maxSize);
         Set<BlockPos> internalAirBlocks = new HashSet<>();
+        BlockPos.MutableBlockPos current = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos neighbour = new BlockPos.MutableBlockPos();
         LongOpenHashSet visited = new LongOpenHashSet();
         LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
         Long startPosLong = startPos.asLong();
@@ -170,7 +171,7 @@ public class InteriorScanner
                 return Interior.createDefault();
             }
 
-            BlockPos current = BlockPos.of(queue.dequeueLong());
+            current.set(BlockPos.of(queue.dequeueLong()));
 
 //            if (isOpening(level, current))
 //            {
@@ -180,11 +181,11 @@ public class InteriorScanner
 //                continue;
 //            }
 
-            internalAirBlocks.add(current);
+            internalAirBlocks.add(current.immutable());
 
             for (Direction dir : Direction.values())
             {
-                BlockPos neighbour = current.relative(dir);
+                neighbour.setWithOffset(current, dir);
                 long neighbourLong = neighbour.asLong();
                 BlockState state = level.getBlockState(neighbour);
                 Block block = state.getBlock();
@@ -195,16 +196,16 @@ public class InteriorScanner
                 {
                     Fluid fluid = state.getFluidState().getType();
 
-                    if (isHeatSource(fluid)) heatSourceFluids.put(neighbour, fluid);
-                    else if (isHeatSink(fluid)) heatSinkFluids.put(neighbour, fluid);
+                    if (isHeatSource(fluid)) heatSourceFluids.put(neighbour.asLong(), fluid);
+                    else if (isHeatSink(fluid)) heatSinkFluids.put(neighbour.asLong(), fluid);
                 }
 
-                if (isHeatSource(state.getBlock())) heatSourceBlocks.put(neighbour, block);
-                else if (isHeatSink(state.getBlock())) heatSinkBlocks.put(neighbour, block);
+                if (isHeatSource(state.getBlock())) heatSourceBlocks.put(neighbour.asLong(), block);
+                else if (isHeatSink(state.getBlock())) heatSinkBlocks.put(neighbour.asLong(), block);
 
                 if (isSolid(level, neighbour))
                 {
-                    edgeBlocks.put(neighbour, block);
+                    edgeBlocks.put(neighbour.asLong(), block);
                     visited.add(neighbourLong);
                 }
                 else if (level.canSeeSky(neighbour))

@@ -50,4 +50,12 @@ public record Interior(
 
     public Interior withIsValid(boolean isValid) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature);}
 
+    public Interior withInternalHumidity(float internalHumidity) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.isValid, internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature);}
+
+    public Interior withInternalTemperature(float internalTemperature) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.isValid, this.internalHumidity, this.externalHumidity, internalTemperature, this.externalTemperature);}
+
+    public Interior withExternalHumidity(float externalHumidity) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.isValid, this.internalHumidity, externalHumidity, this.internalTemperature, this.externalTemperature);}
+
+    public Interior withExternalTemperature(float externalTemperature) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, externalTemperature);}
+
 }

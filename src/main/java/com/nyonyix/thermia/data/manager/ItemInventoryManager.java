@@ -57,6 +57,7 @@ public class ItemInventoryManager
     {
         float temperature = 0.0f;
         float maxEffect = (float) ServerConfig.PEAK_INVENTORY_TEMPERATURE.getAsInt();
+        float multi = (float) ServerConfig.INVENTORY_HEAT_MULTI.getAsDouble();
         if (entity instanceof Player player)
         {
             for (ItemStack stack : player.getInventory().items)
@@ -64,9 +65,7 @@ public class ItemInventoryManager
                 temperature += HeatCapability.getTemperature(stack) * stack.getCount();
             }
 
-            float multi = (float) ServerConfig.INVENTORY_HEAT_MULTI.getAsDouble();
-
-            temperature = (temperature / (temperature + 15000)) * multi;
+            temperature = (float) Math.pow(temperature, 0.30) * multi;
         }
 
         return Mth.clamp(temperature, -maxEffect, maxEffect);

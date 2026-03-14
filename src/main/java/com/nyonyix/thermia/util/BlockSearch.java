@@ -7,6 +7,7 @@ import com.nyonyix.thermia.data.WindOcclusionResult;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,6 +15,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -48,12 +50,12 @@ public class BlockSearch
         private List<FluidPositionsWithDistance> allFoundFluid = new ArrayList<>();
         private Map<BlockPos, ExposedFaces> exposedFaces = new HashMap<>();
 
-        record BlockPositionsWithDistance(BlockPos pos, Block block, double distSq) {}
-        record FluidPositionsWithDistance(BlockPos pos, Fluid fluid, double distSq) {}
+        record BlockPositionsWithDistance(long pos, Block block, double distSq) {}
+        record FluidPositionsWithDistance(long pos, Fluid fluid, double distSq) {}
 
-        void addBlockCandidate(BlockPos pos, Block block, double distSq) {allFound.add(new BlockPositionsWithDistance(pos.immutable(), block, distSq));}
+        void addBlockCandidate(BlockPos pos, Block block, double distSq) {allFound.add(new BlockPositionsWithDistance(pos.asLong(), block, distSq));}
 
-        void addFluidCandidate(BlockPos pos, Fluid fluid, double distSq) {allFoundFluid.add(new FluidPositionsWithDistance(pos.immutable(), fluid, distSq));}
+        void addFluidCandidate(BlockPos pos, Fluid fluid, double distSq) {allFoundFluid.add(new FluidPositionsWithDistance(pos.asLong(), fluid, distSq));}
 
         void addExposedFaces(BlockPos pos, ExposedFaces faces) {exposedFaces.put(pos.immutable(), faces);}
 
@@ -72,7 +74,7 @@ public class BlockSearch
                 if (currentCount >= dataMap.searchCap()) continue;
 
                 tempCounts.put(entry.block(), currentCount + 1);
-                allPositions.computeIfAbsent(entry.block(), k -> new ArrayList<>()).add(entry.pos());
+                allPositions.computeIfAbsent(entry.block(), k -> new ArrayList<>()).add(BlockPos.of(entry.pos));
             }
 
             Map<Fluid, Integer> tempCountsFluid = new HashMap<>();
@@ -85,17 +87,19 @@ public class BlockSearch
                 if (currentCount >= dataMap.searchCap()) continue;
 
                 tempCountsFluid.put(entry.fluid(), currentCount + 1);
-                allFluidPositions.computeIfAbsent(entry.fluid(), k -> new ArrayList<>()).add(entry.pos());
+                allFluidPositions.computeIfAbsent(entry.fluid(), k -> new ArrayList<>()).add(BlockPos.of(entry.pos));
             }
 
             return new BlockSearchResult(origin, levelID, allPositions, allFluidPositions, exposedFaces);
         }
     }
 
-    private static void searchChunk(LevelChunk chunk, Vec3 origin, int radiusSq, BlockSearchBuilder builder, List<LevelChunk> chunks)
+    private static void searchChunk(LevelChunk chunk, Vec3 origin, int radiusSq, BlockSearchBuilder builder, Long2ObjectOpenHashMap<LevelChunk> chunks)
     {
         LevelChunkSection[] sections = chunk.getSections();
         BlockPos chunkPos = chunk.getPos().getWorldPosition();
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos exposedFaceAdjacentPos = new BlockPos.MutableBlockPos();
 
         for (int sectionIdX = 0; sectionIdX < sections.length; sectionIdX++)
         {
@@ -110,8 +114,8 @@ public class BlockSearch
                 {
                     for (int y = 0; y < 16; y++)
                     {
-                        BlockPos pos = new BlockPos(chunkPos.getX() + x, sectionY + y, chunkPos.getZ() + z);
-                        double distSq = origin.distanceToSqr(Vec3.atCenterOf(pos));
+                        pos.set(chunkPos.getX() + x, sectionY + y, chunkPos.getZ() + z);
+                        double distSq = origin.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
                         if (distSq > radiusSq) continue;
 
                         BlockState state = section.getBlockState(x, y, z);
@@ -122,7 +126,7 @@ public class BlockSearch
                         {
                             if (dataMap.isRadiative())
                             {
-                                ExposedFaces exposedFaces = getExposedFaces(pos.immutable(), chunks);
+                                ExposedFaces exposedFaces = getExposedFaces(exposedFaceAdjacentPos, pos, chunks);
 
                                 if (!exposedFaces.isEmpty())
                                 {
@@ -143,7 +147,7 @@ public class BlockSearch
                             {
                                 if (fluidDataMap.isRadiative())
                                 {
-                                    ExposedFaces exposedFaces = getExposedFaces(pos.immutable(), chunks);
+                                    ExposedFaces exposedFaces = getExposedFaces(exposedFaceAdjacentPos, pos, chunks);
 
                                     if (!exposedFaces.isEmpty())
                                     {
@@ -160,31 +164,22 @@ public class BlockSearch
         }
     }
 
-    private static LevelChunk findChunkInList(List<LevelChunk> chunks, BlockPos pos)
+    private static LevelChunk findChunk(Long2ObjectOpenHashMap<LevelChunk> chunkMap, BlockPos pos)
     {
-        int chunkX = pos.getX() >> 4;
-        int chunkZ = pos.getZ() >> 4;
-
-        for (LevelChunk chunk : chunks)
-        {
-            if (chunk.getPos().x == chunkX && chunk.getPos().z == chunkZ) return chunk;
-        }
-
-        return null;
+        return chunkMap.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
     }
 
-    private static ExposedFaces getExposedFaces(BlockPos pos, List<LevelChunk> cachedChunks)
+    private static ExposedFaces getExposedFaces(BlockPos.MutableBlockPos adjacentPos, BlockPos pos, Long2ObjectOpenHashMap<LevelChunk> cachedChunks)
     {
         List<Direction> exposedDirections = new ArrayList<>();
 
         for (Direction dir : Direction.values())
         {
-            BlockPos adjacentPos = pos.relative(dir);
-            LevelChunk chunk = findChunkInList(cachedChunks, adjacentPos);
+            adjacentPos.setWithOffset(pos, dir);
+            LevelChunk chunk = findChunk(cachedChunks, adjacentPos);
             if (chunk == null) continue;
 
-            BlockState state = chunk.getBlockState(adjacentPos);
-            if (!state.canOcclude())  exposedDirections.add(dir);
+            if (!chunk.getBlockState(adjacentPos).canOcclude()) exposedDirections.add(dir);
         }
 
         return new ExposedFaces(exposedDirections);
@@ -193,19 +188,19 @@ public class BlockSearch
     public static CompletableFuture<BlockSearchResult> searchAllAsync(Level level, Vec3 origin, int radius)
     {
         final BlockPos centerBlockPos = BlockPos.containing(origin);
+        final Long2ObjectOpenHashMap<LevelChunk> chunksToSearch = new Long2ObjectOpenHashMap<>();
         final int chunkRadius = (radius >> 4 ) + 1;
         final int radiusSq = radius * radius;
         final int centerChunkX = centerBlockPos.getX() >> 4;
         final int centerChunkZ = centerBlockPos.getZ() >> 4;
 
-        final List<LevelChunk> chunksToSearch = new ArrayList<>();
         for (int cx = centerChunkX - chunkRadius; cx <= centerChunkX + chunkRadius; cx++)
         {
             for (int cz = centerChunkZ - chunkRadius; cz <= centerChunkZ + chunkRadius; cz++)
             {
                 if (level.hasChunk(cx, cz))
                 {
-                    chunksToSearch.add(level.getChunk(cx, cz));
+                    chunksToSearch.put(ChunkPos.asLong(cx, cz), level.getChunk(cx, cz));
                 }
             }
         }
@@ -218,7 +213,7 @@ public class BlockSearch
                 builder.levelID = level.dimension();
                 builder.origin = origin;
 
-                for (LevelChunk chunk : chunksToSearch)
+                for (LevelChunk chunk : chunksToSearch.values())
                 {
                     searchChunk(chunk, origin, radiusSq, builder, chunksToSearch);
                 }

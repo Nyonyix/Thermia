@@ -177,7 +177,7 @@ public record BlockSearchResult(
                 float exposure = exposure(curLevel, entity, pos);
                 BlockState state = curLevel.getBlockState(pos);
 
-                if (dataMap.isRadiative()) totalTempForBlock += (calcTemp(pos, parseBlockState(state, dataMap), entityPos) * exposure);
+                if (dataMap.isRadiative()) totalTempForBlock += (calcTemp(pos, parseBlockState(curLevel, pos, dataMap), entityPos) * exposure);
             }
 
             totalBlockTemp += dataMap.temperature() == 0f ? totalTempForBlock : Math.min(totalTempForBlock, dataMap.temperature());
@@ -205,7 +205,7 @@ public record BlockSearchResult(
                 BlockState state = curLevel.getBlockState(pos);
                 Block block = state.getBlock();
                 BlockTemperatureDataMap blockDataMap = BuiltInRegistries.BLOCK.wrapAsHolder(block).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
-                float blockTemp = blockDataMap != null ? parseBlockState(state, blockDataMap) : 0f;
+                float blockTemp = blockDataMap != null ? parseBlockState(curLevel, pos, blockDataMap) : 0f;
                 float exposure = exposure(curLevel, entity, pos);
 
                 if (dataMap.isRadiative()) totalTempForFluid += (calcTemp(pos, blockTemp != 0f ? blockTemp : dataMap.temperature(), entityPos) * exposure);
@@ -289,7 +289,7 @@ public record BlockSearchResult(
                     BlockTemperatureDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(state.getBlock()).getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
                     if (dataMap == null || dataMap.isRadiative()) continue;
 
-                    float blockTemp = parseBlockState(state, dataMap);
+                    float blockTemp = parseBlockState(curLevel, mutableBlockPos, dataMap);
                     totalContactTemp += blockTemp;
                     contactCount++;
                 }
@@ -407,7 +407,7 @@ public record BlockSearchResult(
         return Mth.clamp(contactTemp, -maxValue, maxValue);
     }
 
-    public static float parseBlockState(BlockState state, BlockTemperatureDataMap dataMap)
+    public static float parseBlockState(Level level, BlockPos pos, BlockTemperatureDataMap dataMap)
     {
 //        StateDefinition<Block, BlockState> stateDef = state.getBlock().getStateDefinition();
 //        float temp = dataMap.temperature();
@@ -429,6 +429,6 @@ public record BlockSearchResult(
 //            else LOGGER.error("Property of {} was not found for block {}", entry.getKey(), state.getBlock().getDescriptionId());
 //        }
 
-        return dataMap.resolveForState(state);
+        return dataMap.resolveForState(level, pos);
     }
 }
