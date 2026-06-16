@@ -106,7 +106,7 @@ public class StayAtComfort extends Behavior<PathfinderMob>
     protected void stop(ServerLevel level, PathfinderMob mob, long gameTime)
     {
         long stayDuration = Calendars.get(level).getCalendarTicks() - arrivalTime;
-        long minutesStayed = (Calendar.CALENDAR_TICKS_IN_HOUR / 60) / stayDuration;
+        long minutesStayed = stayDuration / (Calendar.CALENDAR_TICKS_IN_HOUR / 60);
 
         LOGGER.debug("Entity {}: Stopped staying after {} minutes", mob.getType().getDescriptionId(), minutesStayed);
 

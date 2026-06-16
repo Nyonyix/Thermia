@@ -45,7 +45,7 @@ public class PinnipedAiMixin
     }
 
     @Inject(method = "makeBrain", at = @At("RETURN"), remap = false)
-    private static void addSeekComfortActivity(Brain<? extends TFCAnimal> brain, CallbackInfoReturnable<Brain<? extends AmphibiousAnimal>> cir)
+    private static void addSeekComfortActivity(Brain<? extends AmphibiousAnimal> brain, CallbackInfoReturnable<Brain<? extends AmphibiousAnimal>> cir)
     {
         Brain<? extends AmphibiousAnimal> returnedBrain = cir.getReturnValue();
 

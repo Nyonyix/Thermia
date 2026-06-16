@@ -5,7 +5,11 @@
   "mixins": [
     "TFCPlayerOverride",
     "LivestockAiMixin",
-    "TamableAiMixin"
+    "TamableAiMixin",
+    "AmphibianAiMixin",
+    "OviparousAiMixin",
+    "PinnipedAiMixin",
+    "PinnipedAiMixin"
   ],
   "injectors": {
     "defaultRequire": 1
