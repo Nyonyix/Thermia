@@ -197,8 +197,6 @@ public class ThermiaServer
             InteriorManager.onTick(level, server.getTickCount());
 
             ChunkHumidityManager.processChunkBatch(level, 64);
-
-            AiHelpers.cleanupExpiredTargets(level.getGameTime());
         }
     }
 

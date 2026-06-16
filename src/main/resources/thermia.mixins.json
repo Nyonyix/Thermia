@@ -8,7 +8,6 @@
     "TamableAiMixin",
     "AmphibianAiMixin",
     "OviparousAiMixin",
-    "PinnipedAiMixin",
     "PinnipedAiMixin"
   ],
   "injectors": {
