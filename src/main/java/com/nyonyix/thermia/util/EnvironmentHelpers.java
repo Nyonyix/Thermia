@@ -57,7 +57,7 @@ public class EnvironmentHelpers
 
         float windCooling = Mth.clampedMap(windSpeed, 0f, 32f, 0f, 24f);
 
-        float dampPenalty = 0;
+        float dampPenalty = 0f;
         if (temp < 12f && humidity > 0.6f)
         {
             float tempFactor = Mth.clampedMap(temp, -5f, 12f, 1.0f, 0.0f);
@@ -217,7 +217,7 @@ public class EnvironmentHelpers
 
         float dryingRate = (0.01f * tempComponent * humidityComponent * windComponent * solarComponent) * multi;
 
-        return Mth.clamp(dryingRate, 0.001f, 0.2f);
+        return Mth.clamp(dryingRate, 0.001f, 0.02f);
     }
 
     // Humidity

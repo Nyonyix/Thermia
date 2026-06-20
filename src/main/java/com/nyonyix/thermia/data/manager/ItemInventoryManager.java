@@ -50,7 +50,7 @@ public class ItemInventoryManager
             }
         }
 
-        return (armourInsulation / 4f) + (inventoryInsulation / 18f);
+        return (armourInsulation / 4f) + (inventoryInsulation / 36f);
     }
 
     public static float getInventoryTemperature(Entity entity)

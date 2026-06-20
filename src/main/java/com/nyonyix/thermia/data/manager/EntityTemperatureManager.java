@@ -144,7 +144,18 @@ public class EntityTemperatureManager
         if (!(entity instanceof LivingEntity living)) return;
         if (living instanceof Player player)
         {
-            if (player.isCreative() || player.isSpectator()) return;
+            if (player.isCreative() || player.isSpectator())
+            {
+                if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPERTHERMIA.get())))
+                {
+                    player.removeEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPERTHERMIA.get()));
+                }
+                else if (player.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPOTHERMIA.get())))
+                {
+                    player.removeEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPOTHERMIA.get()));
+                }
+                return;
+            }
         }
         EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
 
@@ -154,57 +165,64 @@ public class EntityTemperatureManager
 
         Holder<MobEffect> hyperthermia = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPERTHERMIA.get());
         Holder<MobEffect> hypothermia = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPOTHERMIA.get());
-        boolean hasEffect = living.hasEffect(hyperthermia) || living.hasEffect(hypothermia);
+        Holder<MobEffect> confusion = MobEffects.CONFUSION;
+        Holder<MobEffect> slowness = MobEffects.MOVEMENT_SLOWDOWN;
+        Holder<MobEffect> fatigue = MobEffects.DIG_SLOWDOWN;
 
-        if (hasEffect && !(effectScale > 0f))
+        if (entityData.internalTemperature() > entityData.minInternalTemperature() && entityData.internalTemperature() < entityData.maxInternalTemperature())
         {
-            if (living.hasEffect(hyperthermia))
-            {
-                living.removeEffect(hyperthermia);
-                living.removeEffect(MobEffects.CONFUSION);
-            }
-            else if (living.hasEffect(hypothermia))
-            {
-                living.removeEffect(hypothermia);
-                living.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
-                living.removeEffect(MobEffects.DIG_SLOWDOWN);
-            }
+            living.removeEffect(hypothermia);
+            living.removeEffect(slowness);
+            living.removeEffect(fatigue);
+            living.removeEffect(hyperthermia);
+            living.removeEffect(confusion);
             return;
         }
 
-        if (!(effectScale > 0)) return;
-
         if (entityData.internalTemperature() > entityTemperatureMidpoint)
         {
-            MobEffectInstance effect = new MobEffectInstance(hyperthermia, -1, amplifier, false, false, true);
             MobEffectInstance currentEffect = living.getEffect(hyperthermia);
-            living.removeEffect(hyperthermia);
+            MobEffectInstance hyper = new MobEffectInstance(hyperthermia, -1, amplifier, false, false, true);
+            MobEffectInstance conf = new MobEffectInstance(confusion, -1, 0, false, false, false);
 
-            if (currentEffect == null || currentEffect.getAmplifier() != amplifier)
+            if (currentEffect == null)
             {
-                living.addEffect(effect);
-
-                living.addEffect(new MobEffectInstance(MobEffects.CONFUSION, -1, 0, false, false, false));
+                living.addEffect(hyper);
+                living.addEffect(conf);
             }
-            else living.addEffect(currentEffect);
+            else if (currentEffect.getAmplifier() < amplifier)
+            {
+                living.addEffect(hyper);
+            }
+            else if (currentEffect.getAmplifier() > amplifier)
+            {
+                living.removeEffect(hyperthermia);
+                living.addEffect(hyper);
+            }
         }
         else if (entityData.internalTemperature() < entityTemperatureMidpoint)
         {
-            MobEffectInstance effect = new MobEffectInstance(hypothermia, -1, amplifier, false, false, true);
             MobEffectInstance currentEffect = living.getEffect(hypothermia);
-            living.removeEffect(hypothermia);
+            MobEffectInstance hypo = new MobEffectInstance(hypothermia, -1, amplifier, false, false, true);
+            MobEffectInstance slow = new MobEffectInstance(slowness, -1, amplifier, false, false, false);
+            MobEffectInstance digSlow = new MobEffectInstance(fatigue, -1, 0, false, false, false);
 
-            if (currentEffect == null || currentEffect.getAmplifier() != amplifier)
+            if (currentEffect == null)
             {
-                living.addEffect(effect);
-
-                living.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, -1, amplifier, false, false, false));
-                living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, -1, amplifier, false, false, false));
+                living.addEffect(hypo);
+                living.addEffect(slow);
+                living.addEffect(digSlow);
             }
-            else living.addEffect(currentEffect);
+            else if (currentEffect.getAmplifier() < amplifier)
+            {
+                living.addEffect(hypo);
+            }
+            else if (currentEffect.getAmplifier() > amplifier)
+            {
+                living.removeEffect(hypothermia);
+                living.addEffect(hypo);
+            }
         }
-
-        return;
     }
 
     private static EntityTemperature handleEnvironmentTemperature(Entity entity, EntityTemperatureDataMap dataMap, EntityTemperature entityData)
@@ -267,7 +285,7 @@ public class EntityTemperatureManager
         float minimumInternalTemperature = tempData.minInternalTemperature();
         float midPoint = (maximumInternalTemperature + minimumInternalTemperature) / 2f;
         float averageTemperature = Climate.get(entity.level()).getAverageTemperature(entity.level(), entity.blockPosition());
-        float acclimatization = (averageTemperature - midPoint) / 10E4f;
+        float acclimatization = (averageTemperature - midPoint) / 1E4f;
 
         float buffer = (float) ServerConfig.TEMPERATURE_SEGMENTS_PERCENT.getAsInt() / 100f;
 

@@ -11,31 +11,20 @@ import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import com.nyonyix.thermia.effect.ThermiaEffects;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.dries007.tfc.client.IngameOverlays;
-import net.dries007.tfc.util.Helpers;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.telemetry.TelemetryProperty;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.ClientChatReceivedEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
-import java.util.Locale;
-
-import static net.dries007.tfc.client.IngameOverlays.setup;
-
-@Mod(value = Thermia.MODID, dist = Dist.CLIENT)
-@EventBusSubscriber(modid = Thermia.MODID, value = Dist.CLIENT)
 public class ThermiaGui
 {
     public static final ResourceLocation ICON_TEXTURE = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/gui/icons.png");
@@ -50,23 +39,36 @@ public class ThermiaGui
     private static final int WIDGET_SIZE = 8;
     private static final float SUB_WIDGET_SIZE = 0.75f;
 
-    private static boolean setupForSurvival(GuiGraphics gui, Minecraft minecraft) {
-        MultiPlayerGameMode gm = Minecraft.getInstance().gameMode;
-        return gm != null && gm.canHurtPlayer() && setup(gui, minecraft);
+    private static int clampX(int screenW, int widgetW, int offset)
+    {
+        return Mth.clamp(offset, 0, screenW - widgetW);
     }
 
-    private static boolean setupForNotSpectator(GuiGraphics gui, Minecraft minecraft) {
-        MultiPlayerGameMode gm = Minecraft.getInstance().gameMode;
-        return gm != null && gm.getPlayerMode() != GameType.SPECTATOR && setup(gui, minecraft);
+    private static int clampY(int screenH, int widgetH, int offset)
+    {
+        return Mth.clamp(offset, 0, screenH - widgetH);
     }
 
-    private static float getConfigUIScale() {return (float) ClientConfig.UI_SCALE.getAsDouble();}
+    private static boolean canRender(GuiGraphics graphics)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return false;
+        if (!mc.player.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
+        MultiPlayerGameMode gm = mc.gameMode;
+        if (gm == null || gm.getPlayerMode() == GameType.CREATIVE) return false;
+        if (!ClientConfig.GLOBAL_UI_TOGGLE.getAsBoolean()) return false;
+        return IngameOverlays.setup(graphics, mc);
+    }
 
-    private static int getConfigUIXOffset() {return ClientConfig.UI_X_OFFSET.getAsInt();}
-
-    private static int getConfigUIYOffset() {return ClientConfig.UI_Y_OFFSET.getAsInt();}
-
-    private static ResourceLocation getTFCResourceLocation(IngameOverlays overlay) {return Helpers.resourceLocation(overlay.name().toLowerCase(Locale.ROOT));}
+    private static boolean canRenderEffect(GuiGraphics graphics)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return false;
+        if (!mc.player.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return false;
+        MultiPlayerGameMode gm = mc.gameMode;
+        if (gm == null || !gm.canHurtPlayer()) return false;
+        return IngameOverlays.setup(graphics, mc);
+    }
 
     private static int rgbToHex(float r, float g, float b, float a)
     {
@@ -80,22 +82,23 @@ public class ThermiaGui
 
     private static void renderPlayerTemp(GuiGraphics graphics, DeltaTracker delta)
     {
-        Minecraft mc = Minecraft.getInstance();
-        if (!setupForNotSpectator(graphics, mc)) return;
+        if (!ClientConfig.TEMPERATURE_UI_TOGGLE.getAsBoolean()) return;
+        if (!canRender(graphics)) return;
 
-        LocalPlayer player = mc.player;
-        if (!player.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
-        EntityTemperature playerTemp = player.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
-        Gui gui = mc.gui;
+        float scale = (float) ClientConfig.TEMPERATURE_UI_SCALE.getAsDouble();
+        float globalScale = (float) ClientConfig.GLOBAL_UI_SCALE.getAsDouble();
+        int iconW = (int) ((WIDGET_SIZE * scale) * globalScale);
+        int widgetW = iconW * 2;
+        int anchorX = (graphics.guiWidth() / 2) - (iconW / 2);
+        int anchorY = graphics.guiHeight() - iconW;
 
-        float uiScale = getConfigUIScale();
-        int uiXOffset = getConfigUIXOffset();
-        int uiYOffset = getConfigUIYOffset();
-        int scaledWidgetSize = (int) (WIDGET_SIZE * uiScale);
+        int rawX = anchorX + ClientConfig.TEMPERATURE_UI_OFFSET_X.getAsInt() + ClientConfig.GLOBAL_UI_OFFSET_X.getAsInt();
+        int rawY = anchorY + ClientConfig.TEMPERATURE_UI_OFFSET_Y.getAsInt() + ClientConfig.GLOBAL_UI_OFFSET_Y.getAsInt();
 
-        int centerX = (graphics.guiWidth() / 2) - scaledWidgetSize / 2;
-        int y = graphics.guiHeight() - gui.leftHeight - (scaledWidgetSize / 2) + 5;
+        int x = clampX(graphics.guiWidth(), widgetW, rawX);
+        int y = clampY(graphics.guiHeight(), iconW, rawY);
 
+        EntityTemperature playerTemp = Minecraft.getInstance().player.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
         float playerTemperature = playerTemp.internalTemperature();
         float environmentTemperature = playerTemp.environmentTemperature();
         float maxTemperature = playerTemp.maxInternalTemperature();
@@ -105,7 +108,7 @@ public class ThermiaGui
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX + uiXOffset, y + uiYOffset, 0f);
+        poseStack.translate(x, y, 0f);
 
         float playerR, playerG, playerB;
         if (playerTemperatureNormalised > 0.5)
@@ -140,10 +143,10 @@ public class ThermiaGui
         }
 
         RenderSystem.setShaderColor(playerR, playerG, playerB, 1.0f);
-        graphics.blit(ICON_TEXTURE, -scaledWidgetSize / 2, 0, scaledWidgetSize, scaledWidgetSize,0, 16, 8, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        graphics.blit(ICON_TEXTURE, -iconW/ 2, 0, iconW, iconW,0, 16, 8, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
 
         RenderSystem.setShaderColor(envR, envG, envB, 1.0f);
-        graphics.blit(ICON_TEXTURE,scaledWidgetSize / 2, 0, scaledWidgetSize, scaledWidgetSize, 8, 16, 8, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        graphics.blit(ICON_TEXTURE,iconW / 2, 0, iconW, iconW, 8, 16, 8, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
 
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
@@ -151,33 +154,34 @@ public class ThermiaGui
 
     private static void renderSolarIntensity(GuiGraphics graphics, DeltaTracker delta)
     {
-        Minecraft mc = Minecraft.getInstance();
-        if (!setupForNotSpectator(graphics, mc)) return;
+        if (!ClientConfig.SOLAR_UI_TOGGLE.getAsBoolean()) return;
+        if (!canRender(graphics)) return;
 
-        LocalPlayer player = mc.player;
-        if (!player.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
+        float scale = (float) ClientConfig.SOLAR_UI_SCALE.getAsDouble();
+        float globalScale = (float) ClientConfig.GLOBAL_UI_SCALE.getAsDouble();
+        int widgetSize = ClientConfig.SOLAR_UI_SUB_TOGGLE.getAsBoolean() ? (int) (((WIDGET_SIZE * scale) * globalScale) * SUB_WIDGET_SIZE): (int) ((WIDGET_SIZE * scale) * globalScale) ;;
+        int anchorX = (graphics.guiWidth() / 2) - (widgetSize / 2);
+        int anchorY = graphics.guiHeight() - widgetSize;
+
+        int rawX = anchorX + ClientConfig.SOLAR_UI_OFFSET_X.getAsInt() + ClientConfig.GLOBAL_UI_OFFSET_X.getAsInt();
+        int rawY = anchorY + ClientConfig.SOLAR_UI_OFFSET_Y.getAsInt() + ClientConfig.GLOBAL_UI_OFFSET_Y.getAsInt();
+
+        int x = clampX(graphics.guiWidth(), widgetSize, rawX);
+        int y = clampY(graphics.guiHeight(), widgetSize, rawY);
+
+        Player player = Minecraft.getInstance().player;
         EntityTemperature playerData = player.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
-        Gui gui = mc.gui;
 
-        float uiScale = getConfigUIScale();
-        float solarWidgetSize = WIDGET_SIZE * SUB_WIDGET_SIZE;
-        int uiXOffset = getConfigUIXOffset();
-        int uiYOffset = getConfigUIYOffset();
-        int scaledWidgetSize = (int) (solarWidgetSize * uiScale);
-
-        int centerX = (graphics.guiWidth() / 2) - scaledWidgetSize / 2 - 6;
-        int y = graphics.guiHeight() - gui.leftHeight - (scaledWidgetSize / 2) - 3;
-
-        float solarIntensity = EnvironmentHelpers.getSolarRadiationWeather(player.clientLevel, player.blockPosition().above(), playerData.solarShadeResult().shade());
+        float solarIntensity = EnvironmentHelpers.getSolarRadiationWeather(player.level(), player.blockPosition().above(), playerData.solarShadeResult().shade());
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX + uiXOffset, y + uiYOffset, 0f);
+        poseStack.translate(x, y, 0f);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1f, 1f, 1f, solarIntensity);
-        graphics.blit(ICON_TEXTURE, 0, 0, scaledWidgetSize, scaledWidgetSize, 32, 16, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        graphics.blit(ICON_TEXTURE, 0, 0, widgetSize, widgetSize, 32, 16, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
         RenderSystem.disableBlend();
 
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -186,33 +190,34 @@ public class ThermiaGui
 
     private static void renderWetness(GuiGraphics graphics, DeltaTracker delta)
     {
-        Minecraft mc = Minecraft.getInstance();
-        if (!setupForNotSpectator(graphics, mc)) return;
+        if (!ClientConfig.WETNESS_UI_TOGGLE.getAsBoolean()) return;
+        if (!canRender(graphics)) return;
 
-        LocalPlayer player = mc.player;
-        if (!player.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
+        float scale = (float) ClientConfig.WETNESS_UI_SCALE.getAsDouble();
+        float globalScale = (float) ClientConfig.GLOBAL_UI_SCALE.getAsDouble();
+        int widgetSize = ClientConfig.WETNESS_UI_SUB_TOGGLE.getAsBoolean() ? (int) (((WIDGET_SIZE * scale) * globalScale) * SUB_WIDGET_SIZE): (int) ((WIDGET_SIZE * scale) * globalScale) ;;
+        int anchorX = (graphics.guiWidth() / 2) - (widgetSize / 2);;
+        int anchorY = graphics.guiHeight() - widgetSize;
+
+        int rawX = anchorX + ClientConfig.WETNESS_UI_OFFSET_X.getAsInt() + ClientConfig.GLOBAL_UI_OFFSET_X.getAsInt();
+        int rawY = anchorY + ClientConfig.WETNESS_UI_OFFSET_Y.getAsInt() + ClientConfig.GLOBAL_UI_OFFSET_Y.getAsInt();
+
+        int x = clampX(graphics.guiWidth(), widgetSize, rawX);
+        int y = clampY(graphics.guiHeight(), widgetSize, rawY);
+
+        Player player = Minecraft.getInstance().player;
         EntityTemperature playerData = player.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
-        Gui gui = mc.gui;
-
-        float uiScale = getConfigUIScale();
-        float wetnessWidgetSize = WIDGET_SIZE * SUB_WIDGET_SIZE;
-        int uiXOffset = getConfigUIXOffset();
-        int uiYOffset = getConfigUIYOffset();
-        int scaledWidgetSize = (int) (wetnessWidgetSize * uiScale);
-
-        int centerX = (graphics.guiWidth() / 2) - scaledWidgetSize / 2 + 6;
-        int y = graphics.guiHeight() - gui.leftHeight - (scaledWidgetSize / 2) - 3;
 
         float wetness = playerData.wetness();
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX + uiXOffset, y + uiYOffset, 0f);
+        poseStack.translate(x, y, 0f);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1f, 1f, 1f, wetness);
-        graphics.blit(ICON_TEXTURE, 0, 0, scaledWidgetSize, scaledWidgetSize, 16, 16, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        graphics.blit(ICON_TEXTURE, 0, 0, widgetSize, widgetSize, 16, 16, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
         RenderSystem.disableBlend();
 
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -221,37 +226,39 @@ public class ThermiaGui
 
     private static void renderWind(GuiGraphics graphics, DeltaTracker delta)
     {
-        Minecraft mc = Minecraft.getInstance();
-        if (!setupForNotSpectator(graphics, mc)) return;
+        if (!ClientConfig.WIND_UI_TOGGLE.getAsBoolean()) return;
+        if (!canRender(graphics)) return;
 
-        LocalPlayer player = mc.player;
-        if (!player.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
+        float scale = (float) ClientConfig.WIND_UI_SCALE.getAsDouble();
+        float globalScale = (float) ClientConfig.GLOBAL_UI_SCALE.getAsDouble();
+        int widgetSize = ClientConfig.WIND_UI_SUB_TOGGLE.getAsBoolean() ? (int) (((WIDGET_SIZE * scale) * globalScale) * SUB_WIDGET_SIZE): (int) ((WIDGET_SIZE * scale) * globalScale) ;;
+        int anchorX = (graphics.guiWidth() / 2) - (widgetSize / 2);;
+        int anchorY = graphics.guiHeight() - widgetSize;
+
+        int rawX = anchorX + ClientConfig.WIND_UI_OFFSET_X.getAsInt() + ClientConfig.GLOBAL_UI_OFFSET_X.getAsInt();
+        int rawY = anchorY + ClientConfig.WIND_UI_OFFSET_Y.getAsInt() + ClientConfig.GLOBAL_UI_OFFSET_Y.getAsInt();
+
+        int x = clampX(graphics.guiWidth(), widgetSize, rawX);
+        int y = clampY(graphics.guiHeight(), widgetSize, rawY);
+
+        Player player = Minecraft.getInstance().player;
         EntityTemperature playerData = player.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
-        Gui gui = mc.gui;
 
-        float uiScale = getConfigUIScale();
-        float windWidgetSize = WIDGET_SIZE * SUB_WIDGET_SIZE;
-        int uiXOffset = getConfigUIXOffset();
-        int uiYOffset = getConfigUIYOffset();
-        int scaledWidgetSize = (int) (windWidgetSize * uiScale);
-
-        int centerX = (graphics.guiWidth() / 2) - scaledWidgetSize / 2;
-        int y = graphics.guiHeight() - gui.leftHeight - (scaledWidgetSize / 2) - 3;
-
-        float windDirection = EnvironmentHelpers.getWindDirection(player.clientLevel, player.blockPosition().above());
-        float windSpeed = EnvironmentHelpers.getWindSpeed(player.clientLevel, player.blockPosition().above(), playerData.windOcclusionResult().occlusionMultiplier());
+        float windDirection = EnvironmentHelpers.getWindDirection(player.level(), player.blockPosition().above());
+        float windSpeed = EnvironmentHelpers.getWindSpeed(player.level(), player.blockPosition().above(), playerData.windOcclusionResult().occlusionMultiplier());
         float playerYaw = (player.getYRot() + 180f) % 360f;
         float playerYawRad = (float) Math.toRadians(playerYaw);
         float relativeWindDirection = windDirection - playerYawRad;
         float arrowRotation = (float) Math.toDegrees(relativeWindDirection) + 90f;
+        float pivot = widgetSize / 2f;
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        poseStack.translate(centerX + uiXOffset, y + uiYOffset, 0f);
+        poseStack.translate(x, y, 0f);
 
-        poseStack.translate(3, 3, 0);
+        poseStack.translate(pivot, pivot, 0);
         poseStack.mulPose(Axis.ZP.rotationDegrees(arrowRotation));
-        poseStack.translate(-3, -3, 0);
+        poseStack.translate(-pivot, -pivot, 0);
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
@@ -261,9 +268,9 @@ public class ThermiaGui
             poseStack.popPose();
             return;
         }
-        else if (windSpeed < 5) graphics.blit(ICON_TEXTURE, 0, 0, scaledWidgetSize, scaledWidgetSize, 0, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
-        else if (windSpeed < 15) graphics.blit(ICON_TEXTURE, 0, 0, scaledWidgetSize, scaledWidgetSize, 16, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
-        else graphics.blit(ICON_TEXTURE, 0, 0, scaledWidgetSize, scaledWidgetSize, 32, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        else if (windSpeed < 5) graphics.blit(ICON_TEXTURE, 0, 0, widgetSize, widgetSize, 0, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        else if (windSpeed < 15) graphics.blit(ICON_TEXTURE, 0, 0, widgetSize, widgetSize, 16, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
+        else graphics.blit(ICON_TEXTURE, 0, 0, widgetSize, widgetSize, 32, 0, 16, 16, ICON_TEXTURE_SIZE_X, ICON_TEXTURE_SIZE_Y);
 
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
@@ -271,75 +278,48 @@ public class ThermiaGui
 
     private static void renderHyperthermiaEffect(GuiGraphics graphics, DeltaTracker delta)
     {
-        Minecraft mc = Minecraft.getInstance();
-        if (!setupForSurvival(graphics, mc)) return;
-
         if (!ClientConfig.ENABLE_HYPER_RENDER.getAsBoolean()) return;
+        if (!canRenderEffect(graphics)) return;
 
-        LocalPlayer player = mc.player;
+        Player player = Minecraft.getInstance().player;
         if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPERTHERMIA.get()))) return;
 
-        float effectScale  = EntityTemperatureManager.getTemperatureEffectScale(player);
-        float configIntensity = (float) ClientConfig.HYPER_EFFECT_INTENSITY.getAsDouble();
-
-        float r = 1f;
-        float g = 0.25f;
-        float b = 0f;
-        float alpha = effectScale * 0.5f;
-
-        PoseStack poseStack = graphics.pose();
-        poseStack.pushPose();
+        float effectScale = EntityTemperatureManager.getTemperatureEffectScale(player);
+        float intensity = (float) ClientConfig.HYPER_EFFECT_INTENSITY.getAsDouble();
+        float alpha = effectScale * 1.5f * intensity;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShaderColor(r * configIntensity, g * configIntensity, b * configIntensity, alpha * configIntensity);
+        RenderSystem.setShaderColor(1f, 0.25f, 0f, alpha);
 
-        int colourHex = (int) (rgbToHex(r, g, b, alpha) * configIntensity);
-
-        graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), colourHex);
+        graphics.blit(HEAT_OVERLAY_TEXTURE, 0, 0, 0, 0, graphics.guiWidth(), graphics.guiHeight(), graphics.guiWidth(), graphics.guiHeight());
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.disableBlend();
-        poseStack.popPose();
     }
 
     private static void renderHypothermiaEffect(GuiGraphics graphics, DeltaTracker delta)
     {
-        Minecraft mc = Minecraft.getInstance();
-        if (!setupForSurvival(graphics, mc)) return;
-
         if (!ClientConfig.ENABLE_HYPO_RENDER.getAsBoolean()) return;
+        if (!canRenderEffect(graphics)) return;
 
-        LocalPlayer player = mc.player;
+        Player player = Minecraft.getInstance().player;
         if (!player.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThermiaEffects.HYPOTHERMIA.get()))) return;
 
         float effectScale = EntityTemperatureManager.getTemperatureEffectScale(player);
-        float configIntensity = (float) ClientConfig.HYPO_EFFECT_INTENSITY.getAsDouble();
-
-        float r = 1f;
-        float g = 1f;
-        float b = 1f;
-        float alpha = effectScale * 0.5f;
-
-        PoseStack poseStack = graphics.pose();
-        poseStack.pushPose();
+        float intensity = (float) ClientConfig.HYPO_EFFECT_INTENSITY.getAsDouble();
+        float alpha = effectScale * 1.5f * intensity;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(r * configIntensity, g * configIntensity, b * configIntensity, alpha * configIntensity);
-
-        int colourHex = (int) (rgbToHex(r, g, b, alpha) * configIntensity);
+        RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
 
         graphics.blit(COLD_OVERLAY_TEXTURE, 0, 0, 0, 0, graphics.guiWidth(), graphics.guiHeight(), graphics.guiWidth(), graphics.guiHeight());
-        graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), colourHex);
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.disableBlend();
-        poseStack.popPose();
     }
 
-    @SubscribeEvent
     public static void registerGuis(RegisterGuiLayersEvent event)
     {
         event.registerBelowAll(ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "hyperthermia_effects"), ThermiaGui::renderHyperthermiaEffect);
