@@ -1,0 +1,40 @@
+{
+    "name": "Thermia Introduction",
+    "category": "tfc:thermia",
+    "icon": "thermia:textures/gui/book/book_icon.png",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Welcome to $(l)Thermia$(), an in-depth and complex thermal management addon for TerraFirmaCraft.$(br2)In the world of Thermia, survival means more than just securing food and water. You must now manage your body temperature against the elements - scorching sun, freezing winds, nearby heat sources, and the humidity of the air itself."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Configured entites have a $(l)natural temperature range$(). Step outside this range, and you'll begin experiencing the debilitating effects of $(l:tfc:thermia/heat)hyperthermia (overheating)$() or $(l:tfc:thermia/cold)hypothermia (freezing)$().$(br2)Your environment constantly influences your body temperature through factors like solar radiation, $(l:tfc:thermia/mechanics#wind)wind$(), $(l:tfc:thermia/mechanics#humidity)humidity$(), $(l:tfc:thermia/mechanics#wetness)wetness$(), nearby blocks, $(l:tfc:thermia/mechanics#insulation)and even your inventory$()."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Thermia adds indicators to your HUD that display critical thermal information at a glance. Understanding these indicators is essential for survival.$(br2)The following pages will show you what each element means and how to read them effectively.",
+            "title": "Thermia GUI"
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "thermia:textures/gui/book/gui.png"
+            ],
+            "text": "The Thermia GUI showing mild temperature conditions in the sun with a light breeze",
+            "border": true
+        },
+        {
+            "type": "patchouli:text",
+            "text": "The two thermometer icons show:$(br)$(li)Left: Your internal body temperature$(br)$(li)Right: Perceived Temperature$(br2)Colors shift from $(l)blue (cold)$() through white (comfortable) to $(l)red (hot)$(), giving you instant feedback on thermal conditions.",
+            "title": "Temperature Indicators"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "$(li)$(l)Sun Icon:$() Brighter means more heating from sunlight$(li)$(l:tfc:thermia/mechanics#wind)$(l)Wind Arrow$():$() Wind speed and direction - points to the direction wind is moving$(li)$(l:tfc:thermia/mechanics#wetness)$(l)Water Droplet$():$() Your wetness level - affects cooling and insulation$(br2)These work together to determine your effective temperature.",
+            "title": "Additional Indicators"
+        }
+    ],
+    "read_by_default": true,
+    "sortnum": 0
+}

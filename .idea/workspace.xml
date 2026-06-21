@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Fixed Acclimatisation&#10;Added lang for ui config">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ServerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ServerConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/lang/en_us.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/lang/en_us.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,6 +77,7 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [runClient # Run client].executor&quot;: &quot;Run&quot;,
     &quot;Gradle.Thermia [runClient].executor&quot;: &quot;Run&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
@@ -85,7 +85,7 @@
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;1.21.1&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/nyon/Coding/Minecraft/Java/Thermia&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/run/media/nyon/FA642B15642AD463/Backup/Coding/Java/MC Mods/Thermia&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   }
 }</component>
@@ -130,6 +130,34 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Thermia [runClient # Run client]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="runClient" />
+            <option value="#" />
+            <option value="Run" />
+            <option value="client" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
+      <method v="2" />
+    </configuration>
     <configuration name="Thermia [runClient]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -158,6 +186,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.Thermia [runClient]" />
+        <item itemvalue="Gradle.Thermia [runClient # Run client]" />
       </list>
     </recent_temporary>
   </component>
@@ -185,12 +214,39 @@
       <option name="project" value="LOCAL" />
       <updated>1781961885382</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Fixed Acclimatisation">
+      <option name="closed" value="true" />
+      <created>1782033753055</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1782033753056</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Fixed Acclimatisation&#10;Added lang for ui config">
+      <option name="closed" value="true" />
+      <created>1782033806602</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1782033806602</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Fixed Acclimatisation&#10;Added lang for ui config">
+      <option name="closed" value="true" />
+      <created>1782033814441</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1782033814441</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Code Clean up" />
     <MESSAGE value="GUI rework&#10;Hyperthermia effect render fix&#10;Effect management rework&#10;Slight inventory heating tweak&#10;Drying rate tweak" />
-    <option name="LAST_COMMIT_MESSAGE" value="GUI rework&#10;Hyperthermia effect render fix&#10;Effect management rework&#10;Slight inventory heating tweak&#10;Drying rate tweak" />
+    <MESSAGE value="Fixed Acclimatisation&#10;Added lang for reworked ui config" />
+    <MESSAGE value="Fixed Acclimatisation" />
+    <MESSAGE value="Fixed Acclimatisation&#10;Added lang for ui config" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed Acclimatisation&#10;Added lang for ui config" />
   </component>
 </project>

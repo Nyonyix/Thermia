@@ -1,0 +1,89 @@
+{
+    "name": "Thermia Mechanics",
+    "category": "tfc:thermia",
+    "icon": "tfc:brass_mechanisms",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "This entry will cover the different machanics and minutia in thermia."
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "shade",
+            "text": "The shade system is thermia is more complex than a simple 'is under block'. Thermia calculates the sun postion and checks for obstruction, This check is only block accurate but extends up to 200 blocks away. As such, in thermia hiding under a block may not work for shade and you will have to actaully hide from the sun.$(br)$(l)NOTE:$() Entites with 'isMob' only check if block is above.",
+            "title": "Shade"
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "humidity",
+            "text": "Humidity is a complex system in thermia, primarily based on TFC's $(l:https://en.wikipedia.org/wiki/K%C3%B6ppen_climate_classification)Koppen Climate Classification$() system there are also other factors considered. Aside from climate there are 3 drivers for humidity, weather, time of day and even depth.",
+            "title": "Humidity"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "While weather and time of day are mostly self explanatory depth is not. How depth works is rather simple, thermia counts the ammount of blocks above the entity per chunk and adds humidity based on the balue in config."
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "homeostasis",
+            "text": "Thermia has a homeostasis, It's not complex and is a simple system where the entity's internal temperature will try to maintain the middle between minimum and maximum.",
+            "title": "Homeostasis"
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "insulation",
+            "text": "As thermia as homeostasis, insulation is an extremely important. Insulation reduces the temperature change from environment, the higher the insulation the more homeostasis drives internal temperature. Insulation is provided by many basic items and articles of clothing, inventory slots matter more than item counts. Wetness also very much matters as the higher your wetness, The more insulation is negated.",
+            "title": "Insulation"
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "wetness",
+            "text": "Being wet can be a killer or a saviour, depending on environment and evaporative cooling. There are a few different ways to get wet, sweat, precipitation or swimming. Wetness from precipitation can occur when raining or snowing above -5c, below -5c snow cannot melt and so cannot make you wet. Swiming can also and obviously make you wet, Take care not to dive too deep as the deeper you go the colder it gets.",
+            "title": "Wetness"
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "wind",
+            "text": "Wind is a base mechanic in TFC but is used quite heavily in thermia. Whether it's wind chill, dyring rate or evaporative cooling wind plays a pivotal role. You can hide from the wind my using a wall, cave or even tree, thermia checks 6 or 12 blocks for occlusion depending if you have a block above.",
+            "title": "Wind"
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "evaporative_cooling",
+            "text": "This effect is why wetness matters, evaporative cooling depends on a few simple factors such as humidity and wind. The higher the humidity or the lower the wind the lower the effect.",
+            "title": "Evaporative Cooling"
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "drying_rate",
+            "text": "Being dry can matter just as much or even more than being wet. Drying has roots in 3 primary factors, humidity, temperature and wind. Say for instance you will dry markedly faster in a dry desert environment versus a humid mild cave environment.",
+            "title": "Drying Rate"
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "sweat",
+            "text": "Sweating occurs when the entity internal temperature exceeds a heat stress threshold, the rate will max out when the internal temperature exceeds the entity's maximum. Sweatiung interacts with TFC's player hydration taking away hydration while also slowing as the player is dyhydrated.",
+            "title": "Sweat"
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "solar_radiation",
+            "text": "As thermia calculates $(l:https://en.wikipedia.org/wiki/Mean_radiant_temperature)Globe Temperature$() solar radiation or just simply heat from the sun matters. This value is simply dependant on how high the sun is in the sky and if you are in view.",
+            "title": "Solar Radiation"
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "radiant_source",
+            "text": "Radiant",
+            "title": "Radiant Sources"
+        },
+        {
+            "type": "patchouli:text",
+            "anchor": "cold_source",
+            "text": "",
+            "title": "Cold Sources"
+        }
+    ],
+    "read_by_default": true,
+    "sortnum": 3
+}

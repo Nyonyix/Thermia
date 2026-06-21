@@ -1,0 +1,45 @@
+{
+    "name": "Managing Heat",
+    "category": "tfc:thermia",
+    "icon": "thermia:textures/mob_effect/hyperthermia.png",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Heat is one of your greatest challenges. When your body temperature exceeds your comfortable range, you'll begin suffering from hyperthermia, which can quickly become deadly if left unmanaged.",
+            "title": "Overheating"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "As you overheat, you'll experience increasingly severe effects:$(br)$(li)Confusion effect$(li)Damage $(li)Red screen tint"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Several factors increase your temperature:$(li)Solar radiation - direct sunlight$(li)Nearby heat blocks - forges, fires, lava$(li)Hot fluids - molten metal, lava$(li)High ambient temperature - desert biomes$(li)Low wind - still air prevents cooling$(li)High humidity - reduces evaporation",
+            "title": "What Causes Heat"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "$(l:tfc:thermia/mechanics#shade)$(l)Seek Shade$()$(br)Thermia has shadows accurate to the block, get under trees, caves or shelters.$(br2)$(l:tfc:thermia/mechanics#wetness)$(l)Get Wet$()$()$(br)Water provides powerful evaporative cooling. Jump in rivers, stand in rain, or carry water to splash yourself.",
+            "title": "Staying Cool"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "$(l:tfc:thermia/mechanics#wind)$(l)Find Wind$()$()$(br)Wind enhances evaporative cooling dramatically. Exposed hilltops and open areas have stronger winds.$(br2)$(l)Avoid Heat Sources$()$(br)Stay away from forges, fires, and lava. Even proximity radiates significant heat. If you must work with heat, do so quickly or palce sources behind walls."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "$(l:tfc:thermia/mechanics#insulation)$(l)Insulation$()$(br)Insulation can help or hinder cooling as it slows your body heat.$(br2)$(l)Time Your Activities$()$(br)Work during dawn, dusk, or night when solar radiation is minimal. Rest in shade during peak sun hours."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "$(l)Sweating$(): Your body automatically sweats when hot, if you have sufficient hydration. This converts thirst into cooling - keep your water topped up!$(br2)$(l)Wet Bulb Temperature$(): In very humid environments, sweating becomes less effective. Seek wind or shade instead.",
+            "title": "Advanced Tips"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "$(l)Working with Forges$()$(br2)Metalworking creates intense heat. To survive:$(li)Remove all metal armor$(li)Stay wet if possible$(li)Work in short bursts$(li)Have water nearby to cool off$(li)Build in open, windy areas$(li)Consider nighttime smithing"
+        }
+    ],
+    "read_by_default": true,
+    "sortnum": 1
+}

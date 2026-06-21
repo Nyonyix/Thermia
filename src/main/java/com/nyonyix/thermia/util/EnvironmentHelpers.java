@@ -244,7 +244,8 @@ public class EnvironmentHelpers
         float forestModifier = 0f; //Todo - Maybe add forest modifier based on forest density.
 
         float baseHumidity = climateHumidity * diurnalModifier;
-        float rainAdjusted = Mth.lerp(rainBoost, baseHumidity, 0.95f);
+        float t = Mth.clamp(rainBoost * 2f, 0f, 1f);
+        float rainAdjusted = Mth.lerp(t, baseHumidity, 1f);
 
         return Mth.clamp(rainAdjusted, 0f, 0.99f);
     }
@@ -263,7 +264,7 @@ public class EnvironmentHelpers
         float realIntensity = WeatherHelpers.calculateRealRainIntensity(rainIntensity, rainfall);
         float moisterFactor = Math.max(rainIntensity * 0.3f, realIntensity);
 
-        return Mth.clamp(moisterFactor, 0f, 0.5f);
+        return Mth.clamp(moisterFactor, 0f, 1f);
     }
 
     public static float newHumidityKoppen(KoppenClimateHumidity koppenClimateHumidity, float rainVar, float fractionOfYear, boolean isNorth)

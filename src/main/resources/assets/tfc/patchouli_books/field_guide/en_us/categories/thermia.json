@@ -1,0 +1,6 @@
+{
+    "name": "Thermia",
+    "description": "All about the Thermia addon",
+    "icon": "thermia:textures/gui/book/book_icon.png",
+    "sortnum": 10
+}

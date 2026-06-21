@@ -101,14 +101,14 @@ public class EntityTemperatureManager
             if (heatStress > 0)
             {
                 float normalisedHeatStress = Mth.clamp(heatStress / heatBufferZone, 0f, 1f);
-                float baseSweatRate = normalisedHeatStress * 0.05f;
+                float baseSweatRate = normalisedHeatStress * 0.005f;
                 float actualSweatRate = baseSweatRate * sweatEfficiency;
                 float newWetness = Math.min(1.0f, entityData.wetness() + actualSweatRate);
 
                 float hydrationLossMulti = (float) ServerConfig.PLAYER_SWEAT_HYDRATION_LOSS_MULTI.getAsDouble();
 
                 entityData = entityData.withWetness(newWetness);
-                player.addThirst(-((baseSweatRate * 10) * hydrationLossMulti));
+                player.addThirst(-((baseSweatRate * 100) * hydrationLossMulti));
             }
         }
         else

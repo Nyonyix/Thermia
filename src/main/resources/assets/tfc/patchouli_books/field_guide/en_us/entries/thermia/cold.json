@@ -1,0 +1,56 @@
+{
+    "name": "Managing Cold",
+    "category": "tfc:thermia",
+    "icon": "thermia:textures/gui/book/cold.png",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Cold is a constant threat in frigid climates. When your body temperature drops below your comfortable range, you'll begin suffering from hypothermia, which can be just as deadly as hyperthermia if not properly managed.",
+            "title": "Freezing"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "As you freeze, you'll experience increasingly severe effects:$(li)Slowness effect$(li)Mining Fatigue$(li)Damage$(li)Blue-white screen tint with frost overlay"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Several factors decrease your temperature:$(li)Low ambient temperature - tundra, mountains$(li)Wind chill - exposed areas$(li)Cold fluids - water, especially deep water$(li)Cold blocks - ice, snow$(li)Being wet - water conducts heat away$(li)Lack of sun - night, caves, shade$(li)High altitude - mountains are colder",
+            "title": "What Causes Cold"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "$(l:tfc:thermia/mechanics#wind)$(l)Wind$()$()$(br)Wind dramatically increases cooling. Find caves, build enclosed structures, or get behind walls to block the wind.$(br2)$(l:tfc:thermia/mechanics#wetness)$(l)Stay Dry:$()$()$(br)Wetness multiplies cold effects. Avoid water, rain, and snow. If you get wet, find shelter immediately and wait to dry.",
+            "title": "Staying Warm"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "$(l)Warm Blocks:$()$(br)Position yourself near fires, lit forges, or other heat-emitting blocks. Even a small campfire can keep you alive.$(br2)$(l:tfc:thermia/mechanics#soalr_radiation)$(l)Sun:$()$()$(br)During the day, stay in open sunny areas. Solar radiation provides significant warmth, especially at low wind."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "$(l:tfc:thermia/mechanics#insulation)$(l)Insulation:$()$()$(br)Wear wool and leather clothing. These materials trap body heat and slow cooling. Carry extra insulating items in your inventory for additional protection.$(br2)$(l)Time Your Activities:$()$(br)Travel and work during midday when the sun is strongest. Shelter in place during night and storms."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Water is extremely dangerous in cold:$(li)Immersion rapidly drains body heat$(li)Wetness persists after leaving water$(li)Deep water increases cold exposure$(li)Freezing water can trap you$(br2)If you must cross water, do so quickly and dry off immediately by a fire.",
+            "title": "Water Dangers"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "In humid, cold environments (just above freezing), wetness and humidity combine to create dangerous conditions. Prioritize staying dry and sheltered.$(br2)In very cold biomes, you may need multiple strategies simultaneously - insulation, heat sources, shelter, and sunshine.",
+            "title": "Damp Cold"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Surviving cold winters requires preparation:$(li)Build insulated shelters$(li)Stock firewood for continuous heat$(li)Wear full wool or leather gear$(li)Avoid unnecessary exposure$(li)Keep food and water accessible$(li)Never travel during snow",
+            "title": "Winter"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "High altitudes present unique challenges:$(li)Temperatures drop with elevation$(li)Wind is stronger and more constant$(li)Less shelter available$(li)Snow and ice increase wetness risk$(br2)Bring extra insulation, portable heat sources, and plan escape routes to lower elevations.",
+            "title": "Mountain Climbing"
+        }
+    ],
+    "read_by_default": true,
+    "sortnum": 2
+}
