@@ -281,26 +281,35 @@ public class EntityTemperatureManager
         if (!entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE)) return;
         EntityTemperature tempData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
 
-        float maximumInternalTemperature = tempData.maxInternalTemperature();
-        float minimumInternalTemperature = tempData.minInternalTemperature();
-        float midPoint = (maximumInternalTemperature + minimumInternalTemperature) / 2f;
-        float averageTemperature = Climate.get(entity.level()).getAverageTemperature(entity.level(), entity.blockPosition());
-        float acclimatization = (averageTemperature - midPoint) / 1E4f;
+        EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
+        if (dataMap == null) return;
 
-        float buffer = (float) ServerConfig.TEMPERATURE_SEGMENTS_PERCENT.getAsInt() / 100f;
+        float baseMax = dataMap.maxEntityTemperature();
+        float baseMin = dataMap.minEntityTemperature();
 
-        float highMaximumInternalTemperature = maximumInternalTemperature * (1f + buffer);
-        float lowMaximumInternalTemperature = maximumInternalTemperature * (1f - buffer);
+        float currentMax = tempData.maxInternalTemperature();
+        float currentMin = tempData.minInternalTemperature();
+        float midPointTemp = (currentMax + currentMin) / 2f;
 
-        float highMinimumInternalTemperature = minimumInternalTemperature * (1f + buffer);
-        float lowMinimumInternalTemperature = minimumInternalTemperature * (1f - buffer);
+        float environmentalAverage = Climate.get(entity.level()).getAverageTemperature(entity.level(), entity.blockPosition());
 
-        float acclimatizedMaxTemperature = Mth.clamp(maximumInternalTemperature + acclimatization, lowMaximumInternalTemperature, highMaximumInternalTemperature);
-        float acclimatizedMinTemperature = Mth.clamp(minimumInternalTemperature + acclimatization, lowMinimumInternalTemperature, highMinimumInternalTemperature);
+        float multi = (float) ServerConfig.ENTITY_ACCLIMATISATION_MULTI.getAsDouble();
+        float delta = (environmentalAverage - midPointTemp) * multi / 1E4f;
 
-        tempData = tempData.withAcclimatization(acclimatization);
-        tempData = tempData.withMaxInternalTemperature(acclimatizedMaxTemperature);
-        tempData = tempData.withMinInternalTemperature(acclimatizedMinTemperature);
+        float acclimatisation = tempData.acclimatization() + delta;
+
+        float buffer = ServerConfig.TEMPERATURE_SEGMENTS_PERCENT.getAsInt() / 100f;
+        float maxUpper = baseMax * (1f + buffer);
+        float maxLower = baseMax * (1f - buffer);
+        float minUpper = baseMin * (1f + buffer);
+        float minLower = baseMin * (1f - buffer);
+
+        float acclimatisedMax = Mth.clamp(currentMax + delta, maxLower, maxUpper);
+        float acclimatisedMin = Mth.clamp(currentMin + delta, minLower, minUpper);
+
+        tempData = tempData.withAcclimatization(acclimatisation);
+        tempData = tempData.withMaxInternalTemperature(acclimatisedMax);
+        tempData = tempData.withMinInternalTemperature(acclimatisedMin);
 
         entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, tempData);
     }

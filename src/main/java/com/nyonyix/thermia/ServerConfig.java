@@ -20,7 +20,7 @@ public class ServerConfig
 
     public static final ModConfigSpec.IntValue MAX_INTERIOR_VOLUME = BUILDER.comment("Maximum volume or number of blocks an interior can have").defineInRange("maxInteriorVolume", 13824, 4096, 32768);
 
-    public static final ModConfigSpec.DoubleValue MAX_PERCENTAGE_OPEN_ALLOWED = BUILDER.comment("Maximum percent of edge to allowed to be air").defineInRange("maxPercentageOpenAllowed", 0.25, 0.0, 0.5);
+//    public static final ModConfigSpec.DoubleValue MAX_PERCENTAGE_OPEN_ALLOWED = BUILDER.comment("Maximum percent of edge to allowed to be air").defineInRange("maxPercentageOpenAllowed", 0.25, 0.0, 0.5);
 
     static {BUILDER.pop();}
     static {BUILDER.push("entity_temperature");}
@@ -38,6 +38,8 @@ public class ServerConfig
     public static final ModConfigSpec.DoubleValue INVENTORY_HEAT_MULTI = BUILDER.comment("Inventory heat multiplier").defineInRange("inventoryHeatMulti", 1.0, 0.0, 2.0);
 
     public static final ModConfigSpec.DoubleValue ENTITY_TEMPERATURE_CHANGE_MULTI = BUILDER.comment("Entity temperature change multiplier").defineInRange("entityTemperatureChangeMulti", 0.5, 0.1, 2.0);
+
+    public static final ModConfigSpec.DoubleValue ENTITY_ACCLIMATISATION_MULTI = BUILDER.comment("Entity climate acclimatisation multiplier").defineInRange("entityAcclimatisationMulti", 1.0, 0.1, 2.0);
 
     static {BUILDER.pop();}
     static {BUILDER.push("ai_and_memory");}
