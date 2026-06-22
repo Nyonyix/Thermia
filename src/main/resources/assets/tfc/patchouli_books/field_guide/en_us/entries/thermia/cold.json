@@ -19,16 +19,16 @@
         },
         {
             "type": "patchouli:text",
-            "text": "$(l:tfc:thermia/mechanics#wind)$(l)Wind$()$()$(br)Wind dramatically increases cooling. Find caves, build enclosed structures, or get behind walls to block the wind.$(br2)$(l:tfc:thermia/mechanics#wetness)$(l)Stay Dry:$()$()$(br)Wetness multiplies cold effects. Avoid water, rain, and snow. If you get wet, find shelter immediately and wait to dry.",
+            "text": "$(l:tfc:thermia/mechanics#wind)$(l)Wind$()$()$(br)Wind dramatically increases cooling. Find caves, build enclosed structures, or get behind walls to block the wind.$(br2)$(l:tfc:thermia/mechanics#wetness)$(l)Stay Dry$()$()$(br)Wetness multiplies cold effects. Avoid water, rain, and snow. If you get wet, find shelter immediately and wait to dry.",
             "title": "Staying Warm"
         },
         {
             "type": "patchouli:text",
-            "text": "$(l)Warm Blocks:$()$(br)Position yourself near fires, lit forges, or other heat-emitting blocks. Even a small campfire can keep you alive.$(br2)$(l:tfc:thermia/mechanics#soalr_radiation)$(l)Sun:$()$()$(br)During the day, stay in open sunny areas. Solar radiation provides significant warmth, especially at low wind."
+            "text": "$(l:tfc:thermia/mechanics#radiant_source)$(l)Warm Blocks$()$()$(br)Position yourself near fires, lit forges, or other heat-emitting blocks. Even a small campfire can keep you alive.$(br2)$(l:tfc:thermia/mechanics#solar_radiation)$(l)Sun$()$()$(br)During the day, stay in open sunny areas. Solar radiation provides significant warmth, especially at low wind."
         },
         {
             "type": "patchouli:text",
-            "text": "$(l:tfc:thermia/mechanics#insulation)$(l)Insulation:$()$()$(br)Wear wool and leather clothing. These materials trap body heat and slow cooling. Carry extra insulating items in your inventory for additional protection.$(br2)$(l)Time Your Activities:$()$(br)Travel and work during midday when the sun is strongest. Shelter in place during night and storms."
+            "text": "$(l:tfc:thermia/mechanics#insulation)$(l)Insulation$()$()$(br)Wear wool and leather clothing. These materials trap body heat and slow cooling. Carry extra insulating items in your inventory for additional protection.$(br2)$(l)Time Your Activities$()$(br)Travel and work during midday when the sun is strongest. Shelter in place during night and storms."
         },
         {
             "type": "patchouli:text",
@@ -37,7 +37,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "In humid, cold environments (just above freezing), wetness and humidity combine to create dangerous conditions. Prioritize staying dry and sheltered.$(br2)In very cold biomes, you may need multiple strategies simultaneously - insulation, heat sources, shelter, and sunshine.",
+            "text": "Humid cold is the worst. Just above freezing, wet and damp at the same time — your temperature plummets and drying takes forever. Don't get wet to begin with. In really cold biomes you'll need everything: good clothes, a fire, a roof, and sunshine. One of those alone won't cut it.",
             "title": "Damp Cold"
         },
         {
@@ -47,7 +47,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "High altitudes present unique challenges:$(li)Temperatures drop with elevation$(li)Wind is stronger and more constant$(li)Less shelter available$(li)Snow and ice increase wetness risk$(br2)Bring extra insulation, portable heat sources, and plan escape routes to lower elevations.",
+            "text": "High altitudes present unique challenges:$(li)Temperatures drop with elevation$(li)Wind is stronger and more constant$(li)Less shelter available$(br2)Bring extra insulation, portable heat sources, and plan escape routes to lower elevations.",
             "title": "Mountain Climbing"
         }
     ],

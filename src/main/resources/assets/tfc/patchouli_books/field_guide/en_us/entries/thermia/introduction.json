@@ -5,11 +5,11 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "Welcome to $(l)Thermia$(), an in-depth and complex thermal management addon for TerraFirmaCraft.$(br2)In the world of Thermia, survival means more than just securing food and water. You must now manage your body temperature against the elements - scorching sun, freezing winds, nearby heat sources, and the humidity of the air itself."
+            "text": "Thermia makes temperature matter. Everything around you pushes your body heat up or down: the sun, the wind, how wet you are, what you're standing next to. Get too hot or too cold and things go bad fast."
         },
         {
             "type": "patchouli:text",
-            "text": "Configured entites have a $(l)natural temperature range$(). Step outside this range, and you'll begin experiencing the debilitating effects of $(l:tfc:thermia/heat)hyperthermia (overheating)$() or $(l:tfc:thermia/cold)hypothermia (freezing)$().$(br2)Your environment constantly influences your body temperature through factors like solar radiation, $(l:tfc:thermia/mechanics#wind)wind$(), $(l:tfc:thermia/mechanics#humidity)humidity$(), $(l:tfc:thermia/mechanics#wetness)wetness$(), nearby blocks, $(l:tfc:thermia/mechanics#insulation)and even your inventory$()."
+            "text": "Configured entites have a $(l)natural temperature range$(). Step outside this range, and you'll begin experiencing the debilitating effects of $(l:tfc:thermia/heat)hyperthermia (overheating)$() or $(l:tfc:thermia/cold)hypothermia (freezing)$().$(br2)Your environment constantly influences your body temperature through factors like $(l:tfc:thermia/mechanics#solar_radiation)solar radiation$(), $(l:tfc:thermia/mechanics#wind)wind$(), $(l:tfc:thermia/mechanics#humidity)humidity$(), $(l:tfc:thermia/mechanics#wetness)wetness$(), nearby blocks, $(l:tfc:thermia/mechanics#insulation)and even your inventory$()."
         },
         {
             "type": "patchouli:text",

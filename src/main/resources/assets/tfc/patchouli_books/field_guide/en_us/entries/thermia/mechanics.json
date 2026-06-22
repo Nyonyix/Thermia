@@ -74,13 +74,13 @@
         {
             "type": "patchouli:text",
             "anchor": "radiant_source",
-            "text": "Radiant",
+            "text": "Radiant sources such as Lava, Fire, Magma BLocks. The closer you get the hotter they feel, Radiant sources are calculated using multiple points between the entity and the source meaning even only partial exposure matters.",
             "title": "Radiant Sources"
         },
         {
             "type": "patchouli:text",
             "anchor": "cold_source",
-            "text": "",
+            "text": "Cold sources are only counted when in direct contact with the entity hitbox. Standing next to a block of ice will do nothing unless you are touching said ice. Cold sources are a flat added effect meaning if you are in contact with multiple sources you can become very cold very quickly.",
             "title": "Cold Sources"
         }
     ],

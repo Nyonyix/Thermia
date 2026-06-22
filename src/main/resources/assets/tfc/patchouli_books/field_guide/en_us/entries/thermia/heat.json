@@ -10,7 +10,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "As you overheat, you'll experience increasingly severe effects:$(br)$(li)Confusion effect$(li)Damage $(li)Red screen tint"
+            "text": "As you overheat, you'll experience increasingly severe effects:$(br)$(li)Confusion effect$(li)Damage $(li)Tunnel Vision"
         },
         {
             "type": "patchouli:text",
@@ -19,7 +19,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "$(l:tfc:thermia/mechanics#shade)$(l)Seek Shade$()$(br)Thermia has shadows accurate to the block, get under trees, caves or shelters.$(br2)$(l:tfc:thermia/mechanics#wetness)$(l)Get Wet$()$()$(br)Water provides powerful evaporative cooling. Jump in rivers, stand in rain, or carry water to splash yourself.",
+            "text": "$(l:tfc:thermia/mechanics#shade)$(l)Seek Shade$()$(br)Shade actually works in Thermia. Hiding under a block isn't enough, you need to be out of the sun's line of sight. Trees, caves, overhangs all cast real shadows.$(br2)$(l:tfc:thermia/mechanics#wetness)$(l)Get Wet$()$()$(br)Water is your best friend. Jump in a river or stand out in the rain and watch your temperature drop. Your body sweats too, so keep your water full or you'll dry out and overheat faster.",
             "title": "Staying Cool"
         },
         {
@@ -32,7 +32,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "$(l)Sweating$(): Your body automatically sweats when hot, if you have sufficient hydration. This converts thirst into cooling - keep your water topped up!$(br2)$(l)Wet Bulb Temperature$(): In very humid environments, sweating becomes less effective. Seek wind or shade instead.",
+            "text": "$(l:tfc:thermia/mechanics#sweat)$(l)Sweating$()$(br)Your body automatically sweats when hot, if you have sufficient hydration. This converts thirst into cooling$(br2)$(l)Wet Bulb Temperature$(): In very humid environments, sweating becomes less effective. Seek wind or shade instead.",
             "title": "Advanced Tips"
         },
         {
