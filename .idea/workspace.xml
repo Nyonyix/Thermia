@@ -4,16 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Finished first pass patchouli book">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/Thermometer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/mixin/TFCThermometerTooltipMixin.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/mixin/ThermometerBlockEntityMixin.java" afterDir="false" />
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Thermometer Support.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/ThermiaAttachments.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/ThermiaAttachments.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/mixin/TFCThermometerTooltipMixin.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/mixin/TFCThermometerTooltipMixin.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/lang/en_us.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/lang/en_us.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/thermia.mixins.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/thermia.mixins.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -260,8 +254,27 @@
       <option name="project" value="LOCAL" />
       <updated>1782120350080</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Thermometer Support.">
+      <option name="closed" value="true" />
+      <created>1782134450273</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1782134450273</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Code Clean up" />
@@ -270,6 +283,7 @@
     <MESSAGE value="Fixed Acclimatisation" />
     <MESSAGE value="Fixed Acclimatisation&#10;Added lang for ui config" />
     <MESSAGE value="Finished first pass patchouli book" />
-    <option name="LAST_COMMIT_MESSAGE" value="Finished first pass patchouli book" />
+    <MESSAGE value="Thermometer Support." />
+    <option name="LAST_COMMIT_MESSAGE" value="Thermometer Support." />
   </component>
 </project>
