@@ -31,12 +31,11 @@ public class TFCThermometerTooltipMixin
             original.display(level, blockState, blockPos, blockEntity, consumer);
             if (!(blockEntity instanceof ThermometerBlockEntity)) return;
             if (blockState.getValue(TFCBlockStateProperties.THERMOMETER_ATTACHED)) return;
-            if (!blockEntity.hasData(ThermiaAttachments.THERMOMETER)) return;
 
             Thermometer data = blockEntity.getData(ThermiaAttachments.THERMOMETER);
             var style = TFCConfig.CLIENT.climateTooltipStyle.get();
             consumer.accept(Component.translatable("thermia.tooltip.thermometer.thermia_temp"));
-            consumer.accept(style.format(data.temperature()));
+            consumer.accept(style.formatRange(data.temperature()));
             consumer.accept(Component.translatable("thermia.tooltip.thermometer.humidity"));
             consumer.accept(Component.literal(String.format("%.0f%%", data.humidity() * 100f)));
         });
