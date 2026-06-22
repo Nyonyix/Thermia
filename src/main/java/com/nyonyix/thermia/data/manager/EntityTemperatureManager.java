@@ -266,7 +266,6 @@ public class EntityTemperatureManager
             SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);
             SolarShadeResult shadeResult = BlockSearch.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth());
             entityData = entityData.withSolarShadeResult(shadeResult);
-            shade = shadeResult.shade();
 
             float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), shadeResult.shade(), entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier());
             float inventoryHeat = ItemInventoryManager.getInventoryTemperature(entity);

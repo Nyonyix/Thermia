@@ -8,7 +8,11 @@
     "TamableAiMixin",
     "AmphibianAiMixin",
     "OviparousAiMixin",
-    "PinnipedAiMixin"
+    "PinnipedAiMixin",
+    "ThermometerBlockEntityMixin"
+  ],
+  "client": [
+    "TFCThermometerTooltipMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -4,13 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Fixed Acclimatisation&#10;Added lang for ui config">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Finished first pass patchouli book">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/Thermometer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/mixin/TFCThermometerTooltipMixin.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/mixin/ThermometerBlockEntityMixin.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/cold.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/cold.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/heat.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/heat.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/introduction.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/introduction.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/ThermiaAttachments.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/ThermiaAttachments.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/lang/en_us.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/lang/en_us.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/thermia.mixins.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/thermia.mixins.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,6 +55,14 @@
         </projects_view>
       </state>
     </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Record" />
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -241,7 +252,15 @@
       <option name="project" value="LOCAL" />
       <updated>1782033814441</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Finished first pass patchouli book">
+      <option name="closed" value="true" />
+      <created>1782120350080</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1782120350080</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -250,6 +269,7 @@
     <MESSAGE value="Fixed Acclimatisation&#10;Added lang for reworked ui config" />
     <MESSAGE value="Fixed Acclimatisation" />
     <MESSAGE value="Fixed Acclimatisation&#10;Added lang for ui config" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed Acclimatisation&#10;Added lang for ui config" />
+    <MESSAGE value="Finished first pass patchouli book" />
+    <option name="LAST_COMMIT_MESSAGE" value="Finished first pass patchouli book" />
   </component>
 </project>

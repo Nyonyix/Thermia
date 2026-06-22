@@ -1,9 +1,15 @@
 package com.nyonyix.thermia.util;
 
 import com.nyonyix.thermia.ServerConfig;
+import com.nyonyix.thermia.data.Interior;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
+import com.nyonyix.thermia.data.SolarShadeResult;
+import com.nyonyix.thermia.data.WindOcclusionResult;
+import com.nyonyix.thermia.data.attachment.Thermometer;
+import com.nyonyix.thermia.data.manager.InteriorManager;
 import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
+import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.calendar.ICalendar;
 import net.dries007.tfc.util.calendar.Month;
@@ -122,6 +128,41 @@ public class EnvironmentHelpers
         return wetness * windComponent * humidityResistance * (8.0f * multi);
     }
 
+    public static Thermometer getThermometer(Level level, BlockPos pos)
+    {
+        if (InteriorManager.isInInterior(level, pos))
+        {
+            Interior interior = InteriorManager.getInteriorByPos(level, pos);
+
+            return new Thermometer(interior.internalTemperature(), interior.externalHumidity());
+        }
+        else
+        {
+            ClimateModel model = Climate.get(level);
+            ICalendar calendar = Calendars.get(level);
+
+            float baseTemp = model.getInstantTemperature(level, pos);
+            float humidity = newEnvironmentHumidity(level, pos);
+
+            float fracYear = calendar.getCalendarFractionOfYear();
+            float fracDay = calendar.getCalendarFractionOfDay();
+            float hemiScale = model.hemisphereScale();
+
+            boolean isRaining = WeatherHelpers.isPrecipitating(model.getRain(calendar.getCalendarTicks()), model.getInstantRainfall(level, pos)) && baseTemp > 0f;
+            boolean canSeeSky = level.canSeeSky(pos);
+
+            float wetness = isRaining && canSeeSky ? 1.0f : 0f;
+
+            SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemiScale, fracYear, fracDay);
+            SolarShadeResult shade = BlockSearch.getSolarShade(level, pos, sunPos.zenith(), sunPos.azimuth());
+            WindOcclusionResult windOcclusion = BlockSearch.getWindOcclusion(level, pos);
+
+            float effTemp = calcEffectiveTemperature(level, pos, baseTemp, humidity, shade.shade(), wetness, windOcclusion.occlusionMultiplier());
+
+            return new Thermometer(effTemp, humidity);
+        }
+    }
+
     // Wind
 
     public static float getWindSpeed(Level level, BlockPos pos, float windOcclusion)
@@ -142,10 +183,8 @@ public class EnvironmentHelpers
 
     public static float getSolarRadiation(Level level, BlockPos pos, float shade)
     {
-        long calendarTick = Calendars.get(level).getTicks();
         float fractionOfDay = Calendars.get(level).getCalendarFractionOfDay();
         float fractionOfYear = Calendars.get(level).getCalendarFractionOfYear();
-        float fractionOfMonth = Calendars.get(level).getCalendarFractionOfMonth();
         float hemisphereScale = Climate.get(level).hemisphereScale();
 
         SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionOfYear, fractionOfDay);

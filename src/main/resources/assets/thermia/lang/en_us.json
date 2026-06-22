@@ -75,5 +75,7 @@
   "thermia.configuration.solarUiOffsetY": "Solar Widget Y Offset",
   "thermia.configuration.wetnessUiToggle": "Wetness Widget Toggle",
   "thermia.configuration.wetnessUISubToggle": "Wetness Sub-Widget Toggle",
-  "thermia.configuration.windUISubToggle": "Wind Sub-Widget Toggle"
+  "thermia.configuration.windUISubToggle": "Wind Sub-Widget Toggle",
+  "thermia.tooltip.thermometer.humidity": "Humidity: %s",
+  "thermia.tooltip.thermometer.thermia_temp": "Thermia Temperature: "
 }
