@@ -26,6 +26,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
@@ -34,6 +35,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import org.slf4j.Logger;
@@ -62,7 +64,7 @@ public class EntityTemperatureManager
         float absDelta = Math.abs(effectiveDelta);
 
         float normalisedRate = 1.0f - (float) Math.exp(-0.005 * absDelta);
-        float baseRate = Mth.lerp(normalisedRate, 0.01f, 0.5f);
+        float baseRate = Mth.lerp(normalisedRate, 0.01f, 0.1f);
 
         return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate));
     }
@@ -93,22 +95,24 @@ public class EntityTemperatureManager
         float heatComfortThreshold = maxTemperature - heatBufferZone;
         float heatStress = currentTemperature - heatComfortThreshold;
 
-        if (entity instanceof IPlayerInfo player)
+        if (entity instanceof Player player)
         {
-            float currentHydration = player.getThirst();
+            IPlayerInfo playerInfo = IPlayerInfo.get(player);
+
+            float currentHydration = playerInfo.getThirst();
             float sweatEfficiency = Mth.clampedMap(currentHydration, 0f, 60f, 0.1f, 1f);
 
             if (heatStress > 0)
             {
                 float normalisedHeatStress = Mth.clamp(heatStress / heatBufferZone, 0f, 1f);
-                float baseSweatRate = normalisedHeatStress * 0.005f;
+                float baseSweatRate = normalisedHeatStress * 0.05f;
                 float actualSweatRate = baseSweatRate * sweatEfficiency;
                 float newWetness = Math.min(1.0f, entityData.wetness() + actualSweatRate);
 
                 float hydrationLossMulti = (float) ServerConfig.PLAYER_SWEAT_HYDRATION_LOSS_MULTI.getAsDouble();
 
                 entityData = entityData.withWetness(newWetness);
-                player.addThirst(-((baseSweatRate * 100) * hydrationLossMulti));
+                playerInfo.addThirst(-((baseSweatRate * 10) * hydrationLossMulti));
             }
         }
         else
@@ -412,6 +416,11 @@ public class EntityTemperatureManager
                 if(pending != null && !pending.isDone()) pending.cancel(true);
                 entity.removeData(ThermiaAttachments.ENTITY_TEMPERATURE);
                 return;
+            }
+
+            if (entity instanceof ServerPlayer player)
+            {
+                if (player.gameMode.getGameModeForPlayer() == GameType.CREATIVE || player.gameMode.getGameModeForPlayer() == GameType.SPECTATOR) return;
             }
 
             if (level.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) nonEmptyAbove = BlockSearch.depthEncasedBlocks(level.getChunkAt(pos), pos);
