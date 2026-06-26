@@ -64,7 +64,7 @@ public class EntityTemperatureManager
         float absDelta = Math.abs(effectiveDelta);
 
         float normalisedRate = 1.0f - (float) Math.exp(-0.005 * absDelta);
-        float baseRate = Mth.lerp(normalisedRate, 0.01f, 0.1f);
+        float baseRate = Mth.lerp(normalisedRate, 0.001f, 0.05f);
 
         return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate));
     }

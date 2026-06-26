@@ -120,11 +120,16 @@ configurations {
 dependencies {
     implementation "maven.modrinth:terrafirmacraft:${tfc_version_id}"
     implementation "maven.modrinth:patchouli:${patchouli_version_id}"
-    implementation "maven.modrinth:firmalife:${firmalife_version_id}"
-    implementation "maven.modrinth:arborfirmacraft-(afc):${afc_version_id}"
+    implementation "maven.modrinth:curios:${curios_version_id}"
 
     compileOnly "maven.modrinth:jade:${jade_version_id}"
     runtimeOnly "maven.modrinth:jade:${jade_version_id}"
+
+    compileOnly "maven.modrinth:arborfirmacraft-(afc):${afc_version_id}"
+    runtimeOnly "maven.modrinth:arborfirmacraft-(afc):${afc_version_id}"
+
+    compileOnly "maven.modrinth:firmalife:${firmalife_version_id}"
+    runtimeOnly "maven.modrinth:firmalife:${firmalife_version_id}"
 
     runtimeOnly "maven.modrinth:jei:${jei_version_id}"
     runtimeOnly "maven.modrinth:spark:${spark_version_id}"

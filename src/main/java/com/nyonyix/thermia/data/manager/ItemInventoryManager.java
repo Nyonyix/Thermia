@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
+import top.theillusivec4.curios.api.CuriosApi;
 
 public class ItemInventoryManager
 {
@@ -69,5 +70,11 @@ public class ItemInventoryManager
         }
 
         return Mth.clamp(temperature, -maxEffect, maxEffect);
+    }
+
+    public static boolean hasCape(Entity entity)
+    {
+        if (!(entity instanceof LivingEntity living)) return false;
+        return CuriosApi.getCuriosInventory(living).map(iCuriosItemHandler -> !iCuriosItemHandler.findCurios("cape").isEmpty()).orElse(false);
     }
 }

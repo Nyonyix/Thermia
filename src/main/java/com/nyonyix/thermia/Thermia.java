@@ -6,6 +6,11 @@ import com.nyonyix.thermia.ai.sensors.ThermiaSensorTypes;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import com.nyonyix.thermia.effect.ThermiaEffects;
+import com.nyonyix.thermia.item.ThermiaCapeAnimal;
+import com.nyonyix.thermia.item.ThermiaItems;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -17,6 +22,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import top.theillusivec4.curios.api.CuriosApi;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(Thermia.MODID)
@@ -38,9 +44,13 @@ public class Thermia {
 
         modEventBus.addListener(ThermiaDataMaps::registerDataMapTypes);
 
-        BLOCKS.register(modEventBus);
+//        BLOCKS.register(modEventBus);
+        ThermiaItems.register();
         ITEMS.register(modEventBus);
+
+        CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder().title(Component.translatable("thermia.creativeTab")).icon(() -> new ItemStack(ThermiaItems.CAPES.get(ThermiaCapeAnimal.POLAR_BEAR))).displayItems(((itemDisplayParameters, output) -> Thermia.ITEMS.getEntries().forEach(holder -> output.accept(holder.get())))).build());
         CREATIVE_MODE_TABS.register(modEventBus);
+
         ThermiaAttachments.ATTACHMENTS.register(modEventBus);
         ThermiaEffects.MOB_EFFECTS.register(modEventBus);
         ThermiaMemoryModules.MEMORY_TYPES.register(modEventBus);

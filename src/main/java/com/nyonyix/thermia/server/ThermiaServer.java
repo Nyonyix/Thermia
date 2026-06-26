@@ -11,6 +11,7 @@ import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datagen.damage.ThermiaDamageTypesDataGen;
 import com.nyonyix.thermia.data.datagen.datamap.*;
 import com.nyonyix.thermia.data.datagen.tags.ThermiaBlockTagProvider;
+import com.nyonyix.thermia.data.datagen.tags.ThermiaItemTagProvider;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import com.nyonyix.thermia.data.datamap.*;
@@ -117,8 +118,11 @@ public class ThermiaServer
         DataGenerator gen = event.getGenerator();
         PackOutput packOutput = gen.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
+        var blockTagProvider = new ThermiaBlockTagProvider(packOutput, lookupProvider, event.getExistingFileHelper());
 
-        gen.addProvider(event.includeServer(), new ThermiaBlockTagProvider(packOutput, lookupProvider, event.getExistingFileHelper()));
+//        gen.addProvider(event.includeServer(), new ThermiaBlockTagProvider(packOutput, lookupProvider, event.getExistingFileHelper()));
+        gen.addProvider(event.includeServer(), blockTagProvider);
+        gen.addProvider(event.includeServer(), new ThermiaItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter(), event.getExistingFileHelper()));
 
         gen.addProvider(event.includeServer(), new BlockTemperatureDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new EntityTemperatureDataMapProvider(packOutput, lookupProvider));
