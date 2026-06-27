@@ -10,6 +10,7 @@ import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datagen.damage.ThermiaDamageTypesDataGen;
 import com.nyonyix.thermia.data.datagen.datamap.*;
+import com.nyonyix.thermia.data.datagen.model.ThermiaItemModelProvider;
 import com.nyonyix.thermia.data.datagen.tags.ThermiaBlockTagProvider;
 import com.nyonyix.thermia.data.datagen.tags.ThermiaItemTagProvider;
 import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
@@ -132,7 +133,7 @@ public class ThermiaServer
 
         gen.addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(packOutput, lookupProvider, new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, ThermiaDamageTypesDataGen::bootstrap), Set.of(Thermia.MODID)));
 
-//        gen.addProvider(event.includeServer(), new ThermiaPatchouliProvider(packOutput, Thermia.MODID));
+        gen.addProvider(event.includeClient(), new ThermiaItemModelProvider(packOutput, event.getExistingFileHelper()));
     }
 
     @SubscribeEvent

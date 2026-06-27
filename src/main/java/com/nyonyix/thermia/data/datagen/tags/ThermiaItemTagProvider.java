@@ -23,6 +23,5 @@ public class ThermiaItemTagProvider extends ItemTagsProvider
     {
         var appender = tag(ThermiaTags.Items.CURIOS_CAPE);
         ThermiaItems.CAPES.values().forEach(h -> appender.add(h.getKey()));
-        ThermiaItems.CLOAKS.values().forEach(h -> appender.add(h.getKey()));
     }
 }
