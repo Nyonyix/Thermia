@@ -3,6 +3,7 @@ package com.nyonyix.thermia.item;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.SlotContext;
+import top.theillusivec4.curios.api.client.ICurioRenderer;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
 public class ThermiaCapeItem extends Item implements ICurioItem

@@ -11,6 +11,9 @@ import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
+import com.nyonyix.thermia.entity.player.ThermiaCapeRenderer;
+import com.nyonyix.thermia.item.ThermiaCapeAnimal;
+import com.nyonyix.thermia.item.ThermiaItems;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.dries007.tfc.client.ClimateRenderCache;
 import net.dries007.tfc.client.overworld.SolarCalculator;
@@ -46,6 +49,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import org.joml.Matrix4f;
 import org.slf4j.Logger;
+import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
 
 import java.util.List;
 
@@ -65,7 +69,13 @@ public class ThermiaClient {
     }
 
     @SubscribeEvent
-    static void onClientSetup(FMLClientSetupEvent event) {
+    static void onClientSetup(FMLClientSetupEvent event)
+    {
+        for (var entry : ThermiaItems.CAPES.entrySet())
+        {
+            ThermiaCapeAnimal animal = entry.getKey();
+            CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaCapeRenderer(animal));
+        }
     }
 
     @SubscribeEvent

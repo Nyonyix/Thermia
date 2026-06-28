@@ -12,7 +12,8 @@
     "ThermometerBlockEntityMixin"
   ],
   "client": [
-    "TFCThermometerTooltipMixin"
+    "TFCThermometerTooltipMixin",
+    "CapeLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

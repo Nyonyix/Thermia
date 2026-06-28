@@ -65,6 +65,7 @@ public class ClientConfig
     static {BUILDER.push("client_misc");}
 
     public static final ModConfigSpec.BooleanValue ENABLE_DEBUG = BUILDER.comment("Enable debug information").define("enableDebug", false);
+    public static final ModConfigSpec.BooleanValue ENABLE_CAPE = BUILDER.comment("Enable cape render").define("enableCape", true);
 
     static {BUILDER.pop();}
 
