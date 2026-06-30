@@ -8,6 +8,8 @@ import com.nyonyix.thermia.data.ThermiaTags;
 import com.nyonyix.thermia.data.attachment.BlockTemperature;
 import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
+import com.nyonyix.thermia.data.datagen.ThermiaLootModifierProvider;
+import com.nyonyix.thermia.data.datagen.ThermiaRecipeProvider;
 import com.nyonyix.thermia.data.datagen.damage.ThermiaDamageTypesDataGen;
 import com.nyonyix.thermia.data.datagen.datamap.*;
 import com.nyonyix.thermia.data.datagen.model.ThermiaItemModelProvider;
@@ -121,17 +123,16 @@ public class ThermiaServer
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
         var blockTagProvider = new ThermiaBlockTagProvider(packOutput, lookupProvider, event.getExistingFileHelper());
 
-//        gen.addProvider(event.includeServer(), new ThermiaBlockTagProvider(packOutput, lookupProvider, event.getExistingFileHelper()));
         gen.addProvider(event.includeServer(), blockTagProvider);
+        gen.addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(packOutput, lookupProvider, new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, ThermiaDamageTypesDataGen::bootstrap), Set.of(Thermia.MODID)));
         gen.addProvider(event.includeServer(), new ThermiaItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter(), event.getExistingFileHelper()));
-
         gen.addProvider(event.includeServer(), new BlockTemperatureDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new EntityTemperatureDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new ItemInsulationDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new FluidTemperatureDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new BlockPorosityDataMapProvider(packOutput, lookupProvider));
-
-        gen.addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(packOutput, lookupProvider, new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, ThermiaDamageTypesDataGen::bootstrap), Set.of(Thermia.MODID)));
+        gen.addProvider(event.includeServer(), new ThermiaLootModifierProvider(packOutput, lookupProvider));
+        gen.addProvider(event.includeServer(), new ThermiaRecipeProvider(packOutput, lookupProvider));
 
         gen.addProvider(event.includeClient(), new ThermiaItemModelProvider(packOutput, event.getExistingFileHelper()));
     }

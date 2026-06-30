@@ -4,34 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Textures for capes and pelts.">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/entity/player/ThermiaCapeRenderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/mixin/CapeLayerMixin.java" afterDir="false" />
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Cape render finished.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaLoot.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaPeltLootModifier.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaLootModifierProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaRecipeProvider.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ClientConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ClientConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaCapeItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaCapeItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/accesstransformer.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/accesstransformer.cfg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/alpaca_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/alpaca_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/bison_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/bison_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/black_bear_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/black_bear_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/couger_pelt_cape.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/cow_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/cow_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/crocodile_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/crocodile_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/direwolf_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/direwolf_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/goat_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/goat_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/grizzly_bear_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/grizzly_bear_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/lion_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/lion_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/musk_ox_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/musk_ox_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/panda_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/panda_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/polar_bear_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/polar_bear_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/sabertooth_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/sabertooth_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/sheep_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/sheep_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/tiger_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/tiger_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/wolf_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/wolf_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/yak_pelt_cape.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/cape/yak_pelt_cape.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/thermia.mixins.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/thermia.mixins.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/Thermia.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/Thermia.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,7 +117,7 @@
       <recent name="com.nyonyix.thermia.item" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Client">
+  <component name="RunManager" selected="Gradle.Thermia [assemble]">
     <configuration name="Client" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="net.neoforged.devlaunch.Main" />
       <module name="Thermia.main" />
@@ -282,8 +263,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.Thermia [runServer]" />
         <item itemvalue="Gradle.Thermia [assemble]" />
+        <item itemvalue="Gradle.Thermia [runServer]" />
         <item itemvalue="Gradle.Thermia [runClient]" />
         <item itemvalue="Gradle.Thermia [runClient # Run client]" />
       </list>
@@ -385,7 +366,15 @@
       <option name="project" value="LOCAL" />
       <updated>1782553493350</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Cape render finished.">
+      <option name="closed" value="true" />
+      <created>1782640169248</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1782640169248</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -414,6 +403,7 @@
     <MESSAGE value="Fixed thermometer crash V2" />
     <MESSAGE value="Fixed sweat for real this time&#10;Changed temp change" />
     <MESSAGE value="Textures for capes and pelts." />
-    <option name="LAST_COMMIT_MESSAGE" value="Textures for capes and pelts." />
+    <MESSAGE value="Cape render finished." />
+    <option name="LAST_COMMIT_MESSAGE" value="Cape render finished." />
   </component>
 </project>

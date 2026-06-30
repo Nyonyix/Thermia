@@ -5,6 +5,7 @@ import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.BlockSearchResult;
 import com.nyonyix.thermia.data.Interior;
 import com.nyonyix.thermia.data.SolarShadeResult;
+import com.nyonyix.thermia.data.WindOcclusionResult;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.EntityTemperatureDataMap;
@@ -442,7 +443,10 @@ public class EntityTemperatureManager
                 }
             }
 
-            entityData = entityData.withWindOcclusionResult(BlockSearch.getWindOcclusion(level, pos));
+            WindOcclusionResult windResult = BlockSearch.getWindOcclusion(level, pos);
+            WindOcclusionResult windResultCape = new WindOcclusionResult(windResult.occludingBlock(), ItemInventoryManager.hasCape(entity) ? windResult.occlusionMultiplier() / 2f : windResult.occlusionMultiplier());
+
+            entityData = entityData.withWindOcclusionResult(windResultCape);
             entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(pos).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
             entityData = handleEnvironmentTemperature(entity, dataMap, entityData);
             entityData = handleEntitySweat(entity, entityData);

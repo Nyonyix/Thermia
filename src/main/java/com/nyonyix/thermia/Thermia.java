@@ -3,6 +3,7 @@ package com.nyonyix.thermia;
 import com.nyonyix.thermia.ai.behaviours.ThermiaActivities;
 import com.nyonyix.thermia.ai.memories.ThermiaMemoryModules;
 import com.nyonyix.thermia.ai.sensors.ThermiaSensorTypes;
+import com.nyonyix.thermia.data.ThermiaLoot;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import com.nyonyix.thermia.effect.ThermiaEffects;
@@ -56,6 +57,7 @@ public class Thermia {
         ThermiaMemoryModules.MEMORY_TYPES.register(modEventBus);
         ThermiaSensorTypes.SENSOR_TYPES.register(modEventBus);
         ThermiaActivities.ACTIVITIES.register(modEventBus);
+        ThermiaLoot.GLM_SERIALISERS.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SERVER_CONFIG);
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CLIENT_CONFIG);
