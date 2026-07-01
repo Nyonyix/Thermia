@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.item;
+package com.nyonyix.thermia.item.cape;
 
 public enum ThermiaCapeAnimal
 {

@@ -2,7 +2,7 @@ package com.nyonyix.thermia.data.datagen;
 
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.ThermiaPeltLootModifier;
-import com.nyonyix.thermia.item.ThermiaCapeAnimal;
+import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import com.nyonyix.thermia.item.ThermiaItems;
 import net.dries007.tfc.TerraFirmaCraft;
 import net.minecraft.advancements.critereon.EntityPredicate;

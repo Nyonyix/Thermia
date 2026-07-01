@@ -21,7 +21,10 @@ public class ThermiaItemTagProvider extends ItemTagsProvider
     @Override
     protected void addTags(HolderLookup.Provider provider)
     {
-        var appender = tag(ThermiaTags.Items.CURIOS_CAPE);
-        ThermiaItems.CAPES.values().forEach(h -> appender.add(h.getKey()));
+        var capeTag = tag(ThermiaTags.Items.CURIOS_CAPE);
+        ThermiaItems.CAPES.values().forEach(h -> capeTag.add(h.getKey()));
+
+        var headTag = tag(ThermiaTags.Items.CURIOS_HEAD);
+        ThermiaItems.WIDE_BRIM_HATS.values().forEach(h -> headTag.add(h.getKey()));
     }
 }

@@ -6,19 +6,20 @@ import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ClientConfig;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.client.renderer.ThermiaWideBrimHatRenderer;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
-import com.nyonyix.thermia.entity.player.ThermiaCapeRenderer;
-import com.nyonyix.thermia.item.ThermiaCapeAnimal;
+import com.nyonyix.thermia.client.renderer.ThermiaCapeRenderer;
+import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import com.nyonyix.thermia.item.ThermiaItems;
+import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatMaterial;
+import com.nyonyix.thermia.models.ThermiaHatModel;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.dries007.tfc.client.ClimateRenderCache;
 import net.dries007.tfc.client.overworld.SolarCalculator;
-import net.dries007.tfc.util.climate.Climate;
-import net.dries007.tfc.util.climate.ClimateModel;
 import net.dries007.tfc.util.climate.KoppenClimateClassification;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -30,9 +31,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -43,6 +42,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -69,12 +69,24 @@ public class ThermiaClient {
     }
 
     @SubscribeEvent
+    static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event)
+    {
+        event.registerLayerDefinition(ThermiaHatModel.LAYER_LOCATION, ThermiaHatModel::createBodyLayer);
+    }
+
+    @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event)
     {
         for (var entry : ThermiaItems.CAPES.entrySet())
         {
             ThermiaCapeAnimal animal = entry.getKey();
             CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaCapeRenderer(animal));
+        }
+
+        for (var entry : ThermiaItems.WIDE_BRIM_HATS.entrySet())
+        {
+            ThermiaWideBrimHatMaterial material = entry.getKey();
+            CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaWideBrimHatRenderer(material));
         }
     }
 

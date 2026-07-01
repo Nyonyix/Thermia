@@ -2,17 +2,14 @@ package com.nyonyix.thermia.data.datagen;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.ibm.icu.text.MessagePatternUtil;
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.item.ThermiaCapeAnimal;
+import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 
-import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;

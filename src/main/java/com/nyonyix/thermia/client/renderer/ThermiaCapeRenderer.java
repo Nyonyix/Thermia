@@ -1,11 +1,11 @@
-package com.nyonyix.thermia.entity.player;
+package com.nyonyix.thermia.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.nyonyix.thermia.ClientConfig;
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.item.ThermiaCapeAnimal;
+import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -20,8 +20,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.client.ICurioRenderer;
-
-import javax.swing.*;
 
 public class ThermiaCapeRenderer implements ICurioRenderer
 {

@@ -1,4 +1,4 @@
 {
   "entities": ["player"],
-  "slots": ["cape"]
+  "slots": ["cape", "head"]
 }
