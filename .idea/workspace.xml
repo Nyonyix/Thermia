@@ -5,24 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Cape recipe finished">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaWideBrimHatRenderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/wideBrimHat/ThermiaWideBrimHatItem.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/wideBrimHat/ThermiaWideBrimHatMaterial.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickBootsRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickHeadRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickLegsRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickBootsItem.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickHeadItem.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickLegsItem.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickMaterial.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickTorsoItem.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/Thermia.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/Thermia.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaTags.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaTags.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaLootModifierProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaLootModifierProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaRecipeProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaRecipeProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/model/ThermiaItemModelProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/model/ThermiaItemModelProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/tags/ThermiaItemTagProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/tags/ThermiaItemTagProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/entity/player/ThermiaCapeRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaCapeRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaCapeAnimal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/cape/ThermiaCapeAnimal.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaCapeItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/cape/ThermiaCapeItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaWideBrimHatRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaWideBrimHatRenderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaItems.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaItems.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaPeltItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaPeltItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/entities/player.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/entities/player.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickBootsModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickBootsModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickHeadModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickHeadModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickLegsModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickLegsModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickTorsoModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickTorsoModel.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,8 +66,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Record" />
-        <option value="Class" />
         <option value="Enum" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -89,6 +86,9 @@
     &quot;accountId&quot;: &quot;39016b8f-0bb9-49a5-83dd-69dca95f8e73&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5,
   &quot;fromUser&quot;: false
@@ -113,6 +113,7 @@
     &quot;git-widget-placeholder&quot;: &quot;1.21.1&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/nyon/Coding/Minecraft/Java/Thermia/src/main/resources/assets/thermia/textures/models/hat&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   }
 }</component>
@@ -128,6 +129,8 @@
       <recent name="com.nyonyix.thermia.item" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.nyonyix.thermia.item.thick" />
+      <recent name="com.nyonyix.thermia.client.renderer" />
       <recent name="com.nyonyix.thermia.item" />
     </key>
   </component>

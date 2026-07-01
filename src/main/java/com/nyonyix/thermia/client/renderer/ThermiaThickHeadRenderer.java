@@ -3,8 +3,8 @@ package com.nyonyix.thermia.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatMaterial;
-import com.nyonyix.thermia.models.ThermiaHatModel;
+import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
+import com.nyonyix.thermia.models.ThermiaThickTorsoModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.PlayerModel;
@@ -20,12 +20,12 @@ import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.client.ICurioRenderer;
 
-public class ThermiaWideBrimHatRenderer implements ICurioRenderer
+public class ThermiaThickHeadRenderer implements ICurioRenderer
 {
-    private final ThermiaWideBrimHatMaterial material;
-    private ModelPart hatModel;
+    private final ThermiaThickMaterial material;
+    private ModelPart headModel;
 
-    public ThermiaWideBrimHatRenderer(ThermiaWideBrimHatMaterial material)
+    public ThermiaThickHeadRenderer(ThermiaThickMaterial material)
     {
         this.material = material;
     }
@@ -48,20 +48,19 @@ public class ThermiaWideBrimHatRenderer implements ICurioRenderer
         if (entity.isInvisible()) return;
 
         EntityModel<?> model = renderLayerParent.getModel();
-        if(!(model instanceof PlayerModel<?> playerModel)) return;
+        if (!(model instanceof PlayerModel<?> playerModel)) return;
 
-        if (hatModel == null)
+        if (headModel == null)
         {
-            hatModel = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaHatModel.LAYER_LOCATION);
+            headModel = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickTorsoModel.LAYER_LOCATION);
         }
 
-        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/hat/" + material.name().toLowerCase() + "_wide_brim_hat.png");
+        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/thick/" + material.name().toLowerCase() + "_thick_head.png");
         VertexConsumer vc = ItemRenderer.getArmorFoilBuffer(bufferSource, RenderType.entityCutoutNoCull(texture), stack.hasFoil());
 
         poseStack.pushPose();
         playerModel.head.translateAndRotate(poseStack);
-        poseStack.translate(0.0, -1.5, 0.0);
-        hatModel.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
+        headModel.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 }
