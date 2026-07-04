@@ -23,6 +23,6 @@ public class ThermiaThickLegsItem extends Item implements ICurioItem
     @Override
     public boolean canEquip(SlotContext slotContext, ItemStack itemStack)
     {
-        return "pants".equals(slotContext.identifier());
+        return "legs".equals(slotContext.identifier());
     }
 }

@@ -12,22 +12,22 @@ public class ThermiaThickHeadModel<T extends Entity>{
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "thick_head"), "main");
 
 
-	public static LayerDefinition createBodyLayer() {
-		MeshDefinition meshdefinition = new MeshDefinition();
-		PartDefinition partdefinition = meshdefinition.getRoot();
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshdefinition = new MeshDefinition();
+        PartDefinition partdefinition = meshdefinition.getRoot();
 
-		PartDefinition root_item = partdefinition.addOrReplaceChild("root_item", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
+        PartDefinition root_item = partdefinition.addOrReplaceChild("root_item", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-		PartDefinition helmet = root_item.addOrReplaceChild("helmet", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 2.0F, 8.0F, new CubeDeformation(0.0F))
-		.texOffs(28, 10).addBox(-4.0F, -10.0F, -5.0F, 8.0F, 5.0F, 2.0F, new CubeDeformation(0.0F))
-		.texOffs(0, 10).addBox(-6.0F, -10.0F, 3.0F, 12.0F, 10.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+        PartDefinition helmet = root_item.addOrReplaceChild("helmet", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 2.0F, 8.0F, new CubeDeformation(0.0F))
+                .texOffs(24, 25).addBox(-4.0F, -10.0F, -5.0F, 8.0F, 5.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 25).addBox(-5.0F, -9.0F, 3.0F, 10.0F, 9.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-		PartDefinition WestSmall = helmet.addOrReplaceChild("WestSmall", CubeListBuilder.create().texOffs(0, 22).addBox(-1.0F, -5.0F, -5.0F, 2.0F, 8.0F, 8.0F, new CubeDeformation(0.0F))
-		.texOffs(0, 38).addBox(-1.0F, 3.0F, -3.0F, 2.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(5.0F, -5.0F, 0.0F));
+        PartDefinition WestSmall = helmet.addOrReplaceChild("WestSmall", CubeListBuilder.create().texOffs(0, 10).addBox(-1.0F, -4.0F, -4.0F, 2.0F, 7.0F, 8.0F, new CubeDeformation(0.0F))
+                .texOffs(24, 32).addBox(-1.0F, 3.0F, -3.0F, 2.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(5.0F, -5.0F, 0.0F));
 
-		PartDefinition EastSmall = helmet.addOrReplaceChild("EastSmall", CubeListBuilder.create().texOffs(20, 22).addBox(-1.0F, -5.0F, -5.0F, 2.0F, 8.0F, 8.0F, new CubeDeformation(0.0F))
-		.texOffs(32, 0).addBox(-1.0F, 3.0F, -3.0F, 2.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(-5.0F, -5.0F, 0.0F));
+        PartDefinition EastSmall = helmet.addOrReplaceChild("EastSmall", CubeListBuilder.create().texOffs(20, 10).addBox(-1.0F, -4.0F, -4.0F, 2.0F, 7.0F, 8.0F, new CubeDeformation(0.0F))
+                .texOffs(32, 0).addBox(-1.0F, 3.0F, -3.0F, 2.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(-5.0F, -5.0F, 0.0F));
 
-		return LayerDefinition.create(meshdefinition, 48, 48);
+        return LayerDefinition.create(meshdefinition, 48, 48);
 	}
 }

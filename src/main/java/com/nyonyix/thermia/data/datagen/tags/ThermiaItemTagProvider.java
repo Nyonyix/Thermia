@@ -26,5 +26,15 @@ public class ThermiaItemTagProvider extends ItemTagsProvider
 
         var headTag = tag(ThermiaTags.Items.CURIOS_HEAD);
         ThermiaItems.WIDE_BRIM_HATS.values().forEach(h -> headTag.add(h.getKey()));
+        ThermiaItems.THICK_HEAD.values().forEach(h -> headTag.add(h.getKey()));
+
+        var bodyTag = tag(ThermiaTags.Items.CURIOS_BODY);
+        ThermiaItems.THICK_TORSO.values().forEach(h -> bodyTag.add(h.getKey()));
+
+        var legsTag = tag(ThermiaTags.Items.CURIOS_LEGS);
+        ThermiaItems.THICK_LEGS.values().forEach(h -> legsTag.add(h.getKey()));
+
+        var feetTag = tag(ThermiaTags.Items.CURIOS_FEET);
+        ThermiaItems.THICK_BOOTS.values().forEach(h -> feetTag.add(h.getKey()));
     }
 }

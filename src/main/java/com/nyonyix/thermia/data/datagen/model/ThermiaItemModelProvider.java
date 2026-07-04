@@ -2,6 +2,7 @@ package com.nyonyix.thermia.data.datagen.model;
 
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
+import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
 import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatMaterial;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
@@ -27,7 +28,16 @@ public class ThermiaItemModelProvider extends ItemModelProvider
         for (ThermiaWideBrimHatMaterial material : ThermiaWideBrimHatMaterial.values())
         {
             String id = material.name().toLowerCase();
-            singleTexture(id + "_hat", mcLoc("item/generated"), "layer0", modLoc("item/hat/" + id + "wide_brim_hat"));
+            singleTexture(id + "_wide_brim_hat", mcLoc("item/generated"), "layer0", modLoc("item/hat/" + id + "_wide_brim_hat"));
+        }
+
+        for (ThermiaThickMaterial material : ThermiaThickMaterial.values())
+        {
+            String id = material.name().toLowerCase();
+            singleTexture(id + "_lined_head", mcLoc("item/generated"), "layer0", modLoc("item/thick/" + id + "_lined_cap"));
+            singleTexture(id + "_lined_tunic", mcLoc("item/generated"), "layer0", modLoc("item/thick/" + id + "_lined_tunic"));
+            singleTexture(id + "_lined_pants", mcLoc("item/generated"), "layer0", modLoc("item/thick/" + id + "_lined_pants"));
+            singleTexture(id + "_lined_boots", mcLoc("item/generated"), "layer0", modLoc("item/thick/" + id + "_lined_boots"));
         }
     }
 }

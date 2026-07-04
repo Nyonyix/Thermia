@@ -23,6 +23,6 @@ public class ThermiaThickBootsItem extends Item implements ICurioItem
     @Override
     public boolean canEquip(SlotContext slotContext, ItemStack itemStack)
     {
-        return "boots".equals(slotContext.identifier());
+        return "feet".equals(slotContext.identifier());
     }
 }

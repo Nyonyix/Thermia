@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
-import com.nyonyix.thermia.models.ThermiaThickTorsoModel;
+import com.nyonyix.thermia.models.ThermiaThickBootsModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.PlayerModel;
@@ -23,7 +23,9 @@ import top.theillusivec4.curios.api.client.ICurioRenderer;
 public class ThermiaThickBootsRenderer implements ICurioRenderer
 {
     private final ThermiaThickMaterial material;
-    private ModelPart bootsModel;
+    private ModelPart baked;
+    private ModelPart leftBoot;
+    private ModelPart rightBoot;
 
     public ThermiaThickBootsRenderer(ThermiaThickMaterial material)
     {
@@ -50,17 +52,26 @@ public class ThermiaThickBootsRenderer implements ICurioRenderer
         EntityModel<?> model = renderLayerParent.getModel();
         if (!(model instanceof PlayerModel<?> playerModel)) return;
 
-        if (bootsModel == null)
+        if (baked == null)
         {
-            bootsModel = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickTorsoModel.LAYER_LOCATION);
+            baked = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickBootsModel.LAYER_LOCATION);
+            leftBoot = baked.getChild("leg_left").getChild("boot_left");
+            rightBoot = baked.getChild("leg_right").getChild("boot_right");
         }
 
         ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/thick/" + material.name().toLowerCase() + "_thick_boots.png");
         VertexConsumer vc = ItemRenderer.getArmorFoilBuffer(bufferSource, RenderType.entityCutoutNoCull(texture), stack.hasFoil());
 
         poseStack.pushPose();
-        playerModel.body.translateAndRotate(poseStack);
-        bootsModel.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
+        playerModel.rightLeg.translateAndRotate(poseStack);
+//        poseStack.translate(0.01, 0.75, 0);
+        rightBoot.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+
+        poseStack.pushPose();
+        playerModel.leftLeg.translateAndRotate(poseStack);
+//        poseStack.translate(0, 0.75, 0);
+        leftBoot.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 }

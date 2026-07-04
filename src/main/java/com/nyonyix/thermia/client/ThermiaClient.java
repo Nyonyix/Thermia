@@ -6,17 +6,17 @@ import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ClientConfig;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.client.renderer.ThermiaWideBrimHatRenderer;
+import com.nyonyix.thermia.client.renderer.*;
 import com.nyonyix.thermia.data.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
-import com.nyonyix.thermia.client.renderer.ThermiaCapeRenderer;
 import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import com.nyonyix.thermia.item.ThermiaItems;
+import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
 import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatMaterial;
-import com.nyonyix.thermia.models.ThermiaHatModel;
+import com.nyonyix.thermia.models.*;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
 import net.dries007.tfc.client.ClimateRenderCache;
 import net.dries007.tfc.client.overworld.SolarCalculator;
@@ -72,6 +72,10 @@ public class ThermiaClient {
     static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event)
     {
         event.registerLayerDefinition(ThermiaHatModel.LAYER_LOCATION, ThermiaHatModel::createBodyLayer);
+        event.registerLayerDefinition(ThermiaThickHeadModel.LAYER_LOCATION, ThermiaThickHeadModel::createBodyLayer);
+        event.registerLayerDefinition(ThermiaThickTorsoModel.LAYER_LOCATION, ThermiaThickTorsoModel::createBodyLayer);
+        event.registerLayerDefinition(ThermiaThickLegsModel.LAYER_LOCATION, ThermiaThickLegsModel::createBodyLayer);
+        event.registerLayerDefinition(ThermiaThickBootsModel.LAYER_LOCATION, ThermiaThickBootsModel::createBodyLayer);
     }
 
     @SubscribeEvent
@@ -87,6 +91,30 @@ public class ThermiaClient {
         {
             ThermiaWideBrimHatMaterial material = entry.getKey();
             CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaWideBrimHatRenderer(material));
+        }
+
+        for (var entry : ThermiaItems.THICK_HEAD.entrySet())
+        {
+            ThermiaThickMaterial material = entry.getKey();
+            CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaThickHeadRenderer(material));
+        }
+
+        for (var entry : ThermiaItems.THICK_TORSO.entrySet())
+        {
+            ThermiaThickMaterial material = entry.getKey();
+            CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaThickTorsoRenderer(material));
+        }
+
+        for (var entry : ThermiaItems.THICK_LEGS.entrySet())
+        {
+            ThermiaThickMaterial material = entry.getKey();
+            CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaThickLegsRenderer(material));
+        }
+
+        for (var entry : ThermiaItems.THICK_BOOTS.entrySet())
+        {
+            ThermiaThickMaterial material = entry.getKey();
+            CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaThickBootsRenderer(material));
         }
     }
 

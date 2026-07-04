@@ -20,5 +20,8 @@ public class ThermiaTags
     {
         public static final TagKey<Item> CURIOS_CAPE = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CuriosApi.MODID, "cape"));
         public static final TagKey<Item> CURIOS_HEAD = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CuriosApi.MODID, "head"));
+        public static final TagKey<Item> CURIOS_BODY = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CuriosApi.MODID, "body"));
+        public static final TagKey<Item> CURIOS_LEGS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CuriosApi.MODID, "legs"));
+        public static final TagKey<Item> CURIOS_FEET = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CuriosApi.MODID, "feet"));
     }
 }

@@ -3,7 +3,9 @@ package com.nyonyix.thermia.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.item.thick.ThermiaThickHeadItem;
 import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
+import com.nyonyix.thermia.models.ThermiaThickHeadModel;
 import com.nyonyix.thermia.models.ThermiaThickTorsoModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
@@ -52,7 +54,7 @@ public class ThermiaThickHeadRenderer implements ICurioRenderer
 
         if (headModel == null)
         {
-            headModel = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickTorsoModel.LAYER_LOCATION);
+            headModel = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickHeadModel.LAYER_LOCATION);
         }
 
         ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/thick/" + material.name().toLowerCase() + "_thick_head.png");
@@ -60,6 +62,7 @@ public class ThermiaThickHeadRenderer implements ICurioRenderer
 
         poseStack.pushPose();
         playerModel.head.translateAndRotate(poseStack);
+        poseStack.translate(0.0, -1.5, 0.0);
         headModel.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

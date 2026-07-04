@@ -3,8 +3,7 @@ package com.nyonyix.thermia.item;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import com.nyonyix.thermia.item.cape.ThermiaCapeItem;
-import com.nyonyix.thermia.item.thick.ThermiaThickHeadItem;
-import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
+import com.nyonyix.thermia.item.thick.*;
 import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatItem;
 import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatMaterial;
 import net.minecraft.world.item.Item;
@@ -41,10 +40,10 @@ public class ThermiaItems
         for (ThermiaThickMaterial material : ThermiaThickMaterial.values())
         {
             String id = material.name().toLowerCase();
-            THICK_HEAD.put(material, Thermia.ITEMS.register(id + "_thick_headwear", () -> new ThermiaThickHeadItem(material, new Item.Properties())));
-            THICK_TORSO.put(material, Thermia.ITEMS.register(id + "_thick_shirt", () -> new ThermiaThickHeadItem(material, new Item.Properties())));
-            THICK_LEGS.put(material, Thermia.ITEMS.register(id + "_thick_pants", () -> new ThermiaThickHeadItem(material, new Item.Properties())));
-            THICK_BOOTS.put(material, Thermia.ITEMS.register(id + "_thick_boots", () -> new ThermiaThickHeadItem(material, new Item.Properties())));
+            THICK_HEAD.put(material, Thermia.ITEMS.register(id + "_lined_cap", () -> new ThermiaThickHeadItem(material, new Item.Properties())));
+            THICK_TORSO.put(material, Thermia.ITEMS.register(id + "_lined_tunic", () -> new ThermiaThickTorsoItem(material, new Item.Properties())));
+            THICK_LEGS.put(material, Thermia.ITEMS.register(id + "_lined_pants", () -> new ThermiaThickLegsItem(material, new Item.Properties())));
+            THICK_BOOTS.put(material, Thermia.ITEMS.register(id + "_lined_boots", () -> new ThermiaThickBootsItem(material, new Item.Properties())));
         }
     }
 }
