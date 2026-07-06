@@ -27,23 +27,23 @@ public class ThermiaItems
         for (ThermiaCapeAnimal animal : ThermiaCapeAnimal.values())
         {
             String id = animal.name().toLowerCase();
-            CAPES.put(animal, Thermia.ITEMS.register(id + "_pelt_cape", () -> new ThermiaCapeItem(animal, new Item.Properties())));
-            PELTS.put(animal, Thermia.ITEMS.register(id + "_pelt", () -> new ThermiaPeltItem(animal, new Item.Properties())));
+            CAPES.put(animal, Thermia.ITEMS.register(id + "_pelt_cape", () -> new ThermiaCapeItem(animal, new Item.Properties().stacksTo(1))));
+            PELTS.put(animal, Thermia.ITEMS.register(id + "_pelt", () -> new ThermiaPeltItem(animal, new Item.Properties().stacksTo(16))));
         }
 
         for (ThermiaWideBrimHatMaterial material : ThermiaWideBrimHatMaterial.values())
         {
             String id = material.name().toLowerCase();
-            WIDE_BRIM_HATS.put(material, Thermia.ITEMS.register(id + "_wide_brim_hat", () -> new ThermiaWideBrimHatItem(material, new Item.Properties())));
+            WIDE_BRIM_HATS.put(material, Thermia.ITEMS.register(id + "_wide_brim_hat", () -> new ThermiaWideBrimHatItem(material, new Item.Properties().stacksTo(1))));
         }
 
         for (ThermiaThickMaterial material : ThermiaThickMaterial.values())
         {
             String id = material.name().toLowerCase();
-            THICK_HEAD.put(material, Thermia.ITEMS.register(id + "_lined_hat", () -> new ThermiaThickHeadItem(material, new Item.Properties())));
-            THICK_TORSO.put(material, Thermia.ITEMS.register(id + "_lined_coat", () -> new ThermiaThickTorsoItem(material, new Item.Properties())));
-            THICK_LEGS.put(material, Thermia.ITEMS.register(id + "_lined_pants", () -> new ThermiaThickLegsItem(material, new Item.Properties())));
-            THICK_BOOTS.put(material, Thermia.ITEMS.register(id + "_lined_boots", () -> new ThermiaThickBootsItem(material, new Item.Properties())));
+            THICK_HEAD.put(material, Thermia.ITEMS.register(id + "_lined_hat", () -> new ThermiaThickItem(material, "head", new Item.Properties().stacksTo(1))));
+            THICK_TORSO.put(material, Thermia.ITEMS.register(id + "_lined_coat", () -> new ThermiaThickItem(material, "body", new Item.Properties().stacksTo(1))));
+            THICK_LEGS.put(material, Thermia.ITEMS.register(id + "_lined_pants", () -> new ThermiaThickItem(material, "legs", new Item.Properties().stacksTo(1))));
+            THICK_BOOTS.put(material, Thermia.ITEMS.register(id + "_lined_boots", () -> new ThermiaThickItem(material, "feet", new Item.Properties().stacksTo(1))));
         }
     }
 }
