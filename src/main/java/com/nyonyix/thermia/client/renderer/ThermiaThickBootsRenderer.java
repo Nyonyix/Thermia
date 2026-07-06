@@ -55,8 +55,8 @@ public class ThermiaThickBootsRenderer implements ICurioRenderer
         if (baked == null)
         {
             baked = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickBootsModel.LAYER_LOCATION);
-            leftBoot = baked.getChild("leg_left").getChild("boot_left");
-            rightBoot = baked.getChild("leg_right").getChild("boot_right");
+            leftBoot = baked.getChild("leg_left").getChild("left_foot");
+            rightBoot = baked.getChild("leg_right").getChild("right_foot");
         }
 
         ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/thick/" + material.name().toLowerCase() + "_thick_boots.png");
@@ -64,13 +64,13 @@ public class ThermiaThickBootsRenderer implements ICurioRenderer
 
         poseStack.pushPose();
         playerModel.rightLeg.translateAndRotate(poseStack);
-//        poseStack.translate(0.01, 0.75, 0);
+        poseStack.translate(0.1, 0.725, 0);
         rightBoot.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
 
         poseStack.pushPose();
         playerModel.leftLeg.translateAndRotate(poseStack);
-//        poseStack.translate(0, 0.75, 0);
+        poseStack.translate(-0.1, 0.725, 0);
         leftBoot.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

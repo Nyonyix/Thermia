@@ -57,8 +57,8 @@ public class ThermiaThickLegsRenderer implements ICurioRenderer
         {
             baked = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickLegsModel.LAYER_LOCATION);
             belt = baked.getChild("body").getChild("belt");
-            leftLeg = baked.getChild("leg_right").getChild("leggings_right");
-            rightLeg = baked.getChild("leg_left").getChild("leggings_left");
+            leftLeg = baked.getChild("right_leg").getChild("leggings_right");
+            rightLeg = baked.getChild("left_leg").getChild("leggings_left");
         }
 
         ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/thick/" + material.name().toLowerCase() + "_thick_legs.png");
@@ -66,16 +66,19 @@ public class ThermiaThickLegsRenderer implements ICurioRenderer
 
         poseStack.pushPose();
         playerModel.body.translateAndRotate(poseStack);
+        poseStack.translate(0.0, 1.4, 0.0);
         belt.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
 
         poseStack.pushPose();
         playerModel.leftLeg.translateAndRotate(poseStack);
+        poseStack.translate(0.15, 0.70, 0.0);
         leftLeg.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
 
         poseStack.pushPose();
         playerModel.rightLeg.translateAndRotate(poseStack);
+        poseStack.translate(-0.15, 0.70, 0.0);
         rightLeg.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

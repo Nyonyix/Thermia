@@ -4,32 +4,37 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Thick clothing first pass">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/woolen_lined_boots.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/woolen_lined_cap.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/woolen_lined_pants.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/woolen_lined_tunic.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/body.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/feet.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/legs.json" afterDir="false" />
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Thick clothing second pass">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/thick/leather_thick_boots.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/thick/leather_thick_head.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/thick/leather_thick_legs.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/thick/leather_thick_torso.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickBootsRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickBootsRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickHeadRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickHeadRenderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickLegsRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickLegsRenderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickTorsoRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/renderer/ThermiaThickTorsoRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaTags.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaTags.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/model/ThermiaItemModelProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/model/ThermiaItemModelProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/tags/ThermiaItemTagProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/tags/ThermiaItemTagProvider.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaItems.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaItems.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickBootsItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickBootsItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickLegsItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickLegsItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickTorsoItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickTorsoItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickMaterial.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickMaterial.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaHatModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaHatModel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickBootsModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickBootsModel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickHeadModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickHeadModel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickLegsModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickLegsModel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickTorsoModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/models/ThermiaThickTorsoModel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/entities/player.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/entities/player.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/hat/felt_wide_brim_hat.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/hat/felt_wide_brim_hat.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/hat/leather_wide_brim_hat.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/hat/leather_wide_brim_hat.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/hat/straw_wide_brim_hat.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/hat/straw_wide_brim_hat.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/woolen_lined_boots.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/leather_lined_boots.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/woolen_lined_cap.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/leather_lined_hat.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/woolen_lined_pants.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/leather_lined_pants.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/woolen_lined_tunic.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/thick/leather_lined_coat.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/hat/felt_wide_brim_hat.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/hat/felt_wide_brim_hat.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/hat/leather_wide_brim_hat.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/hat/leather_wide_brim_hat.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/hat/straw_wide_brim_hat.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/hat/straw_wide_brim_hat.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/thick/woolen_thick_boots.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/thick/woolen_thick_head.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/thick/woolen_thick_legs.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/thick/woolen_thick_torso.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,25 +113,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.Build Thermia.executor": "Run",
-    "Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor": "Run",
-    "Gradle.Thermia [assemble].executor": "Run",
-    "Gradle.Thermia [runClient # Run client].executor": "Run",
-    "Gradle.Thermia [runClient].executor": "Debug",
-    "Gradle.Thermia [runServer].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "1.21.1",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/nyon/Coding/Minecraft/Java/Thermia/src/main/resources/assets/thermia/textures/models/hat",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.lookFeel"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.Build Thermia.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [runClient # Run client].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [runClient].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Thermia [runServer].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;1.21.1&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/nyon/Coding/Minecraft/Java/Thermia/src/main/resources/assets/thermia/textures/models/hat&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/hat" />
@@ -418,7 +423,15 @@
       <option name="project" value="LOCAL" />
       <updated>1782893635032</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Thick clothing second pass">
+      <option name="closed" value="true" />
+      <created>1783165021504</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1783165021505</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -450,6 +463,7 @@
     <MESSAGE value="Cape render finished." />
     <MESSAGE value="Cape recipe finished" />
     <MESSAGE value="Thick clothing first pass" />
-    <option name="LAST_COMMIT_MESSAGE" value="Thick clothing first pass" />
+    <MESSAGE value="Thick clothing second pass" />
+    <option name="LAST_COMMIT_MESSAGE" value="Thick clothing second pass" />
   </component>
 </project>

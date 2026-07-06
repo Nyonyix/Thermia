@@ -56,9 +56,9 @@ public class ThermiaThickTorsoRenderer implements ICurioRenderer
         if (baked == null)
         {
             baked = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickTorsoModel.LAYER_LOCATION);
-            torsoModel = baked.getChild("body").getChild("torso");
-            rightArm = baked.getChild("arm_right").getChild("right_arm_sleeve");
-            leftArm = baked.getChild("arm_left").getChild("left_arm_sleeve");
+            torsoModel = baked.getChild("body");
+            rightArm = baked.getChild("right_arm").getChild("right_arm_sleeve");
+            leftArm = baked.getChild("left_arm").getChild("left_arm_sleeve");
         }
 
         ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/thick/" + material.name().toLowerCase() + "_thick_torso.png");
@@ -66,16 +66,19 @@ public class ThermiaThickTorsoRenderer implements ICurioRenderer
 
         poseStack.pushPose();
         playerModel.body.translateAndRotate(poseStack);
+        poseStack.translate(0.0, -0.7, 0.0);
         torsoModel.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
 
         poseStack.pushPose();
         playerModel.rightArm.translateAndRotate(poseStack);
+        poseStack.translate(0.35, 0.7, 0.0);
         rightArm.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
 
         poseStack.pushPose();
         playerModel.leftArm.translateAndRotate(poseStack);
+        poseStack.translate(-0.35, 0.7, 0.0);
         leftArm.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

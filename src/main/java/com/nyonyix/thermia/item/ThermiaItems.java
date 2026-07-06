@@ -40,8 +40,8 @@ public class ThermiaItems
         for (ThermiaThickMaterial material : ThermiaThickMaterial.values())
         {
             String id = material.name().toLowerCase();
-            THICK_HEAD.put(material, Thermia.ITEMS.register(id + "_lined_cap", () -> new ThermiaThickHeadItem(material, new Item.Properties())));
-            THICK_TORSO.put(material, Thermia.ITEMS.register(id + "_lined_tunic", () -> new ThermiaThickTorsoItem(material, new Item.Properties())));
+            THICK_HEAD.put(material, Thermia.ITEMS.register(id + "_lined_hat", () -> new ThermiaThickHeadItem(material, new Item.Properties())));
+            THICK_TORSO.put(material, Thermia.ITEMS.register(id + "_lined_coat", () -> new ThermiaThickTorsoItem(material, new Item.Properties())));
             THICK_LEGS.put(material, Thermia.ITEMS.register(id + "_lined_pants", () -> new ThermiaThickLegsItem(material, new Item.Properties())));
             THICK_BOOTS.put(material, Thermia.ITEMS.register(id + "_lined_boots", () -> new ThermiaThickBootsItem(material, new Item.Properties())));
         }

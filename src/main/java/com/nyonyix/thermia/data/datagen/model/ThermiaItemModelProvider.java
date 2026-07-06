@@ -34,8 +34,8 @@ public class ThermiaItemModelProvider extends ItemModelProvider
         for (ThermiaThickMaterial material : ThermiaThickMaterial.values())
         {
             String id = material.name().toLowerCase();
-            singleTexture(id + "_lined_head", mcLoc("item/generated"), "layer0", modLoc("item/thick/" + id + "_lined_cap"));
-            singleTexture(id + "_lined_tunic", mcLoc("item/generated"), "layer0", modLoc("item/thick/" + id + "_lined_tunic"));
+            singleTexture(id + "_lined_hat", mcLoc("item/generated"), "layer0", modLoc("item/thick/" + id + "_lined_hat"));
+            singleTexture(id + "_lined_coat", mcLoc("item/generated"), "layer0", modLoc("item/thick/" + id + "_lined_coat"));
             singleTexture(id + "_lined_pants", mcLoc("item/generated"), "layer0", modLoc("item/thick/" + id + "_lined_pants"));
             singleTexture(id + "_lined_boots", mcLoc("item/generated"), "layer0", modLoc("item/thick/" + id + "_lined_boots"));
         }
