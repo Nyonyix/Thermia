@@ -1,20 +1,38 @@
 package com.nyonyix.thermia.data.manager;
 
 import com.nyonyix.thermia.ServerConfig;
+import com.nyonyix.thermia.Thermia;
+import com.nyonyix.thermia.data.ThermiaTags;
 import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import net.dries007.tfc.common.component.heat.HeatCapability;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Equipable;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.SlotResult;
+import top.theillusivec4.curios.api.type.ISlotType;
+import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
+import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
+
+import java.util.Map;
 
 public class ItemInventoryManager
 {
+    private static float getInsulation(Item item)
+    {
+        ItemInsulationDataMap data = BuiltInRegistries.ITEM.wrapAsHolder(item).getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
+        if (data == null) return 0f;
+
+        return data.insulationModifier();
+    }
+
     public static float getInventoryInsulation(Entity entity)
     {
         if (!(entity instanceof LivingEntity livingEntity)) return 0.0f;
@@ -22,17 +40,17 @@ public class ItemInventoryManager
         float armourInsulation = 0.0f;
         float inventoryInsulation = 0.0f;
 
-        for (ItemStack armour : livingEntity.getArmorSlots())
-        {
-            if (!armour.isEmpty())
-            {
-                ItemInsulationDataMap insulation = BuiltInRegistries.ITEM.wrapAsHolder(armour.getItem()).getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
+        float vanillaHead = getInsulation(livingEntity.getItemBySlot(EquipmentSlot.HEAD).getItem());
+        float vanillaBody = getInsulation(livingEntity.getItemBySlot(EquipmentSlot.CHEST).getItem());
+        float vanillaLegs = getInsulation(livingEntity.getItemBySlot(EquipmentSlot.LEGS).getItem());
+        float vanillaFeet = getInsulation(livingEntity.getItemBySlot(EquipmentSlot.FEET).getItem());
 
-                if (insulation != null) armourInsulation += insulation.insulationModifier();
+        float curioHead = getInsulation(CuriosApi.getCuriosInventory(livingEntity).flatMap(h -> h.findCurio("head", 0)).map(SlotResult::stack).orElse(ItemStack.EMPTY).getItem());
+        float curioBody = getInsulation(CuriosApi.getCuriosInventory(livingEntity).flatMap(h -> h.findCurio("body", 0)).map(SlotResult::stack).orElse(ItemStack.EMPTY).getItem());
+        float curioLegs = getInsulation(CuriosApi.getCuriosInventory(livingEntity).flatMap(h -> h.findCurio("legs", 0)).map(SlotResult::stack).orElse(ItemStack.EMPTY).getItem());
+        float curioFeet = getInsulation(CuriosApi.getCuriosInventory(livingEntity).flatMap(h -> h.findCurio("feet", 0)).map(SlotResult::stack).orElse(ItemStack.EMPTY).getItem());
 
-
-            }
-        }
+        armourInsulation = Math.max(vanillaHead, curioHead) + Math.max(vanillaBody, curioBody) + Math.max(vanillaLegs, curioLegs) + Math.max(vanillaFeet, curioFeet);
 
         if (entity instanceof Player player)
         {
@@ -76,5 +94,20 @@ public class ItemInventoryManager
     {
         if (!(entity instanceof LivingEntity living)) return false;
         return CuriosApi.getCuriosInventory(living).map(iCuriosItemHandler -> !iCuriosItemHandler.findCurios("cape").isEmpty()).orElse(false);
+    }
+
+    public static boolean hasHat(Entity entity)
+    {
+        if (!(entity instanceof LivingEntity living)) return false;
+
+        var curios = CuriosApi.getCuriosInventory(living);
+        if (curios.isPresent())
+        {
+            ItemStack stack = curios.get().findCurio("head", 0).get().stack();
+
+            return stack.is(ThermiaTags.Items.WIDE_HAT);
+        }
+
+        return false;
     }
 }

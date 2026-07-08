@@ -4,6 +4,7 @@ import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.ThermiaCommands;
 import com.nyonyix.thermia.data.Interior;
+import com.nyonyix.thermia.data.ThermiaLanguageProvider;
 import com.nyonyix.thermia.data.ThermiaTags;
 import com.nyonyix.thermia.data.attachment.BlockTemperature;
 import com.nyonyix.thermia.data.attachment.InteriorAttachment;
@@ -135,6 +136,7 @@ public class ThermiaServer
         gen.addProvider(event.includeServer(), new ThermiaRecipeProvider(packOutput, lookupProvider));
 
         gen.addProvider(event.includeClient(), new ThermiaItemModelProvider(packOutput, event.getExistingFileHelper()));
+        gen.addProvider(event.includeClient(), new ThermiaLanguageProvider(packOutput));
     }
 
     @SubscribeEvent
@@ -183,7 +185,7 @@ public class ThermiaServer
                     EntityTemperatureManager.init(entity);
                     EntityTemperatureManager.onUpdate(level, entity);
 
-                    if (entity instanceof Player player) LOGGER.debug("Player: {}, inside interior {}", player.getDisplayName().getString(), InteriorManager.getInteriorByPos(level, player.getOnPos().relative(Direction.UP)).homePos());
+//                    if (entity instanceof Player player) LOGGER.debug("Player: {}, inside interior {}", player.getDisplayName().getString(), InteriorManager.getInteriorByPos(level, player.getOnPos().relative(Direction.UP)).homePos());
                 }
 
                 if (server.getTickCount() % 100 == entity.getId() % 100) EntityTemperatureManager.queueBlockSearch(entity);

@@ -18,6 +18,7 @@ public class ThermiaTags
 
     public static class Items
     {
+        public static final TagKey<Item> WIDE_HAT = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "wide_hat"));
         public static final TagKey<Item> CURIOS_CAPE = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CuriosApi.MODID, "cape"));
         public static final TagKey<Item> CURIOS_HEAD = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CuriosApi.MODID, "head"));
         public static final TagKey<Item> CURIOS_BODY = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CuriosApi.MODID, "body"));

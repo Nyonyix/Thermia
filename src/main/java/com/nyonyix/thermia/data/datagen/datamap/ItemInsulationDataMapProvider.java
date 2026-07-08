@@ -2,14 +2,17 @@ package com.nyonyix.thermia.data.datagen.datamap;
 
 import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
+import com.nyonyix.thermia.item.ThermiaItems;
 import net.dries007.tfc.common.TFCTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.DataMapProvider;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -98,6 +101,36 @@ public class ItemInsulationDataMapProvider extends DataMapProvider
                 .add(BuiltInRegistries.ITEM.getHolder(ResourceLocation.parse("tfc:metal/chestplate/red_steel")).orElseThrow(), new ItemInsulationDataMap(-0.7f), false)
                 .add(BuiltInRegistries.ITEM.getHolder(ResourceLocation.parse("tfc:metal/greaves/red_steel")).orElseThrow(), new ItemInsulationDataMap(-0.6f), false)
                 .add(BuiltInRegistries.ITEM.getHolder(ResourceLocation.parse("tfc:metal/boots/red_steel")).orElseThrow(), new ItemInsulationDataMap(-0.4f), false);
+
+        for (DeferredHolder<Item, Item> item : ThermiaItems.THICK_HEAD.values())
+        {
+            builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(item.getKey(), new ItemInsulationDataMap(0.85f), false);
+        }
+
+        for (DeferredHolder<Item, Item> item : ThermiaItems.THICK_TORSO.values())
+        {
+            builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(item.getKey(), new ItemInsulationDataMap(0.85f), false);
+        }
+
+        for (DeferredHolder<Item, Item> item : ThermiaItems.THICK_LEGS.values())
+        {
+            builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(item.getKey(), new ItemInsulationDataMap(0.85f), false);
+        }
+
+        for (DeferredHolder<Item, Item> item : ThermiaItems.THICK_BOOTS.values())
+        {
+            builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(item.getKey(), new ItemInsulationDataMap(0.85f), false);
+        }
+
+        for (DeferredHolder<Item, Item> item : ThermiaItems.PELTS.values())
+        {
+            builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(item.getKey(), new ItemInsulationDataMap(0.05f), false);
+        }
+
+//        for (DeferredHolder<Item, Item> item : ThermiaItems.CAPES.values())
+//        {
+//            builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(item.getKey(), new ItemInsulationDataMap(0.05f), false);
+//        }
     }
 
     @Override

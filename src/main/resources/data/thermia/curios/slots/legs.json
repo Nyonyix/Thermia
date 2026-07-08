@@ -1,5 +1,6 @@
 {
   "size": 1,
-  "order": 128,
+  "order": 2,
+  "icon": "thermia:item/empty_slot_legs",
   "validators": ["curios:tag"]
 }

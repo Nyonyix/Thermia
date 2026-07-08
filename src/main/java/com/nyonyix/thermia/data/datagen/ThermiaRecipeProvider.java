@@ -2,8 +2,11 @@ package com.nyonyix.thermia.data.datagen;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.ibm.icu.impl.number.range.PrefixInfixSuffixLengthHelper;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
+import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
+import net.dries007.tfc.TerraFirmaCraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
@@ -43,6 +46,16 @@ public class ThermiaRecipeProvider implements DataProvider
         return entry;
     }
 
+    private static JsonArray damageCraftingRemainder()
+    {
+        JsonArray modifier = new JsonArray();
+        JsonObject type = new JsonObject();
+
+        type.addProperty("type", "tfc:damage_crafting_remainder");
+        modifier.add(type);
+        return modifier;
+    }
+
     private static JsonObject ingredientEntry(String id)
     {
         JsonObject entry = new JsonObject();
@@ -65,10 +78,71 @@ public class ThermiaRecipeProvider implements DataProvider
 
     private CompletableFuture<?> saveRecipe(CachedOutput output, String type, String name, JsonObject recipe)
     {
+//        Path path = packOutput.getOutputFolder(PackOutput.Target.DATA_PACK).resolve("tfc").resolve("recipe").resolve(type).resolve(id.getPath() + ".json");
+
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, name);
-        Path path = packOutput.getOutputFolder(PackOutput.Target.DATA_PACK).resolve("tfc").resolve("recipe").resolve(type).resolve(id.getPath() + ".json");
+        String recipeType = recipe.get("type").getAsString();
+        String namespace = recipeType.startsWith("tfc:") ? TerraFirmaCraft.MOD_ID : Thermia.MODID;
+
+        Path path = packOutput.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(namespace).resolve("recipe").resolve(type).resolve(id.getPath() + ".json");
 
         return DataProvider.saveStable(output, recipe, path);
+    }
+
+    private void buildThickRecipes(BiConsumer<String, JsonObject> output)
+    {
+        List<List<String>> pattern = List.of(
+                List.of("B", "P", " "),
+                List.of("S", "L", "S"),
+                List.of("W", "W", "W")
+        );
+
+        Map<String, String> baseKey = new HashMap();
+        baseKey.put("B", "tfc:bone_needle");
+        baseKey.put("S", "#c:strings");
+        baseKey.put("W", "tfc:wool");
+        baseKey.put("P", "minecraft:leather");
+
+        baseKey.put("L", "minecraft:leather_helmet");
+        JsonObject recipe = buildAdvanced(pattern, baseKey, damageCraftingRemainder(), "thermia:leather_lined_hat", 1, 0, 0);
+        output.accept("leather_lined_hat", recipe);
+
+        baseKey.put("L", "minecraft:leather_chestplate");
+        recipe = buildAdvanced(pattern, baseKey, damageCraftingRemainder(), "thermia:leather_lined_coat", 1, 0, 0);
+        output.accept("leather_lined_coat", recipe);
+
+        baseKey.put("L", "minecraft:leather_leggings");
+        recipe = buildAdvanced(pattern, baseKey, damageCraftingRemainder(), "thermia:leather_lined_pants", 1, 0, 0);
+        output.accept("leather_lined_pants", recipe);
+
+        baseKey.put("L", "minecraft:leather_boots");
+        recipe = buildAdvanced(pattern, baseKey, damageCraftingRemainder(), "thermia:leather_lined_boots", 1, 0, 0);
+        output.accept("leather_lined_boots", recipe);
+
+        for (ThermiaThickMaterial material : ThermiaThickMaterial.values())
+        {
+            if (material == ThermiaThickMaterial.LEATHER) continue;
+
+            String name = material.name().toLowerCase();
+            Map<String, String> itemKey = new HashMap<>(baseKey);
+            itemKey.put("P", "thermia:" + name + "_pelt");
+
+            itemKey.put("L", "minecraft:leather_helmet");
+            recipe = buildAdvanced(pattern, itemKey, damageCraftingRemainder(), "thermia:" + name + "_lined_hat", 1, 0, 0);
+            output.accept(name + "_lined_hat", recipe);
+
+            itemKey.put("L", "minecraft:leather_chestplate");
+            recipe = buildAdvanced(pattern, itemKey, damageCraftingRemainder(), "thermia:" + name + "_lined_coat", 1, 0, 0);
+            output.accept(name + "_lined_coat", recipe);
+
+            itemKey.put("L", "minecraft:leather_leggings");
+            recipe = buildAdvanced(pattern, itemKey, damageCraftingRemainder(), "thermia:" + name + "_lined_pants", 1, 0, 0);
+            output.accept(name + "_lined_pants", recipe);
+
+            itemKey.put("L", "minecraft:leather_boots");
+            recipe = buildAdvanced(pattern, itemKey, damageCraftingRemainder(), "thermia:" + name + "_lined_boots", 1, 0, 0);
+            output.accept(name + "_lined_boots", recipe);
+        }
     }
 
     private void buildCapeRecipes(BiConsumer<String, JsonObject> output)
@@ -90,19 +164,153 @@ public class ThermiaRecipeProvider implements DataProvider
             Map<String, String> itemKey = new HashMap<>(baseKey);
             itemKey.put("P", "thermia:" + name + "_pelt");
 
-            JsonArray modifier = new JsonArray();
-            JsonObject type = new JsonObject();
-
-            type.addProperty("type", "tfc:damage_crafting_remainder");
-            modifier.add(type);
-
-            JsonObject recipe = buildAdvancedRecipe(pattern, itemKey, modifier, "thermia:" + name + "_pelt_cape", 1, 0, 0);
+            JsonObject recipe = buildAdvanced(pattern, itemKey, damageCraftingRemainder(), "thermia:" + name + "_pelt_cape", 1, 0, 0);
 
             output.accept(name + "_cape", recipe);
         }
     }
 
-    private static JsonObject buildAdvancedRecipe(List<List<String>> pattern, Map<String, String> itemKey, JsonArray modifiers, String output, int count, int toolRow, int toolCol)
+    private static void buildPeltRecipes(BiConsumer<String, JsonObject> output)
+    {
+        for (ThermiaCapeAnimal animal : ThermiaCapeAnimal.values())
+        {
+            String name = animal.name().toLowerCase();
+            String result = "";
+            List<String> ingredients = List.of("#c:tools/knife", "thermia:" + name + "_pelt");
+
+            switch (animal)
+            {
+                case CROCODILE, BLACK_BEAR, GRIZZLY_BEAR, POLAR_BEAR, BISON, COUGAR, COW, DIREWOLF, LION, PANDA, SABERTOOTH, TIGER, YAK ->
+                {
+                    result = "tfc:large_raw_hide";
+                }
+                case GOAT ->
+                {
+                    result = "tfc:medium_raw_hide";
+                }
+                case WOLF ->
+                {
+                    result = "tfc:small_raw_hide";
+                }
+                case MUSK_OX ->
+                {
+                    result = "tfc:large_sheepskin_hide";
+                }
+                case ALPACA ->
+                {
+                    result = "tfc:medium_sheepskin_hide";
+                }
+                case SHEEP ->
+                {
+                    result = "tfc:small_sheepskin_hide";
+                }
+                case null, default ->
+                {
+                    continue;
+                }
+            }
+
+            JsonObject recipe = buildAdvancedShapeless(ingredients, result, 1, damageCraftingRemainder());
+            output.accept(name + "_pelt", recipe);
+        }
+    }
+
+    private static void buildWideHatRecipes(BiConsumer<String, JsonObject> output)
+    {
+        List<List<String>> pattern = List.of(
+                List.of("M", "M"),
+                List.of("M", " ")
+        );
+
+        Map<String, String> itemKey = new HashMap<>();
+        itemKey.put("M", "tfc:wool");
+        JsonObject recipe = buildShaped(pattern, itemKey, "thermia:felt_wide_brim_hat", 1);
+        output.accept("felt_wide_brim_hat", recipe);
+
+        itemKey.put("M", "tfc:straw");
+        recipe = buildShaped(pattern, itemKey, "thermia:straw_wide_brim_hat", 1);
+        output.accept("straw_wide_brim_hat", recipe);
+
+        itemKey.put("M", "minecraft:leather");
+        recipe = buildShaped(pattern, itemKey, "thermia:leather_wide_brim_hat", 1);
+        output.accept("leather_wide_brim_hat", recipe);
+    }
+
+    private static JsonObject buildShapeless(List<String> ingredients, String output, int count)
+    {
+        JsonObject recipe = new JsonObject();
+        recipe.addProperty("type", "minecraft:crafting_shapeless");
+
+        JsonArray ingredientArray = new JsonArray();
+        for (String ingredient : ingredients)
+        {
+            ingredientArray.add(ingredientEntry(ingredient));
+        }
+
+        JsonObject resultStack = new JsonObject();
+        resultStack.addProperty("id", output);
+        resultStack.addProperty("count", count);
+        recipe.add("result", resultStack);
+
+        return recipe;
+    }
+
+    private static JsonObject buildShaped(List<List<String>> pattern, Map<String, String> itemKey, String output, int count)
+    {
+        JsonObject recipe = new JsonObject();
+        recipe.addProperty("type", "minecraft:crafting_shaped");
+
+        JsonArray patternArray = new JsonArray();
+        for (List<String> row : pattern)
+        {
+            patternArray.add(String.join("", row));
+        }
+        recipe.add("pattern", patternArray);
+
+        JsonObject keyObj = new JsonObject();
+        for (var entry : itemKey.entrySet())
+        {
+            keyObj.add(entry.getKey(), ingredientEntry(entry.getValue()));
+        }
+        recipe.add("key", keyObj);
+
+        JsonObject resultStack = new JsonObject();
+        resultStack.addProperty("id", output);
+        resultStack.addProperty("count", count);
+        recipe.add("result", resultStack);
+
+        return recipe;
+    }
+
+    private static JsonObject buildAdvancedShapeless(List<String> ingredients, String output, int count, JsonArray modifiers)
+    {
+
+        JsonObject recipe = new JsonObject();
+
+        recipe.addProperty("type", "tfc:advanced_shapeless_crafting");
+        recipe.add("primary_ingredient", ingredientEntry(ingredients.getFirst()));
+
+        JsonArray ingredientArray = new JsonArray();
+        for (String ingredient : ingredients)
+        {
+//            if (ingredients.getFirst().equals(ingredient)) continue;
+            ingredientArray.add(ingredientEntry(ingredient));
+        }
+        recipe.add("ingredients", ingredientArray);
+
+        JsonObject resultStack = new JsonObject();
+        resultStack.addProperty("id", output);
+        resultStack.addProperty("count", count);
+        recipe.add("result", resultStack);
+
+        JsonObject remainderProvider = new JsonObject();
+        remainderProvider.add("modifiers", modifiers);
+        recipe.add("remainder", remainderProvider);
+
+        return recipe;
+    }
+
+    private static JsonObject buildAdvanced(List<List<String>> pattern, Map<String, String> itemKey, JsonArray modifiers, String output, int count, int toolRow, int toolCol)
     {
         JsonObject recipe = new JsonObject();
         recipe.addProperty("type", "tfc:advanced_shaped_crafting");
@@ -150,6 +358,9 @@ public class ThermiaRecipeProvider implements DataProvider
             List<CompletableFuture<?>> futures = new ArrayList<>();
 
             buildCapeRecipes((name, json) -> futures.add(saveRecipe(output, "crafting", name, json)));
+            buildThickRecipes((name, json) -> futures.add(saveRecipe(output, "crafting", name, json)));
+            buildWideHatRecipes((name, json) -> futures.add(saveRecipe(output, "crafting", name, json)));
+            buildPeltRecipes((name, json) -> futures.add(saveRecipe(output, "crafting", name, json)));
 
             return CompletableFuture.allOf((futures.toArray(CompletableFuture[]::new)));
         });

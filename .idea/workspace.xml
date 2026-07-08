@@ -4,11 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Thick clothing third pass (Thanks Hachi)">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickItem.java" afterDir="false" />
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Thick clothing fourth pass (Thanks Hachi)">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaLanguageProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/head.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaItems.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/ThermiaItems.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickTorsoItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/thick/ThermiaThickTorsoItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaTags.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaTags.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaRecipeProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaRecipeProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/tags/ThermiaItemTagProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/tags/ThermiaItemTagProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/ItemInventoryManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/ItemInventoryManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/wideBrimHat/ThermiaWideBrimHatItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/wideBrimHat/ThermiaWideBrimHatItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/lang/en_us.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/body.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/body.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/cape.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/cape.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/feet.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/feet.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/legs.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/legs.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,25 +98,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.Build Thermia.executor": "Run",
-    "Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor": "Run",
-    "Gradle.Thermia [assemble].executor": "Run",
-    "Gradle.Thermia [runClient # Run client].executor": "Run",
-    "Gradle.Thermia [runClient].executor": "Debug",
-    "Gradle.Thermia [runServer].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "1.21.1",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/nyon/Coding/Minecraft/Java/Thermia/src/main/resources/assets/thermia/textures/models/hat",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.lookFeel"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.Build Thermia.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [runClient # Run client].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [runClient].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Thermia [runServer].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;1.21.1&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/nyon/Coding/Minecraft/Java/Thermia/src/main/resources/assets/thermia/textures/models/hat&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/hat" />
@@ -413,7 +424,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783321715912</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Thick clothing fourth pass (Thanks Hachi)">
+      <option name="closed" value="true" />
+      <created>1783325567135</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1783325567135</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -447,6 +466,7 @@
     <MESSAGE value="Thick clothing first pass" />
     <MESSAGE value="Thick clothing second pass" />
     <MESSAGE value="Thick clothing third pass (Thanks Hachi)" />
-    <option name="LAST_COMMIT_MESSAGE" value="Thick clothing third pass (Thanks Hachi)" />
+    <MESSAGE value="Thick clothing fourth pass (Thanks Hachi)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Thick clothing fourth pass (Thanks Hachi)" />
   </component>
 </project>
