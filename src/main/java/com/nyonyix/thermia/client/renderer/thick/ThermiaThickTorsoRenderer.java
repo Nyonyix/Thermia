@@ -1,10 +1,10 @@
-package com.nyonyix.thermia.client.renderer;
+package com.nyonyix.thermia.client.renderer.thick;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
-import com.nyonyix.thermia.models.ThermiaThickLegsModel;
+import com.nyonyix.thermia.models.ThermiaThickTorsoModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.PlayerModel;
@@ -20,15 +20,15 @@ import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.client.ICurioRenderer;
 
-public class ThermiaThickLegsRenderer implements ICurioRenderer
+public class ThermiaThickTorsoRenderer implements ICurioRenderer
 {
     private final ThermiaThickMaterial material;
     private ModelPart baked;
-    private ModelPart belt;
-    private ModelPart leftLeg;
-    private ModelPart rightLeg;
+    private ModelPart torsoModel;
+    private ModelPart leftArm;
+    private ModelPart rightArm;
 
-    public ThermiaThickLegsRenderer(ThermiaThickMaterial material)
+    public ThermiaThickTorsoRenderer(ThermiaThickMaterial material)
     {
         this.material = material;
     }
@@ -55,31 +55,31 @@ public class ThermiaThickLegsRenderer implements ICurioRenderer
 
         if (baked == null)
         {
-            baked = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickLegsModel.LAYER_LOCATION);
-            belt = baked.getChild("body").getChild("belt");
-            leftLeg = baked.getChild("right_leg").getChild("leggings_right");
-            rightLeg = baked.getChild("left_leg").getChild("leggings_left");
+            baked = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickTorsoModel.LAYER_LOCATION);
+            torsoModel = baked.getChild("body");
+            rightArm = baked.getChild("right_arm").getChild("right_arm_sleeve");
+            leftArm = baked.getChild("left_arm").getChild("left_arm_sleeve");
         }
 
-        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/thick/" + material.name().toLowerCase() + "_thick_legs.png");
+        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/thick/" + material.name().toLowerCase() + "_thick_torso.png");
         VertexConsumer vc = ItemRenderer.getArmorFoilBuffer(bufferSource, RenderType.entityCutoutNoCull(texture), stack.hasFoil());
 
         poseStack.pushPose();
         playerModel.body.translateAndRotate(poseStack);
-        poseStack.translate(0.0, 1.4, 0.0);
-        belt.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
+        poseStack.translate(0.0, -0.7, 0.0);
+        torsoModel.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
 
         poseStack.pushPose();
-        playerModel.leftLeg.translateAndRotate(poseStack);
-        poseStack.translate(0.15, 0.70, 0.0);
-        leftLeg.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
+        playerModel.rightArm.translateAndRotate(poseStack);
+        poseStack.translate(0.35, 0.66, 0.0);
+        rightArm.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
 
         poseStack.pushPose();
-        playerModel.rightLeg.translateAndRotate(poseStack);
-        poseStack.translate(-0.15, 0.70, 0.0);
-        rightLeg.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
+        playerModel.leftArm.translateAndRotate(poseStack);
+        poseStack.translate(-0.35, 0.66, 0.0);
+        leftArm.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 }

@@ -3,11 +3,16 @@ package com.nyonyix.thermia.data.datagen.tags;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.ThermiaTags;
 import com.nyonyix.thermia.item.ThermiaItems;
+import com.nyonyix.thermia.item.cloth.ThermiaClothWearableMaterial;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -43,5 +48,49 @@ public class ThermiaItemTagProvider extends ItemTagsProvider
         var feetTag = tag(ThermiaTags.Items.CURIOS_FEET);
         ThermiaItems.THICK_BOOTS.values().forEach(h -> feetTag.add(h.getKey()));
         ThermiaItems.CLOTH_BOOTS.values().forEach(h -> feetTag.add(h.getKey()));
+
+        for (var entry : ThermiaItems.CLOTH_HEAD.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+            var dyeTag = tag(ItemTags.DYEABLE);
+
+            if (material.isDyeable())
+            {
+                dyeTag.add(entry.getValue().get());
+            }
+        }
+
+        for (var entry : ThermiaItems.CLOTH_TORSO.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+            var dyeTag = tag(ItemTags.DYEABLE);
+
+            if (material.isDyeable())
+            {
+                dyeTag.add(entry.getValue().get());
+            }
+        }
+
+        for (var entry : ThermiaItems.CLOTH_LEGS.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+            var dyeTag = tag(ItemTags.DYEABLE);
+
+            if (material.isDyeable())
+            {
+                dyeTag.add(entry.getValue().get());
+            }
+        }
+
+        for (var entry : ThermiaItems.CLOTH_BOOTS.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+            var dyeTag = tag(ItemTags.DYEABLE);
+
+            if (material.isDyeable())
+            {
+                dyeTag.add(entry.getValue().get());
+            }
+        }
     }
 }

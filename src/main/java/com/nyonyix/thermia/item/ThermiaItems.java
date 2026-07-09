@@ -8,8 +8,11 @@ import com.nyonyix.thermia.item.cloth.ThermiaClothWearableMaterial;
 import com.nyonyix.thermia.item.thick.*;
 import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatItem;
 import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatMaterial;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,10 +61,13 @@ public class ThermiaItems
         for (ThermiaClothWearableMaterial material : ThermiaClothWearableMaterial.values())
         {
             String id = material.name().toLowerCase();
-            CLOTH_HEAD.put(material, Thermia.ITEMS.register(id + "_cat", () -> new ThermiaClothWearableItem(material, "head", new Item.Properties().stacksTo(1))));
-            CLOTH_TORSO.put(material, Thermia.ITEMS.register(id + "_shirt", () -> new ThermiaClothWearableItem(material, "body", new Item.Properties().stacksTo(1))));
-            CLOTH_LEGS.put(material, Thermia.ITEMS.register(id + "_pants", () -> new ThermiaClothWearableItem(material, "legs", new Item.Properties().stacksTo(1))));
-            CLOTH_BOOTS.put(material, Thermia.ITEMS.register(id + "_shoes", () -> new ThermiaClothWearableItem(material, "feet", new Item.Properties().stacksTo(1))));
+
+            Item.Properties properties = material.isDyeable() ? new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(material.getDefaultColour(), true)) : new Item.Properties().stacksTo(1);
+
+            CLOTH_HEAD.put(material, Thermia.ITEMS.register(id + "_hat", () -> new ThermiaClothWearableItem(material, "head", properties)));
+            CLOTH_TORSO.put(material, Thermia.ITEMS.register(id + "_shirt", () -> new ThermiaClothWearableItem(material, "body", properties)));
+            CLOTH_LEGS.put(material, Thermia.ITEMS.register(id + "_pants", () -> new ThermiaClothWearableItem(material, "legs", properties)));
+            CLOTH_BOOTS.put(material, Thermia.ITEMS.register(id + "_shoes", () -> new ThermiaClothWearableItem(material, "feet", properties)));
         }
     }
 }

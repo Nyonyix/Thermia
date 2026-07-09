@@ -1,14 +1,15 @@
-package com.nyonyix.thermia.client.renderer;
+package com.nyonyix.thermia.client.renderer.cloth;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.nyonyix.thermia.Thermia;
-import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
-import com.nyonyix.thermia.models.ThermiaThickBootsModel;
+import com.nyonyix.thermia.item.cloth.ThermiaClothWearableMaterial;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.HumanoidArmorModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -20,14 +21,12 @@ import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.client.ICurioRenderer;
 
-public class ThermiaThickBootsRenderer implements ICurioRenderer
+public class ThermiaClothBootsRenderer implements ICurioRenderer
 {
-    private final ThermiaThickMaterial material;
-    private ModelPart baked;
-    private ModelPart leftBoot;
-    private ModelPart rightBoot;
+    private final ThermiaClothWearableMaterial material;
+    private HumanoidArmorModel<LivingEntity> armourModel;
 
-    public ThermiaThickBootsRenderer(ThermiaThickMaterial material)
+    public ThermiaClothBootsRenderer(ThermiaClothWearableMaterial material)
     {
         this.material = material;
     }
@@ -52,26 +51,20 @@ public class ThermiaThickBootsRenderer implements ICurioRenderer
         EntityModel<?> model = renderLayerParent.getModel();
         if (!(model instanceof PlayerModel<?> playerModel)) return;
 
-        if (baked == null)
+        if (armourModel == null)
         {
-            baked = Minecraft.getInstance().getEntityModels().bakeLayer(ThermiaThickBootsModel.LAYER_LOCATION);
-            leftBoot = baked.getChild("leg_left").getChild("left_foot");
-            rightBoot = baked.getChild("leg_right").getChild("right_foot");
+            armourModel = new HumanoidArmorModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR));
         }
 
-        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/thick/" + material.name().toLowerCase() + "_thick_boots.png");
+        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/cloth/" + material.name().toLowerCase() + "_layer1.png");
         VertexConsumer vc = ItemRenderer.getArmorFoilBuffer(bufferSource, RenderType.entityCutoutNoCull(texture), stack.hasFoil());
 
-        poseStack.pushPose();
-        playerModel.rightLeg.translateAndRotate(poseStack);
-        poseStack.translate(0.1, 0.725, 0);
-        rightBoot.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
-        poseStack.popPose();
+        ((HumanoidModel<LivingEntity>) playerModel).copyPropertiesTo(armourModel);
 
-        poseStack.pushPose();
-        playerModel.leftLeg.translateAndRotate(poseStack);
-        poseStack.translate(-0.1, 0.725, 0);
-        leftBoot.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
-        poseStack.popPose();
+        armourModel.setAllVisible(false);
+        armourModel.rightLeg.visible = true;
+        armourModel.leftLeg.visible = true;
+
+        armourModel.renderToBuffer(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
     }
 }

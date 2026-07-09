@@ -7,6 +7,14 @@ import com.nyonyix.thermia.ClientConfig;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.client.renderer.*;
+import com.nyonyix.thermia.client.renderer.cloth.ThermiaClothBootsRenderer;
+import com.nyonyix.thermia.client.renderer.cloth.ThermiaClothHeadRenderer;
+import com.nyonyix.thermia.client.renderer.cloth.ThermiaClothLegsRenderer;
+import com.nyonyix.thermia.client.renderer.cloth.ThermiaClothTorsoRenderer;
+import com.nyonyix.thermia.client.renderer.thick.ThermiaThickBootsRenderer;
+import com.nyonyix.thermia.client.renderer.thick.ThermiaThickHeadRenderer;
+import com.nyonyix.thermia.client.renderer.thick.ThermiaThickLegsRenderer;
+import com.nyonyix.thermia.client.renderer.thick.ThermiaThickTorsoRenderer;
 import com.nyonyix.thermia.data.manager.ItemInventoryManager;
 import com.nyonyix.thermia.data.records.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
@@ -15,6 +23,7 @@ import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import com.nyonyix.thermia.item.ThermiaItems;
+import com.nyonyix.thermia.item.cloth.ThermiaClothWearableMaterial;
 import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
 import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatMaterial;
 import com.nyonyix.thermia.models.*;
@@ -27,11 +36,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -41,13 +53,11 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import org.joml.Matrix4f;
 import org.slf4j.Logger;
 import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
@@ -117,7 +127,88 @@ public class ThermiaClient {
             ThermiaThickMaterial material = entry.getKey();
             CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaThickBootsRenderer(material));
         }
+
+        for (var entry : ThermiaItems.CLOTH_HEAD.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+            CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaClothHeadRenderer(material));
+        }
+
+        for (var entry : ThermiaItems.CLOTH_TORSO.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+            CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaClothTorsoRenderer(material));
+        }
+
+        for (var entry : ThermiaItems.CLOTH_LEGS.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+            CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaClothLegsRenderer(material));
+        }
+
+        for (var entry : ThermiaItems.CLOTH_BOOTS.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+            CuriosRendererRegistry.register(entry.getValue().get(), () -> new ThermiaClothBootsRenderer(material));
+        }
     }
+
+    @SubscribeEvent
+    public static void onColorHandler(RegisterColorHandlersEvent.Item event)
+    {
+        for (var entry : ThermiaItems.CLOTH_HEAD.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+
+            if (material.isDyeable())
+            {
+                event.register((itemStack, i) -> {
+                    DyedItemColor c = itemStack.get(DataComponents.DYED_COLOR);
+                    return c != null ? c.rgb() : material.getDefaultColour();
+                }, entry.getValue().get());
+            }
+        }
+
+        for (var entry : ThermiaItems.CLOTH_TORSO.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+
+            if (material.isDyeable())
+            {
+                event.register((itemStack, i) -> {
+                    DyedItemColor c = itemStack.get(DataComponents.DYED_COLOR);
+                    return c != null ? c.rgb() : material.getDefaultColour();
+                }, entry.getValue().get());
+            }
+        }
+
+        for (var entry : ThermiaItems.CLOTH_TORSO.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+
+            if (material.isDyeable())
+            {
+                event.register((itemStack, i) -> {
+                    DyedItemColor c = itemStack.get(DataComponents.DYED_COLOR);
+                    return c != null ? c.rgb() : material.getDefaultColour();
+                }, entry.getValue().get());
+            }
+        }
+
+        for (var entry : ThermiaItems.CLOTH_BOOTS.entrySet())
+        {
+            ThermiaClothWearableMaterial material = entry.getKey();
+
+            if (material.isDyeable())
+            {
+                event.register((itemStack, i) -> {
+                    DyedItemColor c = itemStack.get(DataComponents.DYED_COLOR);
+                    return c != null ? c.rgb() : material.getDefaultColour();
+                }, entry.getValue().get());
+            }
+        }
+    }
+
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event)
