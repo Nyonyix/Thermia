@@ -3,6 +3,7 @@ package com.nyonyix.thermia.data.datagen.lang;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.item.ThermiaItems;
 import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
+import com.nyonyix.thermia.item.cloth.ThermiaClothWearableMaterial;
 import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
 import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatMaterial;
 import net.minecraft.data.PackOutput;
@@ -104,6 +105,7 @@ public class ThermiaLanguageProvider extends LanguageProvider
         add("thermia.configuration.wetnessUiToggle", "Wetness Widget Toggle");
         add("thermia.configuration.wetnessUISubToggle", "Wetness Sub-Widget Toggle");
         add("thermia.configuration.windUISubToggle", "Wind Sub-Widget Toggle");
+        add("thermia.configuration.enableCape", "Cape Render Toggle");
 
         add("thermia.tooltip.thermometer.humidity", "Reading Humidity");
         add("thermia.creativeTab", "Thermia");
@@ -162,6 +164,38 @@ public class ThermiaLanguageProvider extends LanguageProvider
         {
             String material = Arrays.stream(entry.getKey().name().toLowerCase().split("_")).map(w -> Character.toUpperCase(w.charAt(0)) + w.substring(1)).collect(Collectors.joining(" "));
             String text = String.format("%s Insulated Boots", material);
+
+            addItem(entry.getValue(), text);
+        }
+
+        for (Map.Entry<ThermiaClothWearableMaterial, DeferredHolder<Item, Item>> entry : ThermiaItems.CLOTH_HEAD.entrySet())
+        {
+            String material = Arrays.stream(entry.getKey().name().toLowerCase().split("_")).map(w -> Character.toUpperCase(w.charAt(0)) + w.substring(1)).collect(Collectors.joining(" "));
+            String text = String.format("%s Hat", material);
+
+            addItem(entry.getValue(), text);
+        }
+
+        for (Map.Entry<ThermiaClothWearableMaterial, DeferredHolder<Item, Item>> entry : ThermiaItems.CLOTH_TORSO.entrySet())
+        {
+            String material = Arrays.stream(entry.getKey().name().toLowerCase().split("_")).map(w -> Character.toUpperCase(w.charAt(0)) + w.substring(1)).collect(Collectors.joining(" "));
+            String text = String.format("%s Shirt", material);
+
+            addItem(entry.getValue(), text);
+        }
+
+        for (Map.Entry<ThermiaClothWearableMaterial, DeferredHolder<Item, Item>> entry : ThermiaItems.CLOTH_LEGS.entrySet())
+        {
+            String material = Arrays.stream(entry.getKey().name().toLowerCase().split("_")).map(w -> Character.toUpperCase(w.charAt(0)) + w.substring(1)).collect(Collectors.joining(" "));
+            String text = String.format("%s Pants", material);
+
+            addItem(entry.getValue(), text);
+        }
+
+        for (Map.Entry<ThermiaClothWearableMaterial, DeferredHolder<Item, Item>> entry : ThermiaItems.CLOTH_BOOTS.entrySet())
+        {
+            String material = Arrays.stream(entry.getKey().name().toLowerCase().split("_")).map(w -> Character.toUpperCase(w.charAt(0)) + w.substring(1)).collect(Collectors.joining(" "));
+            String text = String.format("%s Shoes", material);
 
             addItem(entry.getValue(), text);
         }

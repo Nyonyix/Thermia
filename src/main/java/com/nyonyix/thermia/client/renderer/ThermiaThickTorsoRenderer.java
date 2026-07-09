@@ -72,13 +72,13 @@ public class ThermiaThickTorsoRenderer implements ICurioRenderer
 
         poseStack.pushPose();
         playerModel.rightArm.translateAndRotate(poseStack);
-        poseStack.translate(0.35, 0.7, 0.0);
+        poseStack.translate(0.35, 0.66, 0.0);
         rightArm.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
 
         poseStack.pushPose();
         playerModel.leftArm.translateAndRotate(poseStack);
-        poseStack.translate(-0.35, 0.7, 0.0);
+        poseStack.translate(-0.35, 0.66, 0.0);
         leftArm.render(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

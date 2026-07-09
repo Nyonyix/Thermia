@@ -9,6 +9,7 @@ import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import com.nyonyix.thermia.effect.ThermiaEffects;
 import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import com.nyonyix.thermia.item.ThermiaItems;
+import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class Thermia {
         ThermiaItems.register();
         ITEMS.register(modEventBus);
 
-        CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder().title(Component.translatable("thermia.creativeTab")).icon(() -> new ItemStack(ThermiaItems.CAPES.get(ThermiaCapeAnimal.POLAR_BEAR))).displayItems(((itemDisplayParameters, output) -> Thermia.ITEMS.getEntries().forEach(holder -> output.accept(holder.get())))).build());
+        CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder().title(Component.translatable("thermia.creativeTab")).icon(() -> new ItemStack(ThermiaItems.THICK_TORSO.get(ThermiaThickMaterial.LEATHER))).displayItems(((itemDisplayParameters, output) -> Thermia.ITEMS.getEntries().forEach(holder -> output.accept(holder.get())))).build());
         CREATIVE_MODE_TABS.register(modEventBus);
 
         ThermiaAttachments.ATTACHMENTS.register(modEventBus);
