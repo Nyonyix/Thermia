@@ -103,9 +103,13 @@ public class ItemInventoryManager
         var curios = CuriosApi.getCuriosInventory(living);
         if (curios.isPresent())
         {
-            ItemStack stack = curios.get().findCurio("head", 0).get().stack();
+            var curio = curios.get().findCurio("head", 0);
+            if (curio.isPresent())
+            {
+                ItemStack stack = curio.get().stack();
 
-            return stack.is(ThermiaTags.Items.WIDE_HAT);
+                return stack.is(ThermiaTags.Items.WIDE_HAT);
+            }
         }
 
         return false;

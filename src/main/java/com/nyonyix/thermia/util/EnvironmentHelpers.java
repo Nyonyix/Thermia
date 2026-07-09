@@ -1,15 +1,14 @@
 package com.nyonyix.thermia.util;
 
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.data.Interior;
-import com.nyonyix.thermia.data.KoppenClimateHumidity;
-import com.nyonyix.thermia.data.SolarShadeResult;
-import com.nyonyix.thermia.data.WindOcclusionResult;
+import com.nyonyix.thermia.data.records.Interior;
+import com.nyonyix.thermia.data.records.KoppenClimateHumidity;
+import com.nyonyix.thermia.data.records.SolarShadeResult;
+import com.nyonyix.thermia.data.records.WindOcclusionResult;
 import com.nyonyix.thermia.data.attachment.Thermometer;
 import com.nyonyix.thermia.data.manager.InteriorManager;
 import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
-import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.calendar.ICalendar;
 import net.dries007.tfc.util.calendar.Month;
@@ -93,10 +92,11 @@ public class EnvironmentHelpers
         return temp + solarDelta - windCooling + humidityDiscomfort;
     }
 
-    public static float calcEffectiveTemperature(Level level, BlockPos pos, float temp, float humidity, float shade, float wetness, float windOcclusion)
+    public static float calcEffectiveTemperature(Level level, BlockPos pos, float temp, float humidity, float shade, float wetness, float windOcclusion, boolean hasHat)
     {
         float windSpeed = getWindSpeed(level, pos, windOcclusion);
         float solarRadiation = getSolarRadiationWeather(level, pos, shade);
+        solarRadiation = hasHat ? solarRadiation * 0.5f : solarRadiation;
 
         float cold = calcForCold(temp, windSpeed, solarRadiation, humidity);
         float mild = calcForMild(temp, windSpeed, solarRadiation, humidity);
@@ -157,7 +157,7 @@ public class EnvironmentHelpers
             SolarShadeResult shade = BlockSearch.getSolarShade(level, pos, sunPos.zenith(), sunPos.azimuth());
             WindOcclusionResult windOcclusion = BlockSearch.getWindOcclusion(level, pos);
 
-            float effTemp = calcEffectiveTemperature(level, pos, baseTemp, humidity, shade.shade(), wetness, windOcclusion.occlusionMultiplier());
+            float effTemp = calcEffectiveTemperature(level, pos, baseTemp, humidity, shade.shade(), wetness, windOcclusion.occlusionMultiplier(), false);
 
             return new Thermometer(effTemp, humidity);
         }

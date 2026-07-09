@@ -2,11 +2,9 @@ package com.nyonyix.thermia.data.attachment;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.nyonyix.thermia.data.BlockSearchResult;
-import com.nyonyix.thermia.data.ClosestSource;
-import com.nyonyix.thermia.data.SolarShadeResult;
-import com.nyonyix.thermia.data.WindOcclusionResult;
-import com.nyonyix.thermia.util.BlockSearch;
+import com.nyonyix.thermia.data.records.BlockSearchResult;
+import com.nyonyix.thermia.data.records.SolarShadeResult;
+import com.nyonyix.thermia.data.records.WindOcclusionResult;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 

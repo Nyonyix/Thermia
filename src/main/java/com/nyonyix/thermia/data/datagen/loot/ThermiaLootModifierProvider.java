@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.data.datagen;
+package com.nyonyix.thermia.data.datagen.loot;
 
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.ThermiaPeltLootModifier;

@@ -2,7 +2,7 @@ package com.nyonyix.thermia.data.attachment;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.nyonyix.thermia.data.Interior;
+import com.nyonyix.thermia.data.records.Interior;
 import net.minecraft.core.BlockPos;
 
 import java.util.Map;

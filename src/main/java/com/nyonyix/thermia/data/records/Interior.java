@@ -1,7 +1,8 @@
-package com.nyonyix.thermia.data;
+package com.nyonyix.thermia.data.records;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.nyonyix.thermia.data.InteriorBlocks;
 import net.minecraft.core.BlockPos;
 
 import java.util.HashSet;

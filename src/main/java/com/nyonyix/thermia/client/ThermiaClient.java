@@ -7,7 +7,8 @@ import com.nyonyix.thermia.ClientConfig;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.client.renderer.*;
-import com.nyonyix.thermia.data.KoppenClimateHumidity;
+import com.nyonyix.thermia.data.manager.ItemInventoryManager;
+import com.nyonyix.thermia.data.records.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
@@ -168,7 +169,7 @@ public class ThermiaClient {
                 ClimateRenderCache climate = ClimateRenderCache.INSTANCE;
                 float solarRadiation = EnvironmentHelpers.getSolarRadiationWeather(level, pos, playerData.solarShadeResult().shade());
                 float windSpeed = EnvironmentHelpers.getWindSpeed(level, pos, playerData.windOcclusionResult().occlusionMultiplier());
-                float effectiveTemp = EnvironmentHelpers.calcEffectiveTemperature(level, pos, climate.getInstantTemperature(), playerData.environmentHumidity(), playerData.solarShadeResult().shade(), playerData.wetness(), playerData.windOcclusionResult().occlusionMultiplier());
+                float effectiveTemp = EnvironmentHelpers.calcEffectiveTemperature(level, pos, climate.getInstantTemperature(), playerData.environmentHumidity(), playerData.solarShadeResult().shade(), playerData.wetness(), playerData.windOcclusionResult().occlusionMultiplier(), ItemInventoryManager.hasHat(clientPlayer));
 
                 text.add("Environment:");
                 text.add(String.format("Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(climate.getAverageTemperature(), climate.getAverageRainfall(), climate.getRainVariance(), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));

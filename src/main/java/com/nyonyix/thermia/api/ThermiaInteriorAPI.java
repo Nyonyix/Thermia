@@ -1,16 +1,14 @@
 package com.nyonyix.thermia.api;
 
-import com.nyonyix.thermia.data.Interior;
+import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.manager.InteriorManager;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class ThermiaInteriorAPI
 {

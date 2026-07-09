@@ -2,7 +2,7 @@ package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.data.Interior;
+import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.BlockPorosityDataMap;

@@ -1,9 +1,9 @@
 package com.nyonyix.thermia.util;
 
 import com.mojang.logging.LogUtils;
-import com.nyonyix.thermia.data.ExposedFaces;
-import com.nyonyix.thermia.data.SolarShadeResult;
-import com.nyonyix.thermia.data.WindOcclusionResult;
+import com.nyonyix.thermia.data.records.ExposedFaces;
+import com.nyonyix.thermia.data.records.SolarShadeResult;
+import com.nyonyix.thermia.data.records.WindOcclusionResult;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.slf4j.Logger;
 
-import com.nyonyix.thermia.data.BlockSearchResult;
+import com.nyonyix.thermia.data.records.BlockSearchResult;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;

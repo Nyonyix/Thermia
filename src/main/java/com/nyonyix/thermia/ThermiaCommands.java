@@ -7,7 +7,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.nyonyix.thermia.api.ThermiaEntityTemperatureAPI;
 import com.nyonyix.thermia.api.ThermiaInteriorAPI;
-import com.nyonyix.thermia.data.Interior;
+import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;

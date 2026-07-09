@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.data;
+package com.nyonyix.thermia.data.records;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
@@ -7,25 +7,17 @@ import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
-import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
-import net.dries007.tfc.common.blockentities.IHeatable;
-import net.dries007.tfc.common.blockentities.PitKilnBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
@@ -35,7 +27,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.slf4j.Logger;
 
-import javax.sound.sampled.Clip;
 import java.util.*;
 
 public record BlockSearchResult(

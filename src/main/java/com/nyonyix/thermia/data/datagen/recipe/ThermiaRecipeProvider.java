@@ -1,8 +1,7 @@
-package com.nyonyix.thermia.data.datagen;
+package com.nyonyix.thermia.data.datagen.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.ibm.icu.impl.number.range.PrefixInfixSuffixLengthHelper;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;

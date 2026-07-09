@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.data.datagen;
+package com.nyonyix.thermia.data.datagen.lang;
 
 import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;

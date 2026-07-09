@@ -1,4 +1,4 @@
-package com.nyonyix.thermia.data;
+package com.nyonyix.thermia.data.datagen.lang;
 
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.item.ThermiaItems;
@@ -10,9 +10,7 @@ import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 

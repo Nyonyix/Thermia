@@ -2,10 +2,10 @@ package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.data.BlockSearchResult;
-import com.nyonyix.thermia.data.Interior;
-import com.nyonyix.thermia.data.SolarShadeResult;
-import com.nyonyix.thermia.data.WindOcclusionResult;
+import com.nyonyix.thermia.data.records.BlockSearchResult;
+import com.nyonyix.thermia.data.records.Interior;
+import com.nyonyix.thermia.data.records.SolarShadeResult;
+import com.nyonyix.thermia.data.records.WindOcclusionResult;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.EntityTemperatureDataMap;
@@ -263,7 +263,7 @@ public class EntityTemperatureManager
 
         if (dataMap.isMob())
         {
-            float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: shade, entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier());
+            float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: shade, entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier(), false);
             entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
         }
         else
@@ -272,7 +272,7 @@ public class EntityTemperatureManager
             SolarShadeResult shadeResult = BlockSearch.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth());
             entityData = entityData.withSolarShadeResult(shadeResult);
 
-            float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), shadeResult.shade(), entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier());
+            float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), shadeResult.shade(), entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier(), ItemInventoryManager.hasHat(entity));
             float inventoryHeat = ItemInventoryManager.getInventoryTemperature(entity);
             entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature + inventoryHeat);
         }

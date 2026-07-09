@@ -1,9 +1,9 @@
 package com.nyonyix.thermia.api;
 
 import com.nyonyix.thermia.util.AiHelpers;
-import com.nyonyix.thermia.data.BlockSearchResult;
-import com.nyonyix.thermia.data.SolarShadeResult;
-import com.nyonyix.thermia.data.WindOcclusionResult;
+import com.nyonyix.thermia.data.records.BlockSearchResult;
+import com.nyonyix.thermia.data.records.SolarShadeResult;
+import com.nyonyix.thermia.data.records.WindOcclusionResult;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import net.minecraft.util.Mth;

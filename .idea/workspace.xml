@@ -4,22 +4,33 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Thick clothing fourth pass (Thanks Hachi)">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaLanguageProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/head.json" afterDir="false" />
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Reordered curio slots&#10;Lang datagen&#10;Recipes:&#10; - Pelts&#10; - Hats&#10; - Thick">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaTags.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaTags.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaRecipeProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaRecipeProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/tags/ThermiaItemTagProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/tags/ThermiaItemTagProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ThermiaCommands.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ThermiaCommands.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/api/ThermiaEntityTemperatureAPI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/api/ThermiaEntityTemperatureAPI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/api/ThermiaInteriorAPI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/api/ThermiaInteriorAPI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/BlockSearchResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/BlockSearchResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ClosestSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/ClosestSource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ExposedFaces.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/ExposedFaces.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/Interior.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/Interior.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/KoppenClimateHumidity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/KoppenClimateHumidity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/SolarShadeResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/SolarShadeResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaLanguageProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/lang/ThermiaLanguageProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/WindOcclusionResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/WindOcclusionResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/EntityTemperature.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/EntityTemperature.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/InteriorAttachment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/InteriorAttachment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaLootModifierProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/loot/ThermiaLootModifierProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaPatchouliProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/lang/ThermiaPatchouliProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/ThermiaRecipeProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/recipe/ThermiaRecipeProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/InteriorManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/InteriorManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/ItemInventoryManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/ItemInventoryManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/wideBrimHat/ThermiaWideBrimHatItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/wideBrimHat/ThermiaWideBrimHatItem.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/lang/en_us.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/body.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/body.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/cape.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/cape.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/feet.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/feet.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/legs.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/data/thermia/curios/slots/legs.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/AiHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/AiHelpers.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/BlockSearch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/BlockSearch.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/InteriorScanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/InteriorScanner.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -432,7 +443,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783325567135</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Reordered curio slots&#10;Lang datagen&#10;Recipes:&#10; - Pelts&#10; - Hats&#10; - Thick">
+      <option name="closed" value="true" />
+      <created>1783502802571</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1783502802571</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -467,6 +486,7 @@
     <MESSAGE value="Thick clothing second pass" />
     <MESSAGE value="Thick clothing third pass (Thanks Hachi)" />
     <MESSAGE value="Thick clothing fourth pass (Thanks Hachi)" />
-    <option name="LAST_COMMIT_MESSAGE" value="Thick clothing fourth pass (Thanks Hachi)" />
+    <MESSAGE value="Reordered curio slots&#10;Lang datagen&#10;Recipes:&#10; - Pelts&#10; - Hats&#10; - Thick" />
+    <option name="LAST_COMMIT_MESSAGE" value="Reordered curio slots&#10;Lang datagen&#10;Recipes:&#10; - Pelts&#10; - Hats&#10; - Thick" />
   </component>
 </project>
