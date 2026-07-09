@@ -40,6 +40,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -164,7 +165,7 @@ public class ThermiaClient {
             {
                 event.register((itemStack, i) -> {
                     DyedItemColor c = itemStack.get(DataComponents.DYED_COLOR);
-                    return c != null ? c.rgb() : material.getDefaultColour();
+                    return c != null ? FastColor.ARGB32.opaque(c.rgb()) : FastColor.ARGB32.opaque(material.getDefaultColour());
                 }, entry.getValue().get());
             }
         }
@@ -177,12 +178,12 @@ public class ThermiaClient {
             {
                 event.register((itemStack, i) -> {
                     DyedItemColor c = itemStack.get(DataComponents.DYED_COLOR);
-                    return c != null ? c.rgb() : material.getDefaultColour();
+                    return c != null ? FastColor.ARGB32.opaque(c.rgb()) : FastColor.ARGB32.opaque(material.getDefaultColour());
                 }, entry.getValue().get());
             }
         }
 
-        for (var entry : ThermiaItems.CLOTH_TORSO.entrySet())
+        for (var entry : ThermiaItems.CLOTH_LEGS.entrySet())
         {
             ThermiaClothWearableMaterial material = entry.getKey();
 
@@ -190,7 +191,7 @@ public class ThermiaClient {
             {
                 event.register((itemStack, i) -> {
                     DyedItemColor c = itemStack.get(DataComponents.DYED_COLOR);
-                    return c != null ? c.rgb() : material.getDefaultColour();
+                    return c != null ? FastColor.ARGB32.opaque(c.rgb()) : FastColor.ARGB32.opaque(material.getDefaultColour());
                 }, entry.getValue().get());
             }
         }
@@ -203,7 +204,7 @@ public class ThermiaClient {
             {
                 event.register((itemStack, i) -> {
                     DyedItemColor c = itemStack.get(DataComponents.DYED_COLOR);
-                    return c != null ? c.rgb() : material.getDefaultColour();
+                    return c != null ? FastColor.ARGB32.opaque(c.rgb()) : FastColor.ARGB32.opaque(material.getDefaultColour());
                 }, entry.getValue().get());
             }
         }

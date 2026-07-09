@@ -62,7 +62,8 @@ public class ThermiaItems
         {
             String id = material.name().toLowerCase();
 
-            Item.Properties properties = material.isDyeable() ? new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(material.getDefaultColour(), true)) : new Item.Properties().stacksTo(1);
+            Item.Properties properties = new Item.Properties().stacksTo(1);
+//            Item.Properties properties = material.isDyeable() ? new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(material.getDefaultColour(), true)) : new Item.Properties().stacksTo(1);
 
             CLOTH_HEAD.put(material, Thermia.ITEMS.register(id + "_hat", () -> new ThermiaClothWearableItem(material, "head", properties)));
             CLOTH_TORSO.put(material, Thermia.ITEMS.register(id + "_shirt", () -> new ThermiaClothWearableItem(material, "body", properties)));
