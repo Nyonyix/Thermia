@@ -95,7 +95,7 @@ public class ThermiaServer
             ItemInsulationDataMap dataMap = item.getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
             if (dataMap == null) return;
 
-            LOGGER.debug("Item: {}, insulationModifier: {}", item.value(), dataMap.insulationModifier());
+            LOGGER.debug("Item: {}, conductionProtection: {}", item.value(), dataMap.conductionProtection());
             VerifyDataMap.isValidItemInsulation(dataMap, item.value());
         });
 

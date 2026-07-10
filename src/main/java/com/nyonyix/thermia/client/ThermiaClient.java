@@ -33,13 +33,13 @@ import net.dries007.tfc.client.overworld.SolarCalculator;
 import net.dries007.tfc.util.climate.KoppenClimateClassification;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -58,7 +58,6 @@ import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import org.joml.Matrix4f;
 import org.slf4j.Logger;
 import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
@@ -224,10 +223,27 @@ public class ThermiaClient {
 
         if (insulationData != null)
         {
-            float insulation = insulationData.insulationModifier();
-            Component text = Component.translatable("tooltip.thermia.insulation", String.format("%.2f", insulation)).withColor(insulation > 0 ? 0x6DBCFF : 0xFF4500);
+            if (Screen.hasShiftDown())
+            {
+                float conductionProtection = insulationData.conductionProtection();
+                float radiationProtection = insulationData.radiationProtection();
+                float convectionProtection = insulationData.convectionProtection();
 
-            event.getToolTip().add(text);
+                Component conductionText = Component.translatable("tooltip.thermia.conduction", String.format("%.2f", conductionProtection)).withColor(0xff622e);
+                Component radiationText = Component.translatable("tooltip.thermia.radiation", String.format("%.2f", radiationProtection)).withColor(0xf1ff70);
+                Component convectionText = Component.translatable("tooltip.thermia.convection", String.format("%.2f", convectionProtection)).withColor(0x6188ff);
+
+                event.getToolTip().add(Component.empty());
+                event.getToolTip().add(conductionText);
+                event.getToolTip().add(radiationText);
+                event.getToolTip().add(convectionText);
+            }
+            else
+            {
+                Component shiftTooltip = Component.translatable("tooltip.thermia.holdShift");
+                event.getToolTip().add(Component.empty());
+                event.getToolTip().add(shiftTooltip);
+            }
         }
     }
 

@@ -7,19 +7,23 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 public record ItemInsulationDataMap(
-        float insulationModifier
+        float conductionProtection,
+        float radiationProtection,
+        float convectionProtection
 )
 {
     public static final Codec<ItemInsulationDataMap> CODEC = RecordCodecBuilder.create(itemInsulationInstance -> itemInsulationInstance.group(
-            Codec.FLOAT.fieldOf("insulation_modifier").forGetter(ItemInsulationDataMap::insulationModifier)
+            Codec.FLOAT.fieldOf("conduction_protection").forGetter(ItemInsulationDataMap::conductionProtection),
+            Codec.FLOAT.fieldOf("radiation_protection").forGetter(ItemInsulationDataMap::radiationProtection),
+            Codec.FLOAT.fieldOf("convection_protection").forGetter(ItemInsulationDataMap::convectionProtection)
     ).apply(itemInsulationInstance, ItemInsulationDataMap::new));
 
     public static final StreamCodec<ByteBuf, ItemInsulationDataMap> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.FLOAT, ItemInsulationDataMap::insulationModifier,
+            ByteBufCodecs.FLOAT, ItemInsulationDataMap::conductionProtection,
+            ByteBufCodecs.FLOAT, ItemInsulationDataMap::radiationProtection,
+            ByteBufCodecs.FLOAT, ItemInsulationDataMap::convectionProtection,
             ItemInsulationDataMap::new
     );
 
-    public static ItemInsulationDataMap createDefault() {return new ItemInsulationDataMap(1f);}
-
-    public ItemInsulationDataMap withInsulationModifier(float insulationModifier) {return new ItemInsulationDataMap(insulationModifier);}
+    public static ItemInsulationDataMap createDefault() {return new ItemInsulationDataMap(1f, 1f, 1f);}
 }

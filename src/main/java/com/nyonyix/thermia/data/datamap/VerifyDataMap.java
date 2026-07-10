@@ -1,8 +1,6 @@
 package com.nyonyix.thermia.data.datamap;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -38,9 +36,9 @@ public class VerifyDataMap
 
     public static void isValidItemInsulation(ItemInsulationDataMap dataMap, Item item)
     {
-        if (dataMap.insulationModifier() > 1f) LOGGER.error("Item: {}, Item cannot have insulationModifier exceeding 1.0", item.getDescriptionId());
+        if (dataMap.conductionProtection() > 1f || dataMap.radiationProtection() > 1f || dataMap.convectionProtection() > 1f) LOGGER.error("Item: {}, Item cannot have value(s) exceeding 1.0", item.getDescriptionId());
 
-        if (dataMap.insulationModifier() < -1f) LOGGER.error("Item: {}, Item cannot have insulationModifier less than -1.0", item.getDescriptionId());
+        if (dataMap.conductionProtection() < 1f || dataMap.radiationProtection() < 1f || dataMap.convectionProtection() > 1f) LOGGER.error("Item: {}, Item cannot have value(S) less than -1.0", item.getDescriptionId());
     }
 
     public static void isValidBlockPorosity(BlockPorosityDataMap dataMap, Block block)

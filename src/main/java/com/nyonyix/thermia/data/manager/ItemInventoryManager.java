@@ -1,7 +1,6 @@
 package com.nyonyix.thermia.data.manager;
 
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.data.ThermiaTags;
 import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
@@ -17,11 +16,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
-import top.theillusivec4.curios.api.type.ISlotType;
-import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
-import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
-
-import java.util.Map;
 
 public class ItemInventoryManager
 {
@@ -30,7 +24,7 @@ public class ItemInventoryManager
         ItemInsulationDataMap data = BuiltInRegistries.ITEM.wrapAsHolder(item).getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
         if (data == null) return 0f;
 
-        return data.insulationModifier();
+        return data.conductionProtection();
     }
 
     public static float getInventoryInsulation(Entity entity)
@@ -62,8 +56,8 @@ public class ItemInventoryManager
 
                     if (insulation != null)
                     {
-                        if (stack.getItem() instanceof Equipable) inventoryInsulation += (insulation.insulationModifier() / 10f);
-                        else inventoryInsulation += insulation.insulationModifier();
+                        if (stack.getItem() instanceof Equipable) inventoryInsulation += (insulation.conductionProtection() / 10f);
+                        else inventoryInsulation += insulation.conductionProtection();
                     }
                 }
             }
