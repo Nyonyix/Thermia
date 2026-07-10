@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Fix wool shirt item texture">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Start of insulation rework">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" afterDir="false" />
@@ -523,6 +523,7 @@
     <MESSAGE value="Fixed item render" />
     <MESSAGE value="Cloth mostly done" />
     <MESSAGE value="Fix wool shirt item texture" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix wool shirt item texture" />
+    <MESSAGE value="Start of insulation rework" />
+    <option name="LAST_COMMIT_MESSAGE" value="Start of insulation rework" />
   </component>
 </project>
