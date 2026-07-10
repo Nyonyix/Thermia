@@ -15,9 +15,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DyedItemColor;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.client.ICurioRenderer;
 
@@ -56,8 +59,16 @@ public class ThermiaClothLegsRenderer implements ICurioRenderer
             armourModel = new HumanoidArmorModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_INNER_ARMOR));
         }
 
+        int tint = -1;
+        if (material.isDyeable())
+        {
+            DyedItemColor dyed = stack.get(DataComponents.DYED_COLOR);
+            tint = dyed != null ? FastColor.ARGB32.opaque(dyed.rgb()) : FastColor.ARGB32.opaque(material.getDefaultColour());
+        }
+
         ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Thermia.MODID, "textures/models/cloth/" + material.name().toLowerCase() + "_layer2.png");
-        VertexConsumer vc = ItemRenderer.getArmorFoilBuffer(bufferSource, RenderType.entityCutoutNoCull(texture), stack.hasFoil());
+        RenderType renderType = material.isDyeable() ? RenderType.armorCutoutNoCull(texture) : RenderType.entityCutoutNoCull(texture);
+        VertexConsumer vc = ItemRenderer.getArmorFoilBuffer(bufferSource, renderType, stack.hasFoil());
 
         ((HumanoidModel<LivingEntity>) playerModel).copyPropertiesTo(armourModel);
 
@@ -65,6 +76,6 @@ public class ThermiaClothLegsRenderer implements ICurioRenderer
         armourModel.leftLeg.visible = true;
         armourModel.rightLeg.visible = true;
 
-        armourModel.renderToBuffer(poseStack, vc, light, OverlayTexture.NO_OVERLAY);
+        armourModel.renderToBuffer(poseStack, vc, light, OverlayTexture.NO_OVERLAY, tint);
     }
 }
