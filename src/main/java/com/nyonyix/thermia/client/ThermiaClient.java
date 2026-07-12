@@ -269,23 +269,33 @@ public class ThermiaClient {
                 text.add(colourDarkGreen + "Thermia");
                 text.add("Entity:");
                 text.add(String.format("Environment Temperature: %.2f", playerData.environmentTemperature()));
+                text.add(String.format("Raw Environment Temperature: %.2f", playerData.rawEnvironmentTemperature()));
                 text.add(String.format("Environment Humidity: %.2f", playerData.environmentHumidity()));
                 text.add(String.format("Player Internal Temperature: %.2f", playerData.internalTemperature()));
                 text.add(String.format("Wetness: %.2f", playerData.wetness()));
 
                 Level level = clientPlayer.level();
                 ClimateRenderCache climate = ClimateRenderCache.INSTANCE;
+
+                float conductionProtection = ItemInventoryManager.getInventoryConductionProtection(clientPlayer);
+                float radiationProtection = ItemInventoryManager.getInventoryRadiationProtection(clientPlayer);
+                float convectionProtection = ItemInventoryManager.getInventoryConvectionProtection(clientPlayer);
+
                 float solarRadiation = EnvironmentHelpers.getSolarRadiationWeather(level, pos, playerData.solarShadeResult().shade());
+                float solarRadiationWithProtection = solarRadiation * (1f - radiationProtection);
+
                 float windSpeed = EnvironmentHelpers.getWindSpeed(level, pos, playerData.windOcclusionResult().occlusionMultiplier());
-                float effectiveTemp = EnvironmentHelpers.calcEffectiveTemperature(level, pos, climate.getInstantTemperature(), playerData.environmentHumidity(), playerData.solarShadeResult().shade(), playerData.wetness(), playerData.windOcclusionResult().occlusionMultiplier(), ItemInventoryManager.hasHat(clientPlayer));
+                float windSpeedWithProtection  = windSpeed * (1f - convectionProtection);
+
+                float effectiveTemp = EnvironmentHelpers.calcEffectiveTemperature(level, pos, climate.getInstantTemperature(), playerData.environmentHumidity(), playerData.solarShadeResult().shade(), playerData.wetness(), playerData.windOcclusionResult().occlusionMultiplier(), convectionProtection, radiationProtection);
 
                 text.add("Environment:");
                 text.add(String.format("Climate: %s", KoppenClimateHumidity.KOPPEN_CLIMATE_HUMIDITY_ENUM_MAP.get(KoppenClimateClassification.classify(climate.getAverageTemperature(), climate.getAverageRainfall(), climate.getRainVariance(), SolarCalculator.getInNorthernHemisphere(pos, level))).climateToString()));
-                text.add(String.format("Solar Intensity: %.2f, Raw Solar Heating: %.2f", solarRadiation, solarRadiation * (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble()));
+                text.add(String.format("Solar Intensity: %.2f, Raw Solar Heating: %.2f, With Radiation Protection: %.2f", solarRadiation, solarRadiation * (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble(), solarRadiationWithProtection));
                 text.add(String.format("Drying Rate: %.2f", EnvironmentHelpers.calcDryingRate(level, pos, effectiveTemp, playerData.environmentHumidity(), playerData.solarShadeResult().shade(), playerData.windOcclusionResult().occlusionMultiplier())));
-                text.add(String.format("Evaporative Cooling: %.2f", EnvironmentHelpers.calcEvaporativeCooling(windSpeed, playerData.environmentHumidity(), playerData.wetness())));
+                text.add(String.format("Evaporative Cooling: %.2f", EnvironmentHelpers.calcEvaporativeCooling(windSpeedWithProtection, playerData.environmentHumidity(), playerData.wetness())));
                 text.add(String.format("Wet Bulb: %.2f, Globe: %.2f, WetBulbGlobe(WBGT): %.2f", EnvironmentHelpers.calcWetBulbTemperature(climate.getInstantTemperature(), playerData.environmentHumidity()), EnvironmentHelpers.calcGlobeTemperature(climate.getInstantTemperature(), solarRadiation), EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, climate.getInstantTemperature(), playerData.environmentHumidity(), solarRadiation)));
-                text.add(String.format("Cold: %.2f, Mild: %.2f, Effective: %.2f", EnvironmentHelpers.calcForCold(climate.getInstantTemperature(), windSpeed, solarRadiation, playerData.environmentHumidity()),  EnvironmentHelpers.calcForMild(climate.getInstantTemperature(), windSpeed, solarRadiation, playerData.environmentHumidity()), effectiveTemp));
+                text.add(String.format("Cold: %.2f, Mild: %.2f, Effective: %.2f", EnvironmentHelpers.calcForCold(climate.getInstantTemperature(), windSpeedWithProtection, solarRadiationWithProtection, playerData.environmentHumidity()),  EnvironmentHelpers.calcForMild(climate.getInstantTemperature(), windSpeedWithProtection, solarRadiationWithProtection, playerData.environmentHumidity()), effectiveTemp));
             }
         }
     }

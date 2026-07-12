@@ -58,12 +58,10 @@ public class EntityTemperatureManager
         float entityMedian = (entityTemperature.maxInternalTemperature() + entityTemperature.minInternalTemperature()) / 2f;
         float medianDelta = (entityMedian - entityTemperature.internalTemperature()) * multi;
 
-        float insulation = 1f - (Mth.clamp(ItemInventoryManager.getInventoryInsulation(entity), -1.0f, 1.0f) * (1f - entityTemperature.wetness()));
-
-        float effectiveDelta = medianDelta + (environmentDelta * insulation);
-
+//        float insulation = 1f - (Mth.clamp(ItemInventoryManager.getInventoryConductionProtection(entity), -1.0f, 1.0f) * (1f - entityTemperature.wetness()));
+//
+        float effectiveDelta = medianDelta + environmentDelta;
         float absDelta = Math.abs(effectiveDelta);
-
         float normalisedRate = 1.0f - (float) Math.exp(-0.005 * absDelta);
         float baseRate = Mth.lerp(normalisedRate, 0.001f, 0.05f);
 
@@ -131,15 +129,15 @@ public class EntityTemperatureManager
         return entityData;
     }
 
-    private static EntityTemperature handleWetness(Level level, BlockPos pos, ClimateModel levelModel, ICalendar levelCalender, EntityTemperature entityData, float shade)
+    private static EntityTemperature handleWetness(Level level, BlockPos pos, ClimateModel levelModel, ICalendar levelCalender, EntityTemperature entityData, float shade, float rainProtection)
     {
         boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getInstantRainfall(level, pos));
         if (isRaining && level.canSeeSky(pos) && entityData.wetness() <= 0.9)
         {
-            if (levelModel.getInstantTemperature(level, pos) > 0.0f) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.1f));
-            else if (levelModel.getInstantTemperature(level, pos) > -5) entityData = entityData.withWetness(Math.min(0.9f, entityData.wetness() + 0.05f));
+            if (levelModel.getInstantTemperature(level, pos) > 0.0f) entityData = entityData.withWetness((Math.min(0.5f, entityData.wetness() + 0.1f)) * (1f - rainProtection));
+            else if (levelModel.getInstantTemperature(level, pos) > -5) entityData = entityData.withWetness((Math.min(0.5f, entityData.wetness() + 0.05f)) * (1f - rainProtection));
         }
-        else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos.above(), entityData.environmentTemperature(), entityData.environmentHumidity(), shade, entityData.windOcclusionResult().occlusionMultiplier())));
+        else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos.above(), entityData.rawEnvironmentTemperature(), entityData.environmentHumidity(), shade, entityData.windOcclusionResult().occlusionMultiplier())));
 
         return entityData;
     }
@@ -236,19 +234,30 @@ public class EntityTemperatureManager
         ICalendar levelCalender = Calendars.get(level);
         ClimateModel levelModel = Climate.get(level);
         BlockPos pos = entity.blockPosition();
-        RandomSource random = level.random;
-        long calendarTick = levelCalender.getTicks();
         float fractionOfDay = levelCalender.getCalendarFractionOfDay();
         float fractionOfYear = levelCalender.getCalendarFractionOfYear();
-        float fractionOfMonth = levelCalender.getCalendarFractionOfMonth();
         float hemisphereScale = levelModel.hemisphereScale();
-        float baseTemperature = 0f;
-        float shade = 0.3f;
-        float nearbyBlockTemperature = 0f;
 
-        nearbyBlockTemperature = entityData.blockSearchResult().getRadiance(level, entity);
-        nearbyBlockTemperature += entityData.blockSearchResult().getImmersion(level, entity);
-        nearbyBlockTemperature += entityData.blockSearchResult().getContact(level, entity, dataMap.isMob());
+        float baseTemperature = 0f;
+        float ambientTemperature = 0f;
+        float shade = 0.3f;
+        float multi = (float) ServerConfig.ENTITY_TEMPERATURE_CHANGE_MULTI.getAsDouble();
+
+        float internal = entityData.internalTemperature();
+        float wetness = entityData.wetness();
+
+        float inventoryHeat = ItemInventoryManager.getInventoryTemperature(entity);
+        float conductionProtection = ItemInventoryManager.getInventoryConductionProtection(entity);
+        float radiationProtection =  ItemInventoryManager.getInventoryRadiationProtection(entity);
+        float convectionProtection = ItemInventoryManager.getInventoryConvectionProtection(entity);
+        float effConduction = conductionProtection * (1f - wetness);
+
+        float rawRadiant = entityData.blockSearchResult().getRadiance(level, entity);
+        float rawContact = entityData.blockSearchResult().getContact(level, entity, dataMap.isMob());
+
+        float radiant = rawRadiant * (1f - radiationProtection);
+        float contact = rawContact * (1f - effConduction);
+        float immersive = entityData.blockSearchResult().getImmersion(level, entity);
 
         if (InteriorManager.isInInterior(level, pos.relative(Direction.UP)))
         {
@@ -263,8 +272,7 @@ public class EntityTemperatureManager
 
         if (dataMap.isMob())
         {
-            float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: shade, entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier(), false);
-            entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature);
+            ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: shade, entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier(), convectionProtection, radiationProtection);
         }
         else
         {
@@ -272,10 +280,23 @@ public class EntityTemperatureManager
             SolarShadeResult shadeResult = BlockSearch.getSolarShade(level, pos.above(), sunPos.zenith(), sunPos.azimuth());
             entityData = entityData.withSolarShadeResult(shadeResult);
 
-            float ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), shadeResult.shade(), entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier(), ItemInventoryManager.hasHat(entity));
-            float inventoryHeat = ItemInventoryManager.getInventoryTemperature(entity);
-            entityData = entityData.withEnvironmentTemperature(ambientTemperature + nearbyBlockTemperature + inventoryHeat);
+            ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), shadeResult.shade(), entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier(), convectionProtection, radiationProtection);
         }
+
+        float ambientDelta = (ambientTemperature - internal) * (1f - effConduction);
+        float felt = ambientTemperature + contact + radiant + immersive + inventoryHeat;
+        float pull = 1f - conductionProtection * (1f - wetness);
+        float environmentDelta = (felt - internal) * pull;
+
+        float entityMedian = (entityData.maxInternalTemperature() + entityData.minInternalTemperature()) / 2f;
+        float medianDelta = (entityMedian - internal) * multi;
+        float effectiveDelta = medianDelta + environmentDelta;
+
+        float baseRate = Mth.lerp( 1f - (float) Math.exp(-0.005 * Math.abs(effectiveDelta)), 0.001f, 0.05f);
+
+        entityData = entityData.withRawEnvironmentTemperature(ambientTemperature + rawContact + rawRadiant + immersive);
+        entityData = entityData.withEnvironmentTemperature(felt);
+        entityData = entityData.withInternalTemperature(internal + effectiveDelta * baseRate);
 
         return entityData;
     }
@@ -444,14 +465,12 @@ public class EntityTemperatureManager
             }
 
             WindOcclusionResult windResult = BlockSearch.getWindOcclusion(level, pos);
-            WindOcclusionResult windResultCape = new WindOcclusionResult(windResult.occludingBlock(), ItemInventoryManager.hasCape(entity) ? windResult.occlusionMultiplier() / 2f : windResult.occlusionMultiplier());
-
-            entityData = entityData.withWindOcclusionResult(windResultCape);
+            entityData = entityData.withWindOcclusionResult(windResult);
             entityData = entityData.withEnvironmentHumidity(EnvironmentHelpers.getEntityHumidity(level.getChunkAt(pos).getData(ThermiaAttachments.CHUNK_HUMIDITY).humidity(), nonEmptyAbove));
             entityData = handleEnvironmentTemperature(entity, dataMap, entityData);
             entityData = handleEntitySweat(entity, entityData);
-            entityData = handleWetness(level, pos, levelModel, levelCalender, entityData, entityData.solarShadeResult().shade());
-            entityData = handleTemperatureChange(entity, entityData);
+            entityData = handleWetness(level, pos, levelModel, levelCalender, entityData, entityData.solarShadeResult().shade(), ItemInventoryManager.getInventoryRainProtection(entity));
+//            entityData = handleTemperatureChange(entity, entityData);
 
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
         }

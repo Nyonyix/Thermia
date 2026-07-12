@@ -1,6 +1,7 @@
 package com.nyonyix.thermia.util;
 
 import com.nyonyix.thermia.ServerConfig;
+import com.nyonyix.thermia.data.manager.ItemInventoryManager;
 import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.records.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.records.SolarShadeResult;
@@ -19,6 +20,7 @@ import net.dries007.tfc.util.climate.OverworldClimateModel;
 import net.dries007.tfc.util.tracker.WeatherHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 
@@ -92,11 +94,13 @@ public class EnvironmentHelpers
         return temp + solarDelta - windCooling + humidityDiscomfort;
     }
 
-    public static float calcEffectiveTemperature(Level level, BlockPos pos, float temp, float humidity, float shade, float wetness, float windOcclusion, boolean hasHat)
+    public static float calcEffectiveTemperature(Level level, BlockPos pos, float temp, float humidity, float shade, float wetness, float windOcclusion, float convectionProtection, float radiationProtection)
     {
         float windSpeed = getWindSpeed(level, pos, windOcclusion);
+        windSpeed = windSpeed * (1f - convectionProtection);
+
         float solarRadiation = getSolarRadiationWeather(level, pos, shade);
-        solarRadiation = hasHat ? solarRadiation * 0.5f : solarRadiation;
+        solarRadiation = solarRadiation * (1f - radiationProtection);
 
         float cold = calcForCold(temp, windSpeed, solarRadiation, humidity);
         float mild = calcForMild(temp, windSpeed, solarRadiation, humidity);
@@ -157,7 +161,7 @@ public class EnvironmentHelpers
             SolarShadeResult shade = BlockSearch.getSolarShade(level, pos, sunPos.zenith(), sunPos.azimuth());
             WindOcclusionResult windOcclusion = BlockSearch.getWindOcclusion(level, pos);
 
-            float effTemp = calcEffectiveTemperature(level, pos, baseTemp, humidity, shade.shade(), wetness, windOcclusion.occlusionMultiplier(), false);
+            float effTemp = calcEffectiveTemperature(level, pos, baseTemp, humidity, shade.shade(), wetness, windOcclusion.occlusionMultiplier(), 0f, 0f);
 
             return new Thermometer(effTemp, humidity);
         }
@@ -249,8 +253,8 @@ public class EnvironmentHelpers
     {
         float tempComponent = Mth.clampedMap(temperature,-10f, 40f, 0.1f, 2.0f);
         float humidityComponent = 1.0f - humidity;
-        float windComponent = 1.0f + (getWindSpeed(level, pos, windOcclusion)* 0.15f);
-        float solarComponent = 1.0f + (getSolarRadiationWeather(level, pos, shade) * 2.0f);
+        float windComponent = (1.0f + (getWindSpeed(level, pos, windOcclusion)* 0.15f));
+        float solarComponent = (1.0f + (getSolarRadiationWeather(level, pos, shade) * 2.0f));
 
         float multi = (float) ServerConfig.DRYING_MULTI.getAsDouble();
 
