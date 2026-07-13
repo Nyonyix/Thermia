@@ -4,13 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Insulation Rework&#10;Cut async search from 100 ticks to 20&#10;Increased default search caps&#10;New silk texture">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Fixed fluid default search cap&#10;Insulation rework complete&#10;Change async to 40 ticks">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/clothing.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/gui/book/example_house.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/gui/book/hot.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/FluidTemperatureDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/FluidTemperatureDataMapProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/VerifyDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/VerifyDataMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/ItemInventoryManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/ItemInventoryManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/cold.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/cold.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/heat.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/heat.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/introduction.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/introduction.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,16 +108,20 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "1.21.1",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/nyon/Coding/Minecraft/Java/Thermia/src/main/resources/assets/thermia/textures/models/hat",
+    "last_opened_file_path": "/home/nyon/Coding/Minecraft/Java/Thermia/src/main/resources/assets/thermia/textures/gui/book",
     "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "preferences.lookFeel"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/gui/book" />
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/hat" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/mob_effect" />
+      <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/gui/book" />
+      <recent name="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia" />
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/thick" />
       <recent name="$PROJECT_DIR$/src/main/resources/data" />
     </key>
@@ -495,7 +504,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783918994558</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Fixed fluid default search cap&#10;Insulation rework complete&#10;Change async to 40 ticks">
+      <option name="closed" value="true" />
+      <created>1783927774954</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1783927774954</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -513,7 +530,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed Acclimatisation&#10;Added lang for reworked ui config" />
     <MESSAGE value="Fixed Acclimatisation" />
     <MESSAGE value="Fixed Acclimatisation&#10;Added lang for ui config" />
     <MESSAGE value="Finished first pass patchouli book" />
@@ -538,6 +554,7 @@
     <MESSAGE value="Start of insulation rework" />
     <MESSAGE value="Insulation Rework" />
     <MESSAGE value="Insulation Rework&#10;Cut async search from 100 ticks to 20&#10;Increased default search caps&#10;New silk texture" />
-    <option name="LAST_COMMIT_MESSAGE" value="Insulation Rework&#10;Cut async search from 100 ticks to 20&#10;Increased default search caps&#10;New silk texture" />
+    <MESSAGE value="Fixed fluid default search cap&#10;Insulation rework complete&#10;Change async to 40 ticks" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed fluid default search cap&#10;Insulation rework complete&#10;Change async to 40 ticks" />
   </component>
 </project>

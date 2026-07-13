@@ -1,4 +1,4 @@
-{
+ {
     "name": "Thermia Introduction",
     "category": "tfc:thermia",
     "icon": "thermia:textures/gui/book/book_icon.png",
@@ -32,7 +32,7 @@
         {
             "type": "patchouli:text",
             "text": "$(li)$(l)Sun Icon:$() Brighter means more heating from sunlight$(li)$(l:tfc:thermia/mechanics#wind)$(l)Wind Arrow$():$() Wind speed and direction - points to the direction wind is moving$(li)$(l:tfc:thermia/mechanics#wetness)$(l)Water Droplet$():$() Your wetness level - affects cooling and insulation$(br2)These work together to determine your effective temperature.",
-            "title": "Additional Indicators"
+            "title": "Subwidgets"
         }
     ],
     "read_by_default": true,

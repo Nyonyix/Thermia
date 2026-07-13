@@ -1,0 +1,31 @@
+{
+  "name": "Thermia Interior",
+  "category": "tfc:thermia",
+  "icon": "tfc:wood/door/aspen",
+  "pages": [
+      {
+          "type": "patchouli:text",
+          "text": "Thermia has an interior system, Using flood fill and allowing for quite large and dynamic structures"
+      },
+      {
+        "type": "patchouli:text",
+        "text": ""
+      },
+      {
+          "type": "patchouli:text",
+          "anchor": "create_interior",
+          "text": "Creating an interior is fairly simple, All you need is a solid wall of any material, and a trigger block. (By default a normal or thatch bed.)",
+          "title": "Creating an Interior"
+      },
+      {
+        "type": "patchouli:image",
+        "images": [
+          "thermia:textures/gui/book/example_house.png"
+        ],
+        "text": "Example house with open and closed trapdoors and thatch bed.",
+        "border": true
+      }
+  ],
+  "read_by_default": true,
+  "sortnum": 5
+}

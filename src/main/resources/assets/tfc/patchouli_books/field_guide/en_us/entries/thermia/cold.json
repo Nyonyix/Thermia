@@ -10,7 +10,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "As you freeze, you'll experience increasingly severe effects:$(li)Slowness effect$(li)Mining Fatigue$(li)Damage$(li)Blue-white screen tint with frost overlay"
+            "text": "As you freeze, you'll experience severe effects:$(li)Slowness effect$(li)Mining Fatigue$(li)Damage$(li)with frost overlay"
         },
         {
             "type": "patchouli:text",
@@ -19,16 +19,16 @@
         },
         {
             "type": "patchouli:text",
-            "text": "$(l:tfc:thermia/mechanics#wind)$(l)Wind$()$()$(br)Wind dramatically increases cooling. Find caves, build enclosed structures, or get behind walls to block the wind.$(br2)$(l:tfc:thermia/mechanics#wetness)$(l)Stay Dry$()$()$(br)Wetness multiplies cold effects. Avoid water, rain, and snow. If you get wet, find shelter immediately and wait to dry.",
+            "text": "$(l:tfc:thermia/mechanics#wind)$(l)Wind$()$()$(br)Wind increases cooling. Find caves, build enclosed structures, or get behind walls to block the wind.$(br2)$(l:tfc:thermia/mechanics#wetness)$(l)Stay Dry$()$()$(br)Wetness multiplies cold effects. Avoid water, rain, and snow. If you get wet, find shelter immediately and wait to dry.",
             "title": "Staying Warm"
         },
         {
             "type": "patchouli:text",
-            "text": "$(l:tfc:thermia/mechanics#radiant_source)$(l)Warm Blocks$()$()$(br)Position yourself near fires, lit forges, or other heat-emitting blocks. Even a small campfire can keep you alive.$(br2)$(l:tfc:thermia/mechanics#solar_radiation)$(l)Sun$()$()$(br)During the day, stay in open sunny areas. Solar radiation provides significant warmth, especially at low wind."
+            "text": "$(l:tfc:thermia/mechanics#radiant_source)$(l)Warm Blocks$()$()$(br)Position yourself near fires, lit forges, or other heat-emitting blocks. Even a small campfire can keep you alive.$(br2)$(l:tfc:thermia/mechanics#solar_radiation)$(l)Sun$()$()$(br)During the day, stay in open sunny areas. Solar radiation provides significant warmth, especially in low wind."
         },
         {
             "type": "patchouli:text",
-            "text": "$(l:tfc:thermia/mechanics#insulation)$(l)Insulation$()$()$(br)Wear wool and leather clothing. These materials trap body heat and slow cooling. Carry extra insulating items in your inventory for additional protection.$(br2)$(l)Time Your Activities$()$(br)Travel and work during midday when the sun is strongest. Shelter in place during night and storms."
+            "text": "$(l:tfc:thermia/mechanics#insulation)$(l)Insulation$()$()$(br)Wear wool or thick clothing. These can help slow the pull of the environment. THey can however also block heat from sources. Carry extra insulating items in your inventory for additional protection.$(br2)$(l)Time Your Activities$()$(br)Travel and work during midday when the sun is strongest. Shelter in place during night and storms."
         },
         {
             "type": "patchouli:text",

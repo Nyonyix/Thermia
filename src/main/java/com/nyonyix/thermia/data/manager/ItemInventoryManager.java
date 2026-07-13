@@ -183,10 +183,10 @@ public class ItemInventoryManager
                 }
             }
 
-            float headValue = Math.max(vanillaHead, curioHead) * 0.35f;
+            float headValue = Math.max(vanillaHead, curioHead) * 0.40f;
             float bodyValue = Math.max(vanillaBody, curioBody) * 0.40f;
             float legsValue = Math.max(vanillaLegs, curioLegs) * 0.15f;
-            float feetValue = Math.max(vanillaFeet, curioFeet) * 0.10f;
+            float feetValue = Math.max(vanillaFeet, curioFeet) * 0.05f;
 
             return Math.clamp(curioCape + headValue + bodyValue + legsValue + feetValue, -1f, 1f);
         }
