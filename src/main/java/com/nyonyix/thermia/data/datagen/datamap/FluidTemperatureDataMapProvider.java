@@ -86,8 +86,8 @@ public class FluidTemperatureDataMapProvider extends DataMapProvider
         }
 
         builder(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP)
-                .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.LAVA), new FluidTemperatureDataMap(1000f, 16, true), false)
-                .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.FLOWING_LAVA), new FluidTemperatureDataMap(1200f, 16, true), false)
+                .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.LAVA), new FluidTemperatureDataMap(1000f, 32, true), false)
+                .add(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.FLOWING_LAVA), new FluidTemperatureDataMap(1200f, 32, true), false)
 
                 .add(TFCFluids.SALT_WATER.source(), new FluidTemperatureDataMap(WATER_TEMPERATURE, 16, false), false)
                 .add(TFCFluids.SALT_WATER.flowing(), new FluidTemperatureDataMap(WATER_TEMPERATURE_FLOWING, 16, false), false)

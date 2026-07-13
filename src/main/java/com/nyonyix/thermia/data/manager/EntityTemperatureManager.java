@@ -29,7 +29,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -70,7 +69,7 @@ public class EntityTemperatureManager
         return entityData.withInternalTemperature(internal + effectiveDelta * baseRate);
     }
 
-    private static float getEntitySubmersion(Entity entity, Level level)
+    private static float getEntitySubmersion(Entity entity)
     {
         double waterHeight = entity.getFluidTypeHeight(NeoForgeMod.WATER_TYPE.value());
         double saltWaterHeight = entity.getFluidTypeHeight(TFCFluids.SALT_WATER.getType());
@@ -240,22 +239,18 @@ public class EntityTemperatureManager
         float fractionOfYear = levelCalender.getCalendarFractionOfYear();
         float hemisphereScale = levelModel.hemisphereScale();
 
-        float baseTemperature = 0f;
-        float ambientTemperature = 0f;
+        float baseTemperature;
+        float ambientTemperature;
         float shade = 0.3f;
 
         float inventoryHeat = ItemInventoryManager.getInventoryTemperature(entity);
-        float conductionProtection = ItemInventoryManager.getInventoryConductionProtection(entity);
         float radiationProtection =  ItemInventoryManager.getInventoryRadiationProtection(entity);
         float convectionProtection = ItemInventoryManager.getInventoryConvectionProtection(entity);
-        float wetness = entityData.wetness();
-        float effConduction = conductionProtection * (1f - wetness);
 
         float rawRadiant = entityData.blockSearchResult().getRadiance(level, entity);
         float rawContact = entityData.blockSearchResult().getContact(level, entity, dataMap.isMob());
 
         float radiant = rawRadiant * (1f - radiationProtection);
-//        float contact = rawContact * (1f - effConduction);
         float immersive = entityData.blockSearchResult().getImmersion(level, entity);
 
         if (InteriorManager.isInInterior(level, pos.relative(Direction.UP)))
@@ -283,7 +278,7 @@ public class EntityTemperatureManager
         }
 
         float felt = ambientTemperature + radiant + rawContact + immersive + inventoryHeat;
-        float oldEnv = entityData.rawEnvironmentTemperature();
+        float oldEnv = entityData.environmentTemperature();
         float newEnv = (oldEnv + felt) / 2f;
 
         float raw = ambientTemperature + rawRadiant + rawContact + immersive + inventoryHeat;
@@ -414,7 +409,7 @@ public class EntityTemperatureManager
 
     public static void onUpdate(Level level, Entity entity)
     {
-        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE) && entity.isAlive() && entity instanceof LivingEntity living)
+        if (entity.hasData(ThermiaAttachments.ENTITY_TEMPERATURE) && entity.isAlive() && entity instanceof LivingEntity)
         {
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
             EntityTemperatureDataMap dataMap = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).getData(ThermiaDataMaps.ENTITY_TEMPERATURE_DATA_MAP);
@@ -475,7 +470,7 @@ public class EntityTemperatureManager
         {
             EntityTemperature entityData = entity.getData(ThermiaAttachments.ENTITY_TEMPERATURE);
 
-            float submersion = getEntitySubmersion(entity, entity.level());
+            float submersion = getEntitySubmersion(entity);
             if (entityData.wetness() < submersion ) entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData.withWetness(submersion));
 
             handleEntityTemperatureEffect(entity);

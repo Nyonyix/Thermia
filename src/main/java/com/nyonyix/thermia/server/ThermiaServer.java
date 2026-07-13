@@ -77,7 +77,7 @@ public class ThermiaServer
             BlockTemperatureDataMap dataMap = block.getData(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP);
             if (dataMap == null) return;
 
-            LOGGER.debug("Block: {}, temperature: {}, searchCap: {}, hasTFCHeat: {}, isRadiative: {}, isHomeBlock: {}, stateTemps: {}", block.value().getDescriptionId(), dataMap.temperature(), dataMap.searchCap(), dataMap.hasTFCHeat(), dataMap.isRadiative(), dataMap.stateTemps().toString());
+            LOGGER.debug("Block: {}, temperature: {}, searchCap: {}, hasTFCHeat: {}, isRadiative: {}, stateTemps: {}", block.value().getDescriptionId(), dataMap.temperature(), dataMap.searchCap(), dataMap.hasTFCHeat(), dataMap.isRadiative(), dataMap.stateTemps().toString());
             VerifyDataMap.isValidBlockTemperature(dataMap, block.value());
         });
 
@@ -95,7 +95,7 @@ public class ThermiaServer
             ItemInsulationDataMap dataMap = item.getData(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP);
             if (dataMap == null) return;
 
-            LOGGER.debug("Item: {}, conductionProtection: {}", item.value(), dataMap.conductionProtection());
+            LOGGER.debug("Item: {}, conductionProtection: {}, radiationProtection: {}, convectionProtection: {}, rainProtection: {}", item.value(), dataMap.conductionProtection(), dataMap.radiationProtection(), dataMap.convectionProtection(), dataMap.rainProtection());
             VerifyDataMap.isValidItemInsulation(dataMap, item.value());
         });
 
@@ -180,7 +180,7 @@ public class ThermiaServer
 //                    if (entity instanceof Player player) LOGGER.debug("Player: {}, inside interior {}", player.getDisplayName().getString(), InteriorManager.getInteriorByPos(level, player.getOnPos().relative(Direction.UP)).homePos());
                 }
 
-                if (server.getTickCount() % 20 == entity.getId() % 100) EntityTemperatureManager.queueBlockSearch(entity);
+                if (server.getTickCount() % 40 == entity.getId() % 40) EntityTemperatureManager.queueBlockSearch(entity);
 
                 int ticksInHour = Calendar.CALENDAR_TICKS_IN_HOUR;
                 int refreshTicks = 12 * ticksInHour;

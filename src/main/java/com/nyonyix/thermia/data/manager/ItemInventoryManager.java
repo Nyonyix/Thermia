@@ -1,7 +1,6 @@
 package com.nyonyix.thermia.data.manager;
 
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.data.ThermiaTags;
 import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import net.dries007.tfc.common.component.heat.HeatCapability;
@@ -24,7 +23,7 @@ public class ItemInventoryManager
     {
         if (!(entity instanceof LivingEntity livingEntity)) return 0.0f;
 
-        float armourInsulation = 0.0f;
+        float armourInsulation;
         float inventoryInsulation = 0.0f;
 
         if (entity instanceof Player player)
@@ -94,7 +93,12 @@ public class ItemInventoryManager
                 }
             }
 
-            return Math.clamp(Math.max(vanillaHead, curioHead) + Math.max(vanillaBody, curioBody) + Math.max(vanillaLegs, curioLegs) + Math.max(vanillaFeet, curioFeet), -1f, 1f) + curioCape;
+            float headValue = Math.max(vanillaHead, curioHead) * 0.35f;
+            float bodyValue = Math.max(vanillaBody, curioBody) * 0.50f;
+            float legsValue = Math.max(vanillaLegs, curioLegs) * 0.10f;
+            float feetValue = Math.max(vanillaFeet, curioFeet) * 0.05f;
+
+            return Math.clamp(curioCape + headValue + bodyValue + legsValue + feetValue, -1f, 1f);
         }
         else
         {
@@ -134,7 +138,12 @@ public class ItemInventoryManager
                 }
             }
 
-            return Math.clamp(Math.max(vanillaHead, curioHead) + Math.max(vanillaBody, curioBody) + Math.max(vanillaLegs, curioLegs) + Math.max(vanillaFeet, curioFeet), -1f, 1f) + curioCape;
+            float headValue = Math.max(vanillaHead, curioHead) * 0.15f;
+            float bodyValue = Math.max(vanillaBody, curioBody) * 0.50f;
+            float legsValue = Math.max(vanillaLegs, curioLegs) * 0.25f;
+            float feetValue = Math.max(vanillaFeet, curioFeet) * 0.10f;
+
+            return Math.clamp(curioCape + headValue + bodyValue + legsValue + feetValue, -1f, 1f);
         }
         else
         {
@@ -174,7 +183,12 @@ public class ItemInventoryManager
                 }
             }
 
-            return Math.clamp(Math.max(vanillaHead, curioHead) + Math.max(vanillaBody, curioBody) + Math.max(vanillaLegs, curioLegs) + Math.max(vanillaFeet, curioFeet), -1f, 1f) + curioCape;
+            float headValue = Math.max(vanillaHead, curioHead) * 0.35f;
+            float bodyValue = Math.max(vanillaBody, curioBody) * 0.40f;
+            float legsValue = Math.max(vanillaLegs, curioLegs) * 0.15f;
+            float feetValue = Math.max(vanillaFeet, curioFeet) * 0.10f;
+
+            return Math.clamp(curioCape + headValue + bodyValue + legsValue + feetValue, -1f, 1f);
         }
         else
         {
@@ -200,6 +214,7 @@ public class ItemInventoryManager
         else
         {
             // TODO: Animal Inventory
+            return 0f;
         }
 
         return Mth.clamp(temperature, -maxEffect, maxEffect);
@@ -209,25 +224,6 @@ public class ItemInventoryManager
     {
         if (!(entity instanceof LivingEntity living)) return false;
         return CuriosApi.getCuriosInventory(living).map(iCuriosItemHandler -> !iCuriosItemHandler.findCurios("cape").isEmpty()).orElse(false);
-    }
-
-    public static boolean hasHat(Entity entity)
-    {
-        if (!(entity instanceof LivingEntity living)) return false;
-
-        var curios = CuriosApi.getCuriosInventory(living);
-        if (curios.isPresent())
-        {
-            var curio = curios.get().findCurio("head", 0);
-            if (curio.isPresent())
-            {
-                ItemStack stack = curio.get().stack();
-
-                return stack.is(ThermiaTags.Items.WIDE_HAT);
-            }
-        }
-
-        return false;
     }
 
     public static float getConductionProtection(Item item)
