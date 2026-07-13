@@ -54,7 +54,7 @@ public class ItemInventoryManager
                 }
             }
 
-            return (armourInsulation / 4f) + (inventoryInsulation / 36f);
+            return Math.clamp((armourInsulation / 4f) + (inventoryInsulation / 36f), -1f, 1f);
         }
         else
         {

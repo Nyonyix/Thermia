@@ -18,7 +18,6 @@ public record BlockTemperatureDataMap(
         int searchCap,
         boolean hasTFCHeat,
         boolean isRadiative,
-        boolean isHomeBlock,
         Map<String, Float> stateTemps
 )
 {
@@ -29,11 +28,10 @@ public record BlockTemperatureDataMap(
             Codec.INT.fieldOf("search_cap").forGetter(BlockTemperatureDataMap::searchCap),
             Codec.BOOL.fieldOf("has_tfc_heat").forGetter(BlockTemperatureDataMap::hasTFCHeat),
             Codec.BOOL.fieldOf("is_radiative").forGetter(BlockTemperatureDataMap::isRadiative),
-            Codec.BOOL.fieldOf("is_home_block").forGetter(BlockTemperatureDataMap::isHomeBlock),
             STATE_TEMPS.optionalFieldOf("state_temps", Map.of()).forGetter(BlockTemperatureDataMap::stateTemps)
     ).apply(blockTemperatureDataMapInstance, BlockTemperatureDataMap::new));
 
-    public static BlockTemperatureDataMap createDefault() {return new BlockTemperatureDataMap(256f, 32, false, true, false, Map.of());}
+    public static BlockTemperatureDataMap createDefault() {return new BlockTemperatureDataMap(256f, 32, false, true, Map.of());}
 
     public float resolveForState(Level level, BlockPos pos)
     {

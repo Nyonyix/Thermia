@@ -51,21 +51,23 @@ public class EntityTemperatureManager
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<UUID, CompletableFuture<BlockSearchResult>> pendingBlockSearches = new ConcurrentHashMap<>();
 
-    private static EntityTemperature handleTemperatureChange(Entity entity, EntityTemperature entityTemperature)
+    private static EntityTemperature handleTemperatureChange(Entity entity, EntityTemperature entityData)
     {
-        float multi  = (float) ServerConfig.ENTITY_TEMPERATURE_CHANGE_MULTI.getAsDouble();
-        float environmentDelta = entityTemperature.environmentTemperature() - entityTemperature.internalTemperature();
-        float entityMedian = (entityTemperature.maxInternalTemperature() + entityTemperature.minInternalTemperature()) / 2f;
-        float medianDelta = (entityMedian - entityTemperature.internalTemperature()) * multi;
+        float internal = entityData.internalTemperature();
+        float felt = entityData.environmentTemperature();
+        float wetness = entityData.wetness();
+        float multi = (float) ServerConfig.ENTITY_TEMPERATURE_CHANGE_MULTI.getAsDouble();
 
-//        float insulation = 1f - (Mth.clamp(ItemInventoryManager.getInventoryConductionProtection(entity), -1.0f, 1.0f) * (1f - entityTemperature.wetness()));
-//
+        float conduction = ItemInventoryManager.getInventoryConductionProtection(entity);
+        float pull = 1f - conduction * (1f - wetness);
+
+        float environmentDelta = (felt - internal) * pull;
+        float entityMedian = (entityData.maxInternalTemperature() + entityData.minInternalTemperature()) / 2f;
+        float medianDelta = (entityMedian - internal) * multi;
         float effectiveDelta = medianDelta + environmentDelta;
-        float absDelta = Math.abs(effectiveDelta);
-        float normalisedRate = 1.0f - (float) Math.exp(-0.005 * absDelta);
-        float baseRate = Mth.lerp(normalisedRate, 0.001f, 0.05f);
 
-        return  entityTemperature.withInternalTemperature(entityTemperature.internalTemperature() + (effectiveDelta * baseRate));
+        float baseRate = Mth.lerp(1f - (float) Math.exp(-0.005 * Math.abs(effectiveDelta)), 0.001f, 0.05f);
+        return entityData.withInternalTemperature(internal + effectiveDelta * baseRate);
     }
 
     private static float getEntitySubmersion(Entity entity, Level level)
@@ -241,22 +243,19 @@ public class EntityTemperatureManager
         float baseTemperature = 0f;
         float ambientTemperature = 0f;
         float shade = 0.3f;
-        float multi = (float) ServerConfig.ENTITY_TEMPERATURE_CHANGE_MULTI.getAsDouble();
-
-        float internal = entityData.internalTemperature();
-        float wetness = entityData.wetness();
 
         float inventoryHeat = ItemInventoryManager.getInventoryTemperature(entity);
         float conductionProtection = ItemInventoryManager.getInventoryConductionProtection(entity);
         float radiationProtection =  ItemInventoryManager.getInventoryRadiationProtection(entity);
         float convectionProtection = ItemInventoryManager.getInventoryConvectionProtection(entity);
+        float wetness = entityData.wetness();
         float effConduction = conductionProtection * (1f - wetness);
 
         float rawRadiant = entityData.blockSearchResult().getRadiance(level, entity);
         float rawContact = entityData.blockSearchResult().getContact(level, entity, dataMap.isMob());
 
         float radiant = rawRadiant * (1f - radiationProtection);
-        float contact = rawContact * (1f - effConduction);
+//        float contact = rawContact * (1f - effConduction);
         float immersive = entityData.blockSearchResult().getImmersion(level, entity);
 
         if (InteriorManager.isInInterior(level, pos.relative(Direction.UP)))
@@ -283,20 +282,14 @@ public class EntityTemperatureManager
             ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), shadeResult.shade(), entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier(), convectionProtection, radiationProtection);
         }
 
-        float ambientDelta = (ambientTemperature - internal) * (1f - effConduction);
-        float felt = ambientTemperature + contact + radiant + immersive + inventoryHeat;
-        float pull = 1f - conductionProtection * (1f - wetness);
-        float environmentDelta = (felt - internal) * pull;
+        float felt = ambientTemperature + radiant + rawContact + immersive + inventoryHeat;
+        float oldEnv = entityData.rawEnvironmentTemperature();
+        float newEnv = (oldEnv + felt) / 2f;
 
-        float entityMedian = (entityData.maxInternalTemperature() + entityData.minInternalTemperature()) / 2f;
-        float medianDelta = (entityMedian - internal) * multi;
-        float effectiveDelta = medianDelta + environmentDelta;
+        float raw = ambientTemperature + rawRadiant + rawContact + immersive + inventoryHeat;
 
-        float baseRate = Mth.lerp( 1f - (float) Math.exp(-0.005 * Math.abs(effectiveDelta)), 0.001f, 0.05f);
-
-        entityData = entityData.withRawEnvironmentTemperature(ambientTemperature + rawContact + rawRadiant + immersive);
-        entityData = entityData.withEnvironmentTemperature(felt);
-        entityData = entityData.withInternalTemperature(internal + effectiveDelta * baseRate);
+        entityData = entityData.withEnvironmentTemperature(newEnv);
+        entityData = entityData.withRawEnvironmentTemperature(raw);
 
         return entityData;
     }
@@ -470,7 +463,7 @@ public class EntityTemperatureManager
             entityData = handleEnvironmentTemperature(entity, dataMap, entityData);
             entityData = handleEntitySweat(entity, entityData);
             entityData = handleWetness(level, pos, levelModel, levelCalender, entityData, entityData.solarShadeResult().shade(), ItemInventoryManager.getInventoryRainProtection(entity));
-//            entityData = handleTemperatureChange(entity, entityData);
+            entityData = handleTemperatureChange(entity, entityData);
 
             entity.setData(ThermiaAttachments.ENTITY_TEMPERATURE, entityData);
         }

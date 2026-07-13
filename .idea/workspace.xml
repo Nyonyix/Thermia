@@ -4,16 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Start of insulation rework">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Insulation Rework">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/EntityTemperature.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/EntityTemperature.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/ItemInsulationDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/ItemInsulationDataMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/VerifyDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/VerifyDataMap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockTemperatureDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockTemperatureDataMapProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockTemperatureDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockTemperatureDataMap.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/ItemInventoryManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/ItemInventoryManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/cloth/silk_layer1.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/cloth/silk_layer1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/cloth/silk_layer2.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/cloth/silk_layer2.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -482,7 +482,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783670540524</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Insulation Rework">
+      <option name="closed" value="true" />
+      <created>1783866782563</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1783866782563</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -500,7 +508,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Code Clean up" />
     <MESSAGE value="GUI rework&#10;Hyperthermia effect render fix&#10;Effect management rework&#10;Slight inventory heating tweak&#10;Drying rate tweak" />
     <MESSAGE value="Fixed Acclimatisation&#10;Added lang for reworked ui config" />
     <MESSAGE value="Fixed Acclimatisation" />
@@ -525,6 +532,7 @@
     <MESSAGE value="Cloth mostly done" />
     <MESSAGE value="Fix wool shirt item texture" />
     <MESSAGE value="Start of insulation rework" />
-    <option name="LAST_COMMIT_MESSAGE" value="Start of insulation rework" />
+    <MESSAGE value="Insulation Rework" />
+    <option name="LAST_COMMIT_MESSAGE" value="Insulation Rework" />
   </component>
 </project>
