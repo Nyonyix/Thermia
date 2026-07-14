@@ -4,13 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Field Guide Stuffs">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Field guide finishes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/cold.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/cold.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/heat.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/heat.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/introduction.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/introduction.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -515,7 +512,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783952046647</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="Field guide finishes">
+      <option name="closed" value="true" />
+      <created>1784019442909</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1784019442909</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -533,7 +538,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed Acclimatisation&#10;Added lang for ui config" />
     <MESSAGE value="Finished first pass patchouli book" />
     <MESSAGE value="Thermometer Support." />
     <MESSAGE value="Fixed thermometer crash.&#10;Altered formatting" />
@@ -558,6 +562,7 @@
     <MESSAGE value="Insulation Rework&#10;Cut async search from 100 ticks to 20&#10;Increased default search caps&#10;New silk texture" />
     <MESSAGE value="Fixed fluid default search cap&#10;Insulation rework complete&#10;Change async to 40 ticks" />
     <MESSAGE value="Field Guide Stuffs" />
-    <option name="LAST_COMMIT_MESSAGE" value="Field Guide Stuffs" />
+    <MESSAGE value="Field guide finishes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Field guide finishes" />
   </component>
 </project>

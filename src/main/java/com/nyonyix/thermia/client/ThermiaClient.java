@@ -228,15 +228,18 @@ public class ThermiaClient {
                 float conductionProtection = insulationData.conductionProtection();
                 float radiationProtection = insulationData.radiationProtection();
                 float convectionProtection = insulationData.convectionProtection();
+                float rainProtection = insulationData.rainProtection();
 
                 Component conductionText = Component.translatable("tooltip.thermia.conduction", String.format("%.2f", conductionProtection)).withColor(0xff622e);
                 Component radiationText = Component.translatable("tooltip.thermia.radiation", String.format("%.2f", radiationProtection)).withColor(0xf1ff70);
                 Component convectionText = Component.translatable("tooltip.thermia.convection", String.format("%.2f", convectionProtection)).withColor(0x6188ff);
+                Component rainText = Component.translatable("tooltip.thermia.convection", String.format("%.2f", rainProtection)).withColor(0x4d3ac9);
 
                 event.getToolTip().add(Component.empty());
-                event.getToolTip().add(conductionText);
-                event.getToolTip().add(radiationText);
-                event.getToolTip().add(convectionText);
+                if (conductionProtection != 0.0f) event.getToolTip().add(conductionText);
+                if (radiationProtection != 0.0f) event.getToolTip().add(radiationText);
+                if (convectionProtection != 0.0f) event.getToolTip().add(convectionText);
+                if (rainProtection != 0.0f) event.getToolTip().add(rainText);
             }
             else
             {

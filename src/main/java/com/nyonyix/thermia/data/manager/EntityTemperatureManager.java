@@ -135,8 +135,8 @@ public class EntityTemperatureManager
         boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getInstantRainfall(level, pos));
         if (isRaining && level.canSeeSky(pos) && entityData.wetness() <= 0.9)
         {
-            if (levelModel.getInstantTemperature(level, pos) > 0.0f) entityData = entityData.withWetness((Math.min(0.5f, entityData.wetness() + 0.1f)) * (1f - rainProtection));
-            else if (levelModel.getInstantTemperature(level, pos) > -5) entityData = entityData.withWetness((Math.min(0.5f, entityData.wetness() + 0.05f)) * (1f - rainProtection));
+            if (levelModel.getInstantTemperature(level, pos) > 0.0f) entityData = entityData.withWetness((Math.min(0.5f, entityData.wetness() + 0.1f)) * (1f - Math.clamp(rainProtection, 0f, 1f)));
+            else if (levelModel.getInstantTemperature(level, pos) > -5) entityData = entityData.withWetness((Math.min(0.5f, entityData.wetness() + 0.05f)) * (1f - Math.clamp(rainProtection, 0f, 1f)));
         }
         else if (entityData.wetness() > 0.0f ) entityData = entityData.withWetness(Math.max(0.0f, entityData.wetness() - EnvironmentHelpers.calcDryingRate(level, pos.above(), entityData.rawEnvironmentTemperature(), entityData.environmentHumidity(), shade, entityData.windOcclusionResult().occlusionMultiplier())));
 
