@@ -5,7 +5,7 @@
   "pages": [
       {
           "type": "patchouli:text",
-          "text": "Thermia has an interior system, Using flood fill and allowing for quite large and dynamic structures"
+          "text": "Thermia has an interior system, Using flood fill and allowing for quite large and dynamic structures. The system uses the flood fill data to calculate internal thermodynamics, In short hot things warm the space over time and cold things absorb heat over time. Some blocks have porosity, This metric is a mesure of how leaky a block is and while in an external wall allows heat transfer between the intior and environment."
       },
       {
         "type": "patchouli:text",
@@ -14,7 +14,7 @@
       {
           "type": "patchouli:text",
           "anchor": "create_interior",
-          "text": "Creating an interior is fairly simple, All you need is a solid wall of any material, and a trigger block. (By default a normal or thatch bed.)",
+          "text": "Creating an interior is fairly simple. All you need is a enclosed space of any material, and a block with the thermia:trigger_block tag. (By default a normal or thatch bed.) Shift right click the trigger block to trigger the interior creation.",
           "title": "Creating an Interior"
       },
       {
@@ -22,8 +22,14 @@
         "images": [
           "thermia:textures/gui/book/example_house.png"
         ],
-        "text": "Example house with open and closed trapdoors and thatch bed.",
+        "text": "Example house with open and closed trapdoors and a thatch bed.",
         "border": true
+      },
+      {
+        "type": "patchouli:text",
+        "anchor": "porosity",
+        "text": "The porosity metric can be somewhat complex and is a measure of how open or leaky a block is, For instance a half slab side on has a porosity of 0.5. It also supports block states allowing for multiple porosity values based on state such as trapdoors open or closed. All blocks that have a porosity value in the external walls are averaged and used in the overall leakiness value in the interior math.",
+        "title": "Porosity"
       }
   ],
   "read_by_default": true,

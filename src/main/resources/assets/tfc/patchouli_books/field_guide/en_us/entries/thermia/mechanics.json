@@ -32,17 +32,6 @@
       },
       {
           "type": "patchouli:text",
-          "anchor": "insulation",
-          "text": "Clothes have 4 attributes. Conduction or Insulation helps limit environmental pull and insulated against cold blocks, Radiant or Sun helps protect against the sun or heat/radiant souces, Wind or Convection helps with reducing wind, The rain attribute reduces how wet you can get in the rain.",
-          "title": "Clothing"
-      },
-      {
-          "type": "patchouli:text",
-          "text": "The ways the values work is simple, It's percentage and removed that percentage from the value. So protection value of 0.25 only removes one quater of the targeted value. Each slot is also weighted based on what protection it is. ** TODO AD TABLE OR WEIGHT VALUES",
-          "title": "Clothing"
-      },
-      {
-          "type": "patchouli:text",
           "anchor": "wetness",
           "text": "Being wet can be a killer or a saviour, depending on environment and evaporative cooling. There are a few different ways to get wet, sweat, precipitation or swimming. Wetness from precipitation can occur when raining or snowing above -5c, below -5c snow cannot melt and so cannot make you wet. Swiming can also and obviously make you wet, Take care not to dive too deep as the deeper you go the colder it gets.",
           "title": "Wetness"

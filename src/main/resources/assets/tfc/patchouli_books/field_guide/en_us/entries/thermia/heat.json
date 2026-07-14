@@ -28,7 +28,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "$(l:tfc:thermia/mechanics#insulation)$(l)Insulation$()$(br)Insulation can help or hinder cooling as it can slow transfer with the environment, Radiative protection can also help block sources like fire, lava or the sun.$(br2)$(l)Time Your Activities$()$(br)Work during dawn, dusk, or night when solar radiation is minimal. Rest in shade during peak sun hours."
+            "text": "$(l:tfc:thermia/clothing)$(l)Insulation$()$(br)Insulation can help or hinder cooling as it can slow transfer with the environment, Radiative protection can also help block sources like fire, lava or the sun.$(br2)$(l)Time Your Activities$()$(br)Work during dawn, dusk, or night when solar radiation is minimal. Rest in shade during peak sun hours."
         },
         {
             "type": "patchouli:text",

@@ -28,7 +28,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "$(l:tfc:thermia/mechanics#insulation)$(l)Insulation$()$()$(br)Wear wool or thick clothing. These can help slow the pull of the environment. THey can however also block heat from sources. Carry extra insulating items in your inventory for additional protection.$(br2)$(l)Time Your Activities$()$(br)Travel and work during midday when the sun is strongest. Shelter in place during night and storms."
+            "text": "$(l:tfc:thermia/clothing)$(li)Insulation$()$(br)Wear wool or thick clothing. These can help slow the pull of the environment. THey can however also block heat from sources. Carry extra insulating items in your inventory for additional protection.$(br2)$(l)Time Your Activities$()$(br)Travel and work during midday when the sun is strongest. Shelter in place during night and storms."
         },
         {
             "type": "patchouli:text",
@@ -42,7 +42,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Surviving cold winters requires preparation:$(li)Build insulated shelters$(li)Stock firewood for continuous heat$(li)Wear full wool or leather gear$(li)Avoid unnecessary exposure$(li)Keep food and water accessible$(li)Never travel during snow",
+            "text": "Surviving cold winters requires preparation:$(l:tfc:thermia/interior)$(li)Build insulated shelters$()$(li)Stock firewood for continuous heat$(li)Wear full wool or leather gear$(li)Avoid unnecessary exposure$(li)Keep food and water accessible$(li)Never travel during snow",
             "title": "Winter"
         },
         {

@@ -4,16 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Fixed fluid default search cap&#10;Insulation rework complete&#10;Change async to 40 ticks">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/clothing.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/gui/book/example_house.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/gui/book/hot.png" afterDir="false" />
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Field Guide Stuffs">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/ItemInventoryManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/ItemInventoryManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/cold.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/cold.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/heat.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/heat.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/introduction.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/introduction.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" afterDir="false" />
     </list>
@@ -94,34 +89,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.Build Thermia.executor": "Run",
-    "Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor": "Run",
-    "Gradle.Thermia [assemble].executor": "Run",
-    "Gradle.Thermia [runClient # Run client].executor": "Run",
-    "Gradle.Thermia [runClient].executor": "Debug",
-    "Gradle.Thermia [runServer].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "1.21.1",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/nyon/Coding/Minecraft/Java/Thermia/src/main/resources/assets/thermia/textures/gui/book",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.lookFeel"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.Build Thermia.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [runClient # Run client].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [runClient].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Thermia [runServer].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;1.21.1&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/nyon/Coding/Minecraft/Java/Thermia/src/main/resources/assets/thermia/textures/gui/book&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/gui/book" />
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/hat" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia" />
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/mob_effect" />
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/gui/book" />
-      <recent name="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia" />
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/thick" />
       <recent name="$PROJECT_DIR$/src/main/resources/data" />
     </key>
@@ -135,7 +130,7 @@
       <recent name="com.nyonyix.thermia.item" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Client">
+  <component name="RunManager" selected="Gradle.Thermia [assemble]">
     <configuration name="Client" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="net.neoforged.devlaunch.Main" />
       <module name="Thermia.main" />
@@ -512,7 +507,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783927774954</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="Field Guide Stuffs">
+      <option name="closed" value="true" />
+      <created>1783952046647</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1783952046647</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -530,7 +533,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed Acclimatisation" />
     <MESSAGE value="Fixed Acclimatisation&#10;Added lang for ui config" />
     <MESSAGE value="Finished first pass patchouli book" />
     <MESSAGE value="Thermometer Support." />
@@ -555,6 +557,7 @@
     <MESSAGE value="Insulation Rework" />
     <MESSAGE value="Insulation Rework&#10;Cut async search from 100 ticks to 20&#10;Increased default search caps&#10;New silk texture" />
     <MESSAGE value="Fixed fluid default search cap&#10;Insulation rework complete&#10;Change async to 40 ticks" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed fluid default search cap&#10;Insulation rework complete&#10;Change async to 40 ticks" />
+    <MESSAGE value="Field Guide Stuffs" />
+    <option name="LAST_COMMIT_MESSAGE" value="Field Guide Stuffs" />
   </component>
 </project>
