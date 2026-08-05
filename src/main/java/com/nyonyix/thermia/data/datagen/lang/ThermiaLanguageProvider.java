@@ -110,10 +110,11 @@ public class ThermiaLanguageProvider extends LanguageProvider
         add("thermia.tooltip.thermometer.humidity", "Reading Humidity");
         add("thermia.creativeTab", "Thermia");
         add("thermia.tooltip.thermometer.thermia_temp", "Reading Thermia Temperature");
-        add("tooltip.thermia.conduction", "Insulation: %1$f");
-        add("tooltip.thermia.radiation", "Sun Protection: %1$f");
-        add("tooltip.thermia.convection", "Wind Protection: %1$f");
-        add("tooltip.thermia.holdShift", "Thermia: Hold Shift");
+        add("tooltip.thermia.conduction", "Conduction: %1$f");
+        add("tooltip.thermia.radiation", "Radiation: %1$f");
+        add("tooltip.thermia.convection", "Convection: %1$f");
+        add("tooltip.thermia.rain", "Wetness: %1$f");
+        add("tooltip.thermia.holdShift", "Hold (Shift) for insulation information");
 
         for (Map.Entry<ThermiaWideBrimHatMaterial, DeferredHolder<Item, Item>> entry : ThermiaItems.WIDE_BRIM_HATS.entrySet())
         {

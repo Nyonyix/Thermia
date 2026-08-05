@@ -23,7 +23,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(li)Radiation - Radiation protects from radiative sources like lava, fire or the sun. This helps with teh sun on a hot day or when working by a forge.$(li)Convection - This guards against the wind, Helping keeping the entity warm.",
+      "text": "$(li)Radiation - Radiation protects from radiative sources like lava, fire or the sun. This helps with the sun on a hot day or when working by a forge.$(li)Convection - This guards against the wind, Helping keeping the entity warm.",
       "title": "The Attributes"
     },
     {

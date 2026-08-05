@@ -233,9 +233,8 @@ public class ThermiaClient {
                 Component conductionText = Component.translatable("tooltip.thermia.conduction", String.format("%.2f", conductionProtection)).withColor(0xff622e);
                 Component radiationText = Component.translatable("tooltip.thermia.radiation", String.format("%.2f", radiationProtection)).withColor(0xf1ff70);
                 Component convectionText = Component.translatable("tooltip.thermia.convection", String.format("%.2f", convectionProtection)).withColor(0x6188ff);
-                Component rainText = Component.translatable("tooltip.thermia.convection", String.format("%.2f", rainProtection)).withColor(0x4d3ac9);
+                Component rainText = Component.translatable("tooltip.thermia.rain", String.format("%.2f", rainProtection)).withColor(0x4d3ac9);
 
-                event.getToolTip().add(Component.empty());
                 if (conductionProtection != 0.0f) event.getToolTip().add(conductionText);
                 if (radiationProtection != 0.0f) event.getToolTip().add(radiationText);
                 if (convectionProtection != 0.0f) event.getToolTip().add(convectionText);
@@ -243,8 +242,7 @@ public class ThermiaClient {
             }
             else
             {
-                Component shiftTooltip = Component.translatable("tooltip.thermia.holdShift");
-                event.getToolTip().add(Component.empty());
+                Component shiftTooltip = Component.translatable("tooltip.thermia.holdShift").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
                 event.getToolTip().add(shiftTooltip);
             }
         }
