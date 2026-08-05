@@ -1,6 +1,5 @@
 package com.nyonyix.thermia.data.datagen.datamap;
 
-import com.eerussianguy.firmalife.FirmaLife;
 import com.eerussianguy.firmalife.common.blocks.FLBlocks;
 import com.eerussianguy.firmalife.common.blocks.oven.OvenType;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
@@ -26,7 +25,7 @@ public class BlockTemperatureDataMapProvider extends DataMapProvider
     public BlockTemperatureDataMapProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider) {super(packOutput, lookupProvider);}
 
     @Override
-    protected void  gather()
+    protected void gather()
     {
         builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).replace(true)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("tfc:rock/magma/granite")).orElseThrow(), new BlockTemperatureDataMap(800f, 32, false,true, Map.of()), false)
@@ -57,19 +56,52 @@ public class BlockTemperatureDataMapProvider extends DataMapProvider
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:packed_ice")).orElseThrow(), new BlockTemperatureDataMap(-7.5f, 4, false, false, Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:blue_ice")).orElseThrow(), new BlockTemperatureDataMap(-10f, 4, false, false, Map.of()), false);
 
-        if (ModList.get().isLoaded(FirmaLife.MOD_ID))
+        if (ModList.get().isLoaded("firmalife"))
         {
             for (Map.Entry<OvenType, TFCBlocks.Id<Block>> entry : FLBlocks.CURED_OVEN_BOTTOM.entrySet())
             {
                 Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getValue().get());
-                builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(blockHolder, new BlockTemperatureDataMap(0f, 32, false, true, Map.of("lit=true", 600f)), false, new ModLoadedCondition(FirmaLife.MOD_ID));
+                builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(blockHolder, new BlockTemperatureDataMap(0f, 32, false, true, Map.of("lit=true", 600f)), false, new ModLoadedCondition("firmalife"));
             }
 
             for (Map.Entry<OvenType, TFCBlocks.Id<Block>> entry : FLBlocks.INSULATED_OVEN_BOTTOM.entrySet())
             {
                 Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getValue().get());
-                builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(blockHolder, new BlockTemperatureDataMap(0f, 32, false, true, Map.of("lit=true", 600f)), false, new ModLoadedCondition(FirmaLife.MOD_ID));
+                builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(blockHolder, new BlockTemperatureDataMap(0f, 32, false, true, Map.of("lit=true", 600f)), false, new ModLoadedCondition("firmalife"));
             }
+        }
+
+        if (ModList.get().isLoaded("powergrid"))
+        {
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:battery")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:heating_coil")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:basin_heater")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:wire_connector")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:heavy_wire_connector")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:voltage_gauge")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:current_gauge")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:power_gauge")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:generator_induction_rotor")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:generator_commutator")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:generator_vertical_commutator")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:generator_clutch")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:generator_housing")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:vertical_generator_housing")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:mv_switch")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:hv_switch")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:hv_breaker")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:spark_gap")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:contactor")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:power_resistor")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:transformer_core")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:variac")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:electric_motor")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:constant_speed_motor")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:servo")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:electromagnet")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:device_connector")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:rheostat")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
+            builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("powergrid:carbon_pile_coil")).orElseThrow(), new BlockTemperatureDataMap(0f, 32, true, true, Map.of()), false, new ModLoadedCondition("powergrid"));
         }
     }
 

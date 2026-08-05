@@ -131,8 +131,16 @@ dependencies {
     compileOnly "maven.modrinth:firmalife:${firmalife_version_id}"
     runtimeOnly "maven.modrinth:firmalife:${firmalife_version_id}"
 
+    compileOnly "maven.modrinth:power-grid:${powergrid_version_id}"
+    runtimeOnly "maven.modrinth:power-grid:${powergrid_version_id}"
+
+    compileOnly "maven.modrinth:create:${create_version_id}"
+    runtimeOnly "maven.modrinth:create:${create_version_id}"
+
     runtimeOnly "maven.modrinth:jei:${jei_version_id}"
     runtimeOnly "maven.modrinth:spark:${spark_version_id}"
+    runtimeOnly "maven.modrinth:architectury-api:${architectury_version_id}"
+
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"

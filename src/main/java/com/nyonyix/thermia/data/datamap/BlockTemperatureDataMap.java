@@ -2,6 +2,7 @@ package com.nyonyix.thermia.data.datamap;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.nyonyix.thermia.compat.powergrid.PowerGridCompat;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.IHeatable;
 import net.dries007.tfc.common.blockentities.PitKilnBlockEntity;
@@ -41,6 +42,12 @@ public record BlockTemperatureDataMap(
         if (blockEntity instanceof IHeatable heatable) return heatable.getTemperature();
         if (blockEntity instanceof CharcoalForgeBlockEntity charcoalForge) return charcoalForge.getTemperature();
         if (blockEntity instanceof PitKilnBlockEntity pitKiln) return pitKiln.isLit() ? this.temperature() : 0.0f;
+
+        if (blockEntity != null)
+        {
+            Float temp = PowerGridCompat.resolveTemeprature(level, pos);
+            if (temp != null) return temp;
+        }
 
         BlockState state = level.getBlockState(pos);
 
