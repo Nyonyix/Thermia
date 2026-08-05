@@ -1,5 +1,6 @@
 package com.nyonyix.thermia.data.datagen.datamap;
 
+import com.eerussianguy.firmalife.FirmaLife;
 import com.eerussianguy.firmalife.common.blocks.FLBlocks;
 import com.eerussianguy.firmalife.common.blocks.oven.OvenType;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
@@ -13,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import net.neoforged.neoforge.common.data.DataMapProvider;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,18 +57,18 @@ public class BlockTemperatureDataMapProvider extends DataMapProvider
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:packed_ice")).orElseThrow(), new BlockTemperatureDataMap(-7.5f, 4, false, false, Map.of()), false)
                 .add(BuiltInRegistries.BLOCK.getHolder(ResourceLocation.parse("minecraft:blue_ice")).orElseThrow(), new BlockTemperatureDataMap(-10f, 4, false, false, Map.of()), false);
 
-        if (ModList.get().isLoaded("firmalife"))
+        if (ModList.get().isLoaded(FirmaLife.MOD_ID))
         {
             for (Map.Entry<OvenType, TFCBlocks.Id<Block>> entry : FLBlocks.CURED_OVEN_BOTTOM.entrySet())
             {
                 Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getValue().get());
-                builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(blockHolder, new BlockTemperatureDataMap(0f, 32, false, true, Map.of("lit=true", 600f)), false);
+                builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(blockHolder, new BlockTemperatureDataMap(0f, 32, false, true, Map.of("lit=true", 600f)), false, new ModLoadedCondition(FirmaLife.MOD_ID));
             }
 
             for (Map.Entry<OvenType, TFCBlocks.Id<Block>> entry : FLBlocks.INSULATED_OVEN_BOTTOM.entrySet())
             {
                 Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getValue().get());
-                builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(blockHolder, new BlockTemperatureDataMap(0f, 32, false, true, Map.of("lit=true", 600f)), false);
+                builder(ThermiaDataMaps.BLOCK_TEMPERATURE_DATA_MAP).add(blockHolder, new BlockTemperatureDataMap(0f, 32, false, true, Map.of("lit=true", 600f)), false, new ModLoadedCondition(FirmaLife.MOD_ID));
             }
         }
     }
