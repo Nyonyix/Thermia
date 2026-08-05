@@ -114,7 +114,7 @@ public class ThermiaLanguageProvider extends LanguageProvider
         add("tooltip.thermia.radiation", "Radiation: %1$f");
         add("tooltip.thermia.convection", "Convection: %1$f");
         add("tooltip.thermia.rain", "Wetness: %1$f");
-        add("tooltip.thermia.holdShift", "Hold (Shift) for insulation information");
+        add("tooltip.thermia.holdShift", "Hold (Shift) for Insulation Info");
 
         for (Map.Entry<ThermiaWideBrimHatMaterial, DeferredHolder<Item, Item>> entry : ThermiaItems.WIDE_BRIM_HATS.entrySet())
         {
