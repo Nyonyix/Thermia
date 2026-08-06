@@ -21,6 +21,9 @@ repositories {
     maven {
         url = "https://api.modrinth.com/maven"
     }
+    maven {
+        url = "https://maven.createmod.net"
+    }
 }
 
 base {
@@ -135,6 +138,7 @@ dependencies {
     runtimeOnly "maven.modrinth:power-grid:${powergrid_version_id}"
 
     compileOnly "maven.modrinth:create:${create_version_id}"
+    compileOnly "net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}"
     runtimeOnly "maven.modrinth:create:${create_version_id}"
 
     runtimeOnly "maven.modrinth:jei:${jei_version_id}"

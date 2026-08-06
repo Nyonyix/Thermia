@@ -2,6 +2,8 @@ package com.nyonyix.thermia.data.datamap;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.nyonyix.thermia.compat.BlockEntityFluidCompat;
+import com.nyonyix.thermia.compat.create.CreateHeatCompat;
 import com.nyonyix.thermia.compat.powergrid.PowerGridCompat;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.IHeatable;
@@ -45,8 +47,17 @@ public record BlockTemperatureDataMap(
 
         if (blockEntity != null)
         {
-            Float temp = PowerGridCompat.resolveTemeprature(level, pos);
-            if (temp != null) return temp;
+            Float pgTemp = PowerGridCompat.resolveTemeprature(level, pos);
+            if (pgTemp != null) return pgTemp;
+
+            Float boilerTemp = CreateHeatCompat.resolveBoilerTemperature(level, pos);
+            if (boilerTemp != null) return boilerTemp;
+
+            Float pipeTemp = CreateHeatCompat.resolvePipeTemperature(level, pos);
+            if (pipeTemp != null) return pipeTemp;
+
+            Float tankTemp = BlockEntityFluidCompat.resolveTemperature(level, pos);
+            if (tankTemp != null) return tankTemp;
         }
 
         BlockState state = level.getBlockState(pos);

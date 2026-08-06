@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Added conditional datamap loading">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/compat/powergrid/PowerGridCompat.java" afterDir="false" />
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Powergrid compat">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/compat/BlockEntityFluidCompat.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/compat/create/CreateHeatCompat.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockPorosityDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockPorosityDataMapProvider.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockTemperatureDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockTemperatureDataMapProvider.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockTemperatureDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockTemperatureDataMap.java" afterDir="false" />
     </list>
@@ -110,6 +110,11 @@
     "project.structure.side.proportion": "0.0",
     "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "preferences.lookFeel"
+  },
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "TEXT"
+    ]
   }
 }]]></component>
   <component name="RecentsManager">
@@ -559,7 +564,15 @@
       <option name="project" value="LOCAL" />
       <updated>1785915206601</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="Powergrid compat">
+      <option name="closed" value="true" />
+      <created>1785931656348</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1785931656348</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -577,7 +590,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed sweat for real this time&#10;Changed temp change" />
     <MESSAGE value="Textures for capes and pelts." />
     <MESSAGE value="Cape render finished." />
     <MESSAGE value="Cape recipe finished" />
@@ -602,6 +614,7 @@
     <MESSAGE value="Changed insulation info tooltip&#10;Tweaked cloth insulation values" />
     <MESSAGE value="Change Lang Wording" />
     <MESSAGE value="Added conditional datamap loading" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added conditional datamap loading" />
+    <MESSAGE value="Powergrid compat" />
+    <option name="LAST_COMMIT_MESSAGE" value="Powergrid compat" />
   </component>
 </project>
