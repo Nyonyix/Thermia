@@ -18,6 +18,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -152,12 +154,15 @@ public class InteriorScanner
         Long2ObjectOpenHashMap<Fluid> heatSourceFluids = new Long2ObjectOpenHashMap<>(maxSize);
         Long2ObjectOpenHashMap<Block> heatSinkBlocks = new Long2ObjectOpenHashMap<>(maxSize);
         Long2ObjectOpenHashMap<Fluid> heatSinkFluids = new Long2ObjectOpenHashMap<>(maxSize);
-        Set<BlockPos> internalAirBlocks = new HashSet<>();
+        LongOpenHashSet internalAirBlocks = new LongOpenHashSet();
         BlockPos.MutableBlockPos current = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos neighbour = new BlockPos.MutableBlockPos();
         LongOpenHashSet visited = new LongOpenHashSet();
         LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
         Long startPosLong = startPos.asLong();
+
+        long minX = Long.MAX_VALUE, minY = Long.MAX_VALUE, minZ = Long.MAX_VALUE;
+        long maxX = Long.MIN_VALUE, maxY = Long.MIN_VALUE, maxZ = Long.MIN_VALUE;
 
         queue.enqueue(startPosLong);
         visited.add(startPosLong);
@@ -180,7 +185,7 @@ public class InteriorScanner
 //                continue;
 //            }
 
-            internalAirBlocks.add(current.immutable());
+            internalAirBlocks.add(current.immutable().asLong());
 
             for (Direction dir : Direction.values())
             {
@@ -201,6 +206,14 @@ public class InteriorScanner
 
                 if (isHeatSource(state.getBlock())) heatSourceBlocks.put(neighbour.asLong(), block);
                 else if (isHeatSink(state.getBlock())) heatSinkBlocks.put(neighbour.asLong(), block);
+
+                minX = Math.min(minX, neighbour.getX());
+                minY = Math.min(minY, neighbour.getY());
+                minZ = Math.min(minZ, neighbour.getZ());
+
+                maxX = Math.max(maxX, neighbour.getX());
+                maxY = Math.max(maxY, neighbour.getY());
+                maxZ = Math.max(maxZ, neighbour.getZ());
 
                 if (isSolid(level, neighbour))
                 {
@@ -226,7 +239,12 @@ public class InteriorScanner
 //            return Interior.createDefault();
 //        }
 
-        return new Interior(new InteriorBlocks(edgeBlocks, heatSourceBlocks, heatSourceFluids, heatSinkBlocks, heatSinkFluids), internalAirBlocks, startPos, true, 0f, 0f, 0f, 0f);
+        Vec3 startVec = new Vec3(minX, minY, minZ);
+        Vec3 endVec = new Vec3(maxX, maxY, maxZ);
+
+        AABB boundingBox = new AABB(startVec, endVec).inflate(2);
+
+        return new Interior(new InteriorBlocks(edgeBlocks, heatSourceBlocks, heatSourceFluids, heatSinkBlocks, heatSinkFluids), internalAirBlocks, startPos, boundingBox, true, 0f, 0f, 0f, 0f);
     }
 
     public static CompletableFuture<Interior> scanAsync(Level level, BlockPos startPos, int maxSize)

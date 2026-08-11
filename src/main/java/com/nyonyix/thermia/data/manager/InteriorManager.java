@@ -15,17 +15,24 @@ import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.calendar.ICalendar;
 import net.dries007.tfc.util.climate.Climate;
 import net.dries007.tfc.util.climate.ClimateModel;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class InteriorManager
 {
@@ -67,7 +74,18 @@ public class InteriorManager
 
                         interior = interior.withInternalTemperature(oldInterior.internalTemperature());
                     }
-                    else interior = interior.withInternalTemperature(getTemperatureSample(level, interior));
+                    else
+                    {
+                        interior = interior.withInternalTemperature(getTemperatureSample(level, interior));
+
+                        if (interior.isValid())
+                        {
+                            for (Player player : getPLayersInBox(level, interior.boundingBox()))
+                            {
+                                player.displayClientMessage(Component.translatable("thermia.interior.chatCreation").withStyle(ChatFormatting.DARK_GREEN), true);
+                            }
+                        }
+                    }
 
                     interiors.put(entry.getKey(), interior);
                 }
@@ -179,7 +197,7 @@ public class InteriorManager
             {
                 neighbourPos.setWithOffset(pos, dir);
 
-                if (interior.internalAirBlocks().contains(neighbourPos))
+                if (interior.internalAirBlocks().contains(neighbourPos.asLong()))
                 {
                     exposedFace = dir;
                     exposedCount++;
@@ -198,9 +216,15 @@ public class InteriorManager
         return leakyBlocks > 0 ? (float) Math.pow(leakiness / leakyBlocks, 0.75) : 0f;
     }
 
+    private static List<Player> getPLayersInBox(Level level, AABB box)
+    {
+        List<ServerPlayer> players = ((ServerLevel) level).players();
+        return players.stream().filter(p -> box.contains(p.position())).collect(Collectors.toList());
+    }
+
     public static boolean isInInterior(Level level, BlockPos pos) {return getInteriorByPos(level, pos).isValid();}
 
-    public static boolean isInInterior(BlockPos pos, Interior interior) {return interior.internalAirBlocks().contains(pos) || interior.interiorBlocks().edgeBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceFluids.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkFluids.containsKey(pos.asLong());}
+    public static boolean isInInterior(BlockPos pos, Interior interior) {return interior.internalAirBlocks().contains(pos.asLong()) || interior.interiorBlocks().edgeBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceFluids.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkFluids.containsKey(pos.asLong());}
 
     public static void onCreateEvent(Level level, BlockPos startPos)
     {
@@ -221,7 +245,7 @@ public class InteriorManager
         {
             if (!interior.isValid()) continue;
 
-            if (interior.internalAirBlocks().contains(pos) || interior.interiorBlocks().edgeBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceFluids.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkFluids.containsKey(pos.asLong())) return interior;
+            if (interior.internalAirBlocks().contains(pos.asLong()) || interior.interiorBlocks().edgeBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceFluids.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkFluids.containsKey(pos.asLong())) return interior;
         }
 
         return Interior.createDefault();
@@ -247,6 +271,10 @@ public class InteriorManager
             if (!entry.getValue().isValid())
             {
                 toRemove.add(entry.getKey());
+                for (Player player : getPLayersInBox(level, entry.getValue().boundingBox()))
+                {
+                    player.displayClientMessage(Component.translatable("thermia.interior.chatRemove").withStyle(ChatFormatting.DARK_RED), true);
+                }
                 continue;
             }
 

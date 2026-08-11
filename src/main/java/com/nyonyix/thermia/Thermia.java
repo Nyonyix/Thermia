@@ -7,7 +7,6 @@ import com.nyonyix.thermia.data.ThermiaLoot;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import com.nyonyix.thermia.effect.ThermiaEffects;
-import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import com.nyonyix.thermia.item.ThermiaItems;
 import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
 import net.minecraft.network.chat.Component;

@@ -3,7 +3,12 @@ package com.nyonyix.thermia.data.records;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.nyonyix.thermia.data.InteriorBlocks;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongOpenHashBigSet;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,8 +16,9 @@ import java.util.stream.Collectors;
 
 public record Interior(
         InteriorBlocks interiorBlocks,
-        Set<BlockPos> internalAirBlocks,
+        LongOpenHashSet internalAirBlocks,
         BlockPos homePos,
+        AABB boundingBox,
         boolean isValid,
         float internalHumidity,
         float externalHumidity,
@@ -20,16 +26,20 @@ public record Interior(
         float externalTemperature
 )
 {
-//    private static final Codec<Set<BlockPos>> INTERNAL_AIR_BLOCKS_CODEC = BlockPos.CODEC.listOf().xmap(list -> new HashSet<>(list), set -> new ArrayList<>(set));
-    private static final Codec<Set<BlockPos>> INTERNAL_AIR_BLOCKS_CODEC = Codec.LONG.listOf().xmap(
-            longs -> longs.stream().map(BlockPos::of).collect(Collectors.toCollection(HashSet::new)),
-        set -> set.stream().map(BlockPos::asLong).collect(Collectors.toList())
+
+    private static final Codec<LongOpenHashSet> INTERNAL_AIR_BLOCKS_CODEC = Codec.LONG.listOf().xmap(LongOpenHashSet::new,set -> new LongArrayList(set.toLongArray())
     );
+
+    public static final Codec<AABB> AABB_CODEC = RecordCodecBuilder.create(i -> i.group(
+            Vec3.CODEC.fieldOf("min").forGetter(AABB::getMinPosition),
+            Vec3.CODEC.fieldOf("max").forGetter(AABB::getMaxPosition)
+    ).apply(i, AABB::new));
 
     public static final Codec<Interior> CODEC = RecordCodecBuilder.create(interiorInstance -> interiorInstance.group(
             InteriorBlocks.CODEC.fieldOf("interior_Blocks").forGetter(Interior::interiorBlocks),
             INTERNAL_AIR_BLOCKS_CODEC.fieldOf("internal_air_blocks").forGetter(Interior::internalAirBlocks),
             BlockPos.CODEC.fieldOf("home_pos").forGetter(Interior::homePos),
+            AABB_CODEC.fieldOf("bounding_box").forGetter(Interior::boundingBox),
             Codec.BOOL.fieldOf("is_valid").forGetter(Interior::isValid),
             Codec.FLOAT.fieldOf("internal_humidity").forGetter(Interior::internalHumidity),
             Codec.FLOAT.fieldOf("external_humidity").forGetter(Interior::externalHumidity),
@@ -37,16 +47,16 @@ public record Interior(
             Codec.FLOAT.fieldOf("external_temperature").forGetter(Interior::externalTemperature)
     ).apply(interiorInstance, Interior::new));
 
-    public static Interior createDefault() {return new Interior(InteriorBlocks.createDefault(), Set.of(), BlockPos.ZERO, false, 0f, 0f, 0f, 0f);}
+    public static Interior createDefault() {return new Interior(InteriorBlocks.createDefault(), LongOpenHashSet.of(), BlockPos.ZERO, AABB.INFINITE, false, 0f, 0f, 0f, 0f);}
 
-    public Interior withIsValid(boolean isValid) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature);}
+    public Interior withIsValid(boolean isValid) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature);}
 
-    public Interior withInternalHumidity(float internalHumidity) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.isValid, internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature);}
+    public Interior withInternalHumidity(float internalHumidity) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature);}
 
-    public Interior withInternalTemperature(float internalTemperature) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.isValid, this.internalHumidity, this.externalHumidity, internalTemperature, this.externalTemperature);}
+    public Interior withInternalTemperature(float internalTemperature) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, internalTemperature, this.externalTemperature);}
 
-    public Interior withExternalHumidity(float externalHumidity) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.isValid, this.internalHumidity, externalHumidity, this.internalTemperature, this.externalTemperature);}
+    public Interior withExternalHumidity(float externalHumidity) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, externalHumidity, this.internalTemperature, this.externalTemperature);}
 
-    public Interior withExternalTemperature(float externalTemperature) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, externalTemperature);}
+    public Interior withExternalTemperature(float externalTemperature) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, externalTemperature);}
 
 }

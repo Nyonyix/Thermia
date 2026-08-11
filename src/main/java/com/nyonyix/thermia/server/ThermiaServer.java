@@ -245,7 +245,6 @@ public class ThermiaServer
         if (state.is(ThermiaTags.Blocks.INTERIOR_TRIGGERS))
         {
             InteriorManager.onCreateEvent(level, startPos);
-            player.sendSystemMessage(Component.literal("Right clicked: ").append(state.getBlock().getName().withStyle(ChatFormatting.DARK_GREEN)));
             event.setCanceled(true);
         }
     }

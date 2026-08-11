@@ -223,8 +223,9 @@ public class ThermiaCommands
 
             int count = interior.internalAirBlocks().size();
 
-            for (BlockPos airPos : interior.internalAirBlocks())
+            for (long packedPos : interior.internalAirBlocks())
             {
+                BlockPos airPos = BlockPos.of(packedPos);
                 context.getSource().getLevel().setBlock(airPos, Blocks.GLASS.defaultBlockState(), 3);
             }
 
