@@ -2,6 +2,9 @@ package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
+import com.nyonyix.thermia.api.ThermiaInteriorAPI;
+import com.nyonyix.thermia.data.attachment.SyncedInteriorAttachment;
+import com.nyonyix.thermia.data.attachment.SyncedInteriorTemperatureAttachment;
 import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
@@ -9,6 +12,8 @@ import com.nyonyix.thermia.data.datamap.BlockPorosityDataMap;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
+import com.nyonyix.thermia.data.records.SyncedInterior;
+import com.nyonyix.thermia.data.records.SyncedInteriorData;
 import com.nyonyix.thermia.util.InteriorScanner;
 import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
@@ -68,11 +73,12 @@ public class InteriorManager
                 {
                     Interior interior = entry.getValue().join();
 
-                    if (interiors.containsKey(interior.homePos()))
+                    if (interiors.containsKey(entry.getKey()))
                     {
-                        Interior oldInterior = interiors.get(interior.homePos());
+                        Interior oldInterior = interiors.get(entry.getKey());
 
                         interior = interior.withInternalTemperature(oldInterior.internalTemperature());
+                        if (!interior.isValid() && oldInterior.isValid()) interior = interior.withBoundingBox(oldInterior.boundingBox());
                     }
                     else
                     {
@@ -99,6 +105,7 @@ public class InteriorManager
         }
 
         toRemove.forEach(pendingMap::remove);
+        if (!toRemove.isEmpty() && ServerConfig.ENABLE_DEBUG.get()) updateSyncedInterior(level, interiors);
 
         return interiors;
     }
@@ -173,7 +180,21 @@ public class InteriorManager
         return pull;
     }
 
-    private static float getLeakiness(Level level, Interior interior)
+    private static List<Player> getPLayersInBox(Level level, AABB box)
+    {
+        List<ServerPlayer> players = ((ServerLevel) level).players();
+        return players.stream().filter(p -> box.contains(p.position())).collect(Collectors.toList());
+    }
+
+    private static void updateSyncedInterior(Level level, Map<BlockPos, Interior> interiors)
+    {
+        Map<BlockPos, SyncedInterior> synced = new HashMap<>();
+
+        interiors.forEach((pos, interior) -> synced.put(pos, SyncedInterior.from(interior)));
+        level.setData(ThermiaAttachments.SYNCED_INTERIOR_ATTACHMENT, new SyncedInteriorAttachment(synced));
+    }
+
+    public static float getLeakiness(Level level, Interior interior)
     {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos neighbourPos = new BlockPos.MutableBlockPos();
@@ -216,39 +237,15 @@ public class InteriorManager
         return leakyBlocks > 0 ? (float) Math.pow(leakiness / leakyBlocks, 0.75) : 0f;
     }
 
-    private static List<Player> getPLayersInBox(Level level, AABB box)
-    {
-        List<ServerPlayer> players = ((ServerLevel) level).players();
-        return players.stream().filter(p -> box.contains(p.position())).collect(Collectors.toList());
-    }
-
-    public static boolean isInInterior(Level level, BlockPos pos) {return getInteriorByPos(level, pos).isValid();}
-
-    public static boolean isInInterior(BlockPos pos, Interior interior) {return interior.internalAirBlocks().contains(pos.asLong()) || interior.interiorBlocks().edgeBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceFluids.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkFluids.containsKey(pos.asLong());}
-
     public static void onCreateEvent(Level level, BlockPos startPos)
     {
         int maxSize = ServerConfig.MAX_INTERIOR_VOLUME.getAsInt();
 
-        if (!pendingInteriorScans.containsKey(startPos) && !isInInterior(level, startPos))
+        if (!pendingInteriorScans.containsKey(startPos) && !ThermiaInteriorAPI.isInInterior(level, startPos))
         {
             CompletableFuture<Interior> future = InteriorScanner.scanAsync(level, startPos, maxSize);
             pendingInteriorScans.put(startPos, future);
         }
-    }
-
-    public static Interior getInteriorByPos(Level level, BlockPos pos)
-    {
-        if (!level.hasData(ThermiaAttachments.INTERIOR_ATTACHMENT)) return Interior.createDefault();
-
-        for (Interior interior : level.getData(ThermiaAttachments.INTERIOR_ATTACHMENT).activeInteriors().values())
-        {
-            if (!interior.isValid()) continue;
-
-            if (interior.internalAirBlocks().contains(pos.asLong()) || interior.interiorBlocks().edgeBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceFluids.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkFluids.containsKey(pos.asLong())) return interior;
-        }
-
-        return Interior.createDefault();
     }
 
     public static void onTick(Level level, int serverTick)
@@ -262,6 +259,7 @@ public class InteriorManager
 
         Map<BlockPos, Interior> interiors = new HashMap<>(level.getData(ThermiaAttachments.INTERIOR_ATTACHMENT).activeInteriors());
         List<BlockPos> toRemove = new ArrayList<>();
+        boolean tempUpdated = false;
 
         interiors = joinPending(pendingInteriorScans,interiors, level);
         interiors = joinPending(pendingInteriorRescans, interiors, level);
@@ -287,10 +285,10 @@ public class InteriorManager
 
                 if (!level.isLoaded(BlockPos.of(interiorId))) continue;
 
-                float volume = interior.internalAirBlocks().size();
                 float internalTemperature = interior.internalTemperature();
                 float externalTemperature = getTemperatureSample(level, interior);
 
+                float volume = interior.internalAirBlocks().size();
                 float sourcePull = calcSourcePull(level, interior, internalTemperature) / volume;
 
                 float leakiness = Math.max(getLeakiness(level, interior), 0.01f);
@@ -302,16 +300,25 @@ public class InteriorManager
 
                 internalTemperature += (externalPull + sourcePull) * dt;
 
-                interior = interior.withInternalTemperature(internalTemperature);
-                interior = interior.withExternalTemperature(externalTemperature);
+                interior = interior.withInternalTemperature(internalTemperature).withExternalTemperature(externalTemperature).withPorosity(leakiness).withExternalPull(externalPull).withSourcePull(sourcePull).withVolume(volume);
 
                 interiors.put(BlockPos.of(interiorId), interior);
+                tempUpdated = true;
             }
         }
 
         toRemove.forEach(interiors::remove);
+        if (!toRemove.isEmpty() && ServerConfig.ENABLE_DEBUG.get()) updateSyncedInterior(level, interiors);
 
         level.setData(ThermiaAttachments.INTERIOR_ATTACHMENT, new InteriorAttachment(interiors));
+
+        if (tempUpdated && ServerConfig.ENABLE_DEBUG.get())
+        {
+            Map<BlockPos, SyncedInteriorData> temps = new HashMap<>();
+
+            interiors.forEach((pos, i) -> temps.put(pos, new SyncedInteriorData(i.internalHumidity(), i.externalHumidity(), i.internalTemperature(), i.externalTemperature(), i.porosity(), i.externalPull(), i.sourcePull(), i.volume())));
+            level.setData(ThermiaAttachments.SYNCED_INTERIOR_TEMPERATURE_ATTACHMENT, new SyncedInteriorTemperatureAttachment(temps));
+        }
     }
 
     public static void invalidateAndRescan(Level level, BlockPos pos)
@@ -325,7 +332,7 @@ public class InteriorManager
             if (pos.distManhattan(id) > 256) continue;
             if (!interiors.get(id).isValid()) continue;
 
-            if (isInInterior(pos, interiors.get(id)))
+            if (ThermiaInteriorAPI.isInInterior(pos, interiors.get(id)))
             {
 //                Interior interior = interiors.get(id);
 

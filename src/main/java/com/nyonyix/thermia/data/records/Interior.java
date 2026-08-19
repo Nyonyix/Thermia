@@ -23,7 +23,11 @@ public record Interior(
         float internalHumidity,
         float externalHumidity,
         float internalTemperature,
-        float externalTemperature
+        float externalTemperature,
+        float porosity,
+        float externalPull,
+        float sourcePull,
+        float volume
 )
 {
 
@@ -44,19 +48,21 @@ public record Interior(
             Codec.FLOAT.fieldOf("internal_humidity").forGetter(Interior::internalHumidity),
             Codec.FLOAT.fieldOf("external_humidity").forGetter(Interior::externalHumidity),
             Codec.FLOAT.fieldOf("internal_temperature").forGetter(Interior::internalTemperature),
-            Codec.FLOAT.fieldOf("external_temperature").forGetter(Interior::externalTemperature)
+            Codec.FLOAT.fieldOf("external_temperature").forGetter(Interior::externalTemperature),
+            Codec.FLOAT.fieldOf("porosity").forGetter(Interior::porosity),
+            Codec.FLOAT.fieldOf("external_pull").forGetter(Interior::externalPull),
+            Codec.FLOAT.fieldOf("source_pull").forGetter(Interior::sourcePull),
+            Codec.FLOAT.fieldOf("volume").forGetter(Interior::volume)
     ).apply(interiorInstance, Interior::new));
 
-    public static Interior createDefault() {return new Interior(InteriorBlocks.createDefault(), LongOpenHashSet.of(), BlockPos.ZERO, AABB.INFINITE, false, 0f, 0f, 0f, 0f);}
+    public static Interior createDefault() {return new Interior(InteriorBlocks.createDefault(), LongOpenHashSet.of(), BlockPos.ZERO, new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0), false, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f);}
 
-    public Interior withIsValid(boolean isValid) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature);}
-
-    public Interior withInternalHumidity(float internalHumidity) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature);}
-
-    public Interior withInternalTemperature(float internalTemperature) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, internalTemperature, this.externalTemperature);}
-
-    public Interior withExternalHumidity(float externalHumidity) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, externalHumidity, this.internalTemperature, this.externalTemperature);}
-
-    public Interior withExternalTemperature(float externalTemperature) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, externalTemperature);}
-
+    public Interior withBoundingBox(AABB boundingBox) {return  new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature, this.porosity, this.externalPull, this.sourcePull, this.volume);}
+    public Interior withIsValid(boolean isValid) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature, this.porosity, this.externalPull, this.sourcePull, this.volume);}
+    public Interior withInternalTemperature(float internalTemperature) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, internalTemperature, this.externalTemperature, this.porosity, this.externalPull, this.sourcePull, this.volume);}
+    public Interior withExternalTemperature(float externalTemperature) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, externalTemperature, this.porosity, this.externalPull, this.sourcePull, this.volume);}
+    public Interior withVolume(float volume) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature, this.porosity, this.externalPull, this.sourcePull, volume);}
+    public Interior withPorosity(float porosity) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature, porosity, this.externalPull, this.sourcePull, this.volume);}
+    public Interior withExternalPull(float externalPull) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature, this.porosity, externalPull, this.sourcePull, this.volume);}
+    public Interior withSourcePull(float sourcePull) {return new Interior(this.interiorBlocks, this.internalAirBlocks, this.homePos, this.boundingBox, this.isValid, this.internalHumidity, this.externalHumidity, this.internalTemperature, this.externalTemperature, this.porosity, this.externalPull, sourcePull, this.volume);}
 }

@@ -66,6 +66,8 @@ public class ServerConfig
 
     public static final ModConfigSpec.BooleanValue OVERRIDE_TFC_TEMP_THIRST = BUILDER.comment("Disable TFC's temperature dependant thirst.").define("overrideTFCTempThirst", true);
 
+    public static final ModConfigSpec.BooleanValue ENABLE_DEBUG = BUILDER.comment("Toggles server sending data for client debug render").define("serverEnableDebug", false);
+
     static {BUILDER.pop();}
 
     static final ModConfigSpec SERVER_CONFIG = BUILDER.build();

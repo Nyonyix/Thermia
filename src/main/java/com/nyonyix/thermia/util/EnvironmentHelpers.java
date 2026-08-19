@@ -1,13 +1,12 @@
 package com.nyonyix.thermia.util;
 
 import com.nyonyix.thermia.ServerConfig;
-import com.nyonyix.thermia.data.manager.ItemInventoryManager;
+import com.nyonyix.thermia.api.ThermiaInteriorAPI;
 import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.records.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.records.SolarShadeResult;
 import com.nyonyix.thermia.data.records.WindOcclusionResult;
 import com.nyonyix.thermia.data.attachment.Thermometer;
-import com.nyonyix.thermia.data.manager.InteriorManager;
 import net.dries007.tfc.client.overworld.SkyPos;
 import net.dries007.tfc.client.overworld.SolarCalculator;
 import net.dries007.tfc.util.calendar.Calendars;
@@ -20,7 +19,6 @@ import net.dries007.tfc.util.climate.OverworldClimateModel;
 import net.dries007.tfc.util.tracker.WeatherHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 
@@ -134,9 +132,9 @@ public class EnvironmentHelpers
 
     public static Thermometer getThermometer(Level level, BlockPos pos)
     {
-        if (InteriorManager.isInInterior(level, pos))
+        if (ThermiaInteriorAPI.isInInterior(level, pos))
         {
-            Interior interior = InteriorManager.getInteriorByPos(level, pos);
+            Interior interior = ThermiaInteriorAPI.getInterior(level, pos);
 
             return new Thermometer(interior.internalTemperature(), interior.externalHumidity());
         }

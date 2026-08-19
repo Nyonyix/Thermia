@@ -2,6 +2,7 @@ package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
+import com.nyonyix.thermia.api.ThermiaInteriorAPI;
 import com.nyonyix.thermia.data.records.BlockSearchResult;
 import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.records.SolarShadeResult;
@@ -253,9 +254,9 @@ public class EntityTemperatureManager
         float radiant = rawRadiant * (1f - radiationProtection);
         float immersive = entityData.blockSearchResult().getImmersion(level, entity);
 
-        if (InteriorManager.isInInterior(level, pos.relative(Direction.UP)))
+        if (ThermiaInteriorAPI.isInInterior(level, pos.relative(Direction.UP)))
         {
-            Interior interior = InteriorManager.getInteriorByPos(level, pos.relative(Direction.UP));
+            Interior interior = ThermiaInteriorAPI.getInterior(level, pos.relative(Direction.UP));
 
             baseTemperature = interior.internalTemperature();
         }

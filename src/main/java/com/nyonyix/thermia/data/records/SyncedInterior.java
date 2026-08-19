@@ -28,4 +28,8 @@ public record SyncedInterior(
             Codec.FLOAT.fieldOf("internal_temperature").forGetter(SyncedInterior::internalTemperature),
             Codec.FLOAT.fieldOf("external_temperature").forGetter(SyncedInterior::externalTemperature)
     ).apply(i, SyncedInterior::new));
+
+    public static SyncedInterior createDefault() {return new SyncedInterior(InteriorBlocks.createDefault(), BlockPos.ZERO, new AABB(0, 0, 0, 0, 0, 0), false, 0f, 0f, 0f, 0f);}
+
+    public static SyncedInterior from(Interior i) {return new SyncedInterior(i.interiorBlocks(), i.homePos(), i.boundingBox(), i.isValid(), i.internalHumidity(), i.externalHumidity(), i.internalTemperature(), i.externalTemperature());}
 }

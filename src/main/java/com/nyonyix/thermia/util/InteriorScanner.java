@@ -240,11 +240,11 @@ public class InteriorScanner
 //        }
 
         Vec3 startVec = new Vec3(minX, minY, minZ);
-        Vec3 endVec = new Vec3(maxX, maxY, maxZ);
+        Vec3 endVec = new Vec3(maxX + 1, maxY + 1, maxZ + 1);
 
         AABB boundingBox = new AABB(startVec, endVec).inflate(2);
 
-        return new Interior(new InteriorBlocks(edgeBlocks, heatSourceBlocks, heatSourceFluids, heatSinkBlocks, heatSinkFluids), internalAirBlocks, startPos, boundingBox, true, 0f, 0f, 0f, 0f);
+        return new Interior(new InteriorBlocks(edgeBlocks, heatSourceBlocks, heatSourceFluids, heatSinkBlocks, heatSinkFluids), internalAirBlocks, startPos, boundingBox, true, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f);
     }
 
     public static CompletableFuture<Interior> scanAsync(Level level, BlockPos startPos, int maxSize)

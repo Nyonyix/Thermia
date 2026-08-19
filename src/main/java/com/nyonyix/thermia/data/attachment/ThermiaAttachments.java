@@ -22,4 +22,8 @@ public class ThermiaAttachments
     public static final Supplier<AttachmentType<ChunkHumidity>> CHUNK_HUMIDITY = ATTACHMENTS.register("chunk_humidity", () -> AttachmentType.builder(ChunkHumidity::createDefault).serialize(ChunkHumidity.CODEC).build());
 
     public static final Supplier<AttachmentType<InteriorAttachment>> INTERIOR_ATTACHMENT = ATTACHMENTS.register("interior_attachment", () -> AttachmentType.builder(InteriorAttachment::createDefault).serialize(InteriorAttachment.CODEC).build());
+
+    public static final Supplier<AttachmentType<SyncedInteriorAttachment>> SYNCED_INTERIOR_ATTACHMENT = ATTACHMENTS.register("synced_interior_attachment", () -> AttachmentType.builder(SyncedInteriorAttachment::createDefault).sync(SyncedInteriorAttachment.STREAM_CODEC).build());
+
+    public static final Supplier<AttachmentType<SyncedInteriorTemperatureAttachment>> SYNCED_INTERIOR_TEMPERATURE_ATTACHMENT = ATTACHMENTS.register("synced_interior_temperature_attachment", () -> AttachmentType.builder(SyncedInteriorTemperatureAttachment::createDefault).sync(SyncedInteriorTemperatureAttachment.STREAM_CODEC).build());
 }

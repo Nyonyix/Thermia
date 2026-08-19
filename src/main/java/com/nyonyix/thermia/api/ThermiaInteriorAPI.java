@@ -3,21 +3,46 @@ package com.nyonyix.thermia.api;
 import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
-import com.nyonyix.thermia.data.manager.InteriorManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ThermiaInteriorAPI
 {
+    public static boolean isInInterior(Level level, BlockPos pos)
+    {
+        return getInteriorByPos(level, pos).isValid();
+    }
 
-    public static boolean isInInterior(Level level, BlockPos pos) {return InteriorManager.isInInterior(level, pos);}
+    public static boolean isInInterior(BlockPos pos, Interior interior)
+    {
+        if (interior.boundingBox().contains(Vec3.atCenterOf(pos)))
+        {
+            return interior.internalAirBlocks().contains(pos.asLong()) || interior.interiorBlocks().edgeBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceFluids.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkFluids.containsKey(pos.asLong());
+        }
 
-    public static boolean isInInterior(BlockPos pos, Interior interior) {return InteriorManager.isInInterior(pos, interior);}
+        return false;
+    }
 
-    public static Interior getInteriorByPos(Level level, BlockPos pos) {return InteriorManager.getInteriorByPos(level, pos);}
+    public static Interior getInteriorByPos(Level level, BlockPos pos)
+    {
+        if (!level.hasData(ThermiaAttachments.INTERIOR_ATTACHMENT)) return Interior.createDefault();
+
+        for (Interior interior : level.getData(ThermiaAttachments.INTERIOR_ATTACHMENT).activeInteriors().values())
+        {
+            if (!interior.isValid()) continue;
+
+            if (interior.boundingBox().contains(Vec3.atCenterOf(pos)))
+            {
+                if (interior.internalAirBlocks().contains(pos.asLong()) || interior.interiorBlocks().edgeBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkBlocks.containsKey(pos.asLong()) || interior.interiorBlocks().heatSourceFluids.containsKey(pos.asLong()) || interior.interiorBlocks().heatSinkFluids.containsKey(pos.asLong())) return interior;
+            }
+        }
+
+        return Interior.createDefault();
+    }
 
     public static Interior getInterior(Level level, BlockPos homePos)
     {

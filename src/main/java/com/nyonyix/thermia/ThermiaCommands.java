@@ -129,7 +129,7 @@ public class ThermiaCommands
                 return 0;
             }
 
-            Interior interior = ThermiaInteriorAPI.getInteriorByPos(context.getSource().getLevel(), pos);
+            Interior interior = ThermiaInteriorAPI.getInterior(context.getSource().getLevel(), pos);
 
             if (!interior.isValid())
             {

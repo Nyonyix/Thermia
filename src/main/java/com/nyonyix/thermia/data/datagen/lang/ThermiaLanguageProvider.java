@@ -82,6 +82,7 @@ public class ThermiaLanguageProvider extends LanguageProvider
         add("thermia.configuration.hyperEffectIntensity", "Hyperthermia effect intensity");
         add("thermia.configuration.hypoEffectIntensity", "Hypothermia effect intensity");
         add("thermia.configuration.enableDebug", "Enable Debug");
+        add("thermia.configuration.serverEnableDebug", "Enable Debug Data");
         add("thermia.configuration.temperatureUiOffsetX", "Temperature Widget X Offset");
         add("thermia.configuration.solarUISubToggle", "Solar Sub-Widget Toggle");
         add("thermia.configuration.solarUiToggle", "Solar Widget Toggle");
