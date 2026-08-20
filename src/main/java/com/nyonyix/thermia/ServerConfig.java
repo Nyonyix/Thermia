@@ -61,6 +61,10 @@ public class ServerConfig
 
     public static final ModConfigSpec.DoubleValue INTERIOR_SOURCE_MULTI = BUILDER.comment("Interior source pull multiplier").defineInRange("interiorSourceMulti", 1, 0.5, 10);
 
+    public static final ModConfigSpec.DoubleValue INTERIOR_VENT_CURVE = BUILDER.comment("Interior ventilation curve, Higher and interiors are more ventilated, Lower is less ventilated.").defineInRange("interiorVentCurve", 8.0, 1.0, 16.0);
+
+    public static final ModConfigSpec.DoubleValue INTERIOR_WIND_FACTOR = BUILDER.comment("Interior wind factor. Higher and wind matters more for interior leakiness, lower is less.").defineInRange("interiorWindFactor", 0.2, 0.0, 1.0);
+
     static {BUILDER.pop();}
     static {BUILDER.push("server_misc");}
 

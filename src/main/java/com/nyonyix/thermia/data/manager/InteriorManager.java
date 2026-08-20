@@ -8,12 +8,13 @@ import com.nyonyix.thermia.data.attachment.SyncedInteriorTemperatureAttachment;
 import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
-import com.nyonyix.thermia.data.datamap.BlockPorosityDataMap;
+import com.nyonyix.thermia.data.datamap.BlockSealDataMap;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import com.nyonyix.thermia.data.records.SyncedInterior;
 import com.nyonyix.thermia.data.records.SyncedInteriorData;
+import com.nyonyix.thermia.util.EnvironmentHelpers;
 import com.nyonyix.thermia.util.InteriorScanner;
 import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
@@ -33,6 +34,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -194,20 +197,23 @@ public class InteriorManager
         level.setData(ThermiaAttachments.SYNCED_INTERIOR_ATTACHMENT, new SyncedInteriorAttachment(synced));
     }
 
-    public static float getLeakiness(Level level, Interior interior)
+    private static float getAveragedLeakiness(Level level, Interior interior)
     {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos neighbourPos = new BlockPos.MutableBlockPos();
-        Set<BlockState> debugBlockStates = new HashSet<>();
-        float leakiness = 0f;
-        int leakyBlocks = 0;
+        float totalOpenness = 0f;
+        float windSPeedMS = EnvironmentHelpers.getWindSpeed(level, interior.homePos(), 1f);
+        ClimateModel model = Climate.get(level);
+        Vec2 windVector = model.getWind(level, interior.homePos());
+        Vec2 windDir = windVector.lengthSquared() > 0.0001f ? windVector.normalized() : Vec2.ZERO;
+        int shellSize = interior.interiorBlocks().edgeBlocks.size();
 
         for (Map.Entry<Long, Block> entry : interior.interiorBlocks().edgeBlocks.long2ObjectEntrySet())
         {
             pos.set(entry.getKey());
             if (!level.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) continue;
 
-            BlockPorosityDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getValue()).getData(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP);
+            BlockSealDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getValue()).getData(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP);
             if (dataMap == null) continue;
 
             BlockState state = level.getBlockState(pos);
@@ -226,15 +232,82 @@ public class InteriorManager
             }
 
             if (exposedCount != 1) continue;
-            if (!state.isFaceSturdy(level, pos, exposedFace))
+            if (state.isFaceSturdy(level, pos, exposedFace)) continue;
+
+            float blockSeal = 1f - dataMap.resolveForState(state);
+
+            Direction outwardFace = exposedFace.getOpposite();
+            Vec2 outwardFaceNormal = new Vec2(outwardFace.getStepX(), outwardFace.getStepZ());
+
+            float alignment = Math.abs(windDir.dot(outwardFaceNormal));
+
+            float windBoost = 1.0f + alignment * windSPeedMS * (float) ServerConfig.INTERIOR_WIND_FACTOR.getAsDouble();
+
+            totalOpenness += blockSeal * windBoost;
+        }
+
+        if (shellSize == 0) return 0f;
+
+        float openFraction = totalOpenness / shellSize;
+        float leakiness = 1.0f - (float) Math.exp(-openFraction * ServerConfig.INTERIOR_VENT_CURVE.getAsDouble());
+
+        return Math.clamp(leakiness, 0.0f, 1.0f);
+    }
+
+    private static float getSolarRadiation(Level level, Interior interior)
+    {
+        Vec3 sunDir = EnvironmentHelpers.getSunDirection(level, interior.homePos());
+        if (sunDir == Vec3.ZERO) return 0.0f;
+
+        float baseRadiation = EnvironmentHelpers.getSolarRadiationWeather(level, interior.homePos(), 1.0f);
+        if (baseRadiation <= 0.0f) return 0.0f;
+
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos neighbourPos = new BlockPos.MutableBlockPos();
+        float totalSolarRadiation = 0.0f;
+        int transparentSurfaces = 0;
+
+        for (Map.Entry<Long, Block> entry : interior.interiorBlocks().edgeBlocks.long2ObjectEntrySet())
+        {
+            pos.set(entry.getKey());
+            if (!level.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) continue;
+
+            BlockState state = level.getBlockState(pos);
+            float opacity = state.getLightBlock(level, pos);
+            if (opacity >= 15) continue;
+
+            float transparency = 1.0f - (opacity / 15.0f);
+
+            Direction exposedFace = null;
+            int exposedCount = 0;
+            for (Direction dir : Direction.values())
             {
-                leakiness +=  1f - dataMap.resolveForState(state);
-                leakyBlocks++;
-                debugBlockStates.add(state);
+                neighbourPos.setWithOffset(pos, dir);
+
+                if (interior.internalAirBlocks().contains(neighbourPos.asLong()))
+                {
+                    exposedFace = dir;
+                    exposedCount++;
+                }
+            }
+            if (exposedCount != 1) continue;
+
+            Direction outwardFace = exposedFace.getOpposite();
+            Vec3 outwardFaceNormal = new Vec3(outwardFace.getStepX(), outwardFace.getStepY(), outwardFace.getStepZ());
+
+            float alignment = (float) sunDir.dot(outwardFaceNormal);
+
+            if (alignment > 0.0f)
+            {
+                totalSolarRadiation += transparency * alignment;
+                transparentSurfaces++;
             }
         }
 
-        return leakyBlocks > 0 ? (float) Math.pow(leakiness / leakyBlocks, 0.75) : 0f;
+        if (transparentSurfaces == 0) return 0.0f;
+
+        float averageRadiation = totalSolarRadiation / transparentSurfaces;
+        return averageRadiation * baseRadiation;
     }
 
     public static void onCreateEvent(Level level, BlockPos startPos)
@@ -290,8 +363,9 @@ public class InteriorManager
 
                 float volume = interior.internalAirBlocks().size();
                 float sourcePull = calcSourcePull(level, interior, internalTemperature) / volume;
+                sourcePull += getSolarRadiation(level, interior);
 
-                float leakiness = Math.max(getLeakiness(level, interior), 0.01f);
+                float leakiness = Math.max(getAveragedLeakiness(level, interior), 0.01f);
                 float externalPull = leakiness * (externalTemperature - internalTemperature);
 
                 long calendarTicksElapsed = calendar.getFixedCalendarTicksFromTick(20);

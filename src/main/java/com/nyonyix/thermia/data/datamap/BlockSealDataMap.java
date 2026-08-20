@@ -11,21 +11,21 @@ import net.minecraft.world.level.block.state.properties.Property;
 import java.util.HashMap;
 import java.util.Map;
 
-public record BlockPorosityDataMap(Map<String, Float> statePorosity, float defaultPorosity)
+public record BlockSealDataMap(Map<String, Float> statePorosity, float defaultPorosity)
 {
     private static final Codec<Map<String, Float>> STATE_POROSITY_CODEC = Codec.unboundedMap(Codec.STRING, Codec.FLOAT);
 
-    public static final Codec<BlockPorosityDataMap> CODEC = RecordCodecBuilder.create(blockPorosityDataMapInstance -> blockPorosityDataMapInstance.group(
-            STATE_POROSITY_CODEC.optionalFieldOf("state_porosity", Map.of()).forGetter(BlockPorosityDataMap::statePorosity),
-            Codec.FLOAT.fieldOf("default_porosity").forGetter(BlockPorosityDataMap::defaultPorosity)
-    ).apply(blockPorosityDataMapInstance, BlockPorosityDataMap::new));
+    public static final Codec<BlockSealDataMap> CODEC = RecordCodecBuilder.create(blockPorosityDataMapInstance -> blockPorosityDataMapInstance.group(
+            STATE_POROSITY_CODEC.optionalFieldOf("state_porosity", Map.of()).forGetter(BlockSealDataMap::statePorosity),
+            Codec.FLOAT.fieldOf("default_porosity").forGetter(BlockSealDataMap::defaultPorosity)
+    ).apply(blockPorosityDataMapInstance, BlockSealDataMap::new));
 
-    public static final StreamCodec<ByteBuf, BlockPorosityDataMap> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.FLOAT), BlockPorosityDataMap::statePorosity,
-            ByteBufCodecs.FLOAT, BlockPorosityDataMap::defaultPorosity,
-            BlockPorosityDataMap::new);
+    public static final StreamCodec<ByteBuf, BlockSealDataMap> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.FLOAT), BlockSealDataMap::statePorosity,
+            ByteBufCodecs.FLOAT, BlockSealDataMap::defaultPorosity,
+            BlockSealDataMap::new);
 
-    public static BlockPorosityDataMap createDefault() {return new BlockPorosityDataMap(Map.of(), 1f);}
+    public static BlockSealDataMap createDefault() {return new BlockSealDataMap(Map.of(), 1f);}
 
     public float resolveForState(BlockState state)
     {

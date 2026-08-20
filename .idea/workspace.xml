@@ -4,22 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/SyncedInteriorTemperatureAttachment.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/SyncedInteriorData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Interior Debug stuffs">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ServerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ServerConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ThermiaCommands.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ThermiaCommands.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/api/ThermiaInteriorAPI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/api/ThermiaInteriorAPI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/ClientInteriorAttachment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/SyncedInteriorAttachment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/ThermiaAttachments.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/ThermiaAttachments.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockPorosityDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockSealDataMapProvider.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/lang/ThermiaLanguageProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/lang/ThermiaLanguageProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockPorosityDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockSealDataMap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/ThermiaDataMaps.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/ThermiaDataMaps.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/VerifyDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/VerifyDataMap.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/InteriorManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/InteriorManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/Interior.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/Interior.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/SyncedInterior.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/SyncedInterior.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/InteriorScanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/InteriorScanner.java" afterDir="false" />
     </list>
@@ -100,33 +95,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.Build Thermia.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Thermia [assemble].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Thermia [runClient # Run client].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Thermia [runClient].executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.Thermia [runServer].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;1.21.1&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/nyon/Coding/Minecraft/Java/Lithic-Core&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Libraries&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.Build Thermia.executor": "Run",
+    "Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor": "Run",
+    "Gradle.Thermia [assemble].executor": "Run",
+    "Gradle.Thermia [runClient # Run client].executor": "Run",
+    "Gradle.Thermia [runClient].executor": "Debug",
+    "Gradle.Thermia [runServer].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "1.21.1",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/nyon/Coding/Minecraft/Java/Lithic-Core",
+    "project.structure.last.edited": "Libraries",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;TEXT&quot;
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "TEXT"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/gui/book" />
@@ -624,7 +619,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Thick clothing first pass" />
     <MESSAGE value="Thick clothing second pass" />
     <MESSAGE value="Thick clothing third pass (Thanks Hachi)" />
     <MESSAGE value="Thick clothing fourth pass (Thanks Hachi)" />
@@ -649,6 +643,7 @@
     <MESSAGE value="Create compat, First pass&#10;Fluid container compat" />
     <MESSAGE value="Create compat, Contraption support halted" />
     <MESSAGE value="Minor InteriorScanner optimisation&#10;Start of interior debug interface" />
-    <option name="LAST_COMMIT_MESSAGE" value="Minor InteriorScanner optimisation&#10;Start of interior debug interface" />
+    <MESSAGE value="Interior Debug stuffs" />
+    <option name="LAST_COMMIT_MESSAGE" value="Interior Debug stuffs" />
   </component>
 </project>

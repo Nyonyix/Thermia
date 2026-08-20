@@ -20,7 +20,9 @@ import net.dries007.tfc.util.tracker.WeatherHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
 
 public class EnvironmentHelpers
@@ -222,7 +224,35 @@ public class EnvironmentHelpers
         return Mth.clamp(baseRadiation, 0.0f, 1.0f);
     }
 
+    public static Vec3 getSunDirection(Level level, BlockPos pos)
+    {
+        ICalendar calender = Calendars.get(level);
+        ClimateModel model = Climate.get(level);
+
+        float fracDay = calender.getCalendarFractionOfDay();
+        float fracYear = calender.getCalendarFractionOfYear();
+        float hemiScale = model.hemisphereScale();
+
+        SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemiScale, fracYear, fracDay);
+        float zenith = sunPos.zenith();
+        float azimuth = sunPos.azimuth();
+
+        if (zenith >= Math.PI / 1.8f) return Vec3.ZERO;
+
+        float sunY = (float) Math.cos(zenith);
+        float horizonMag = (float) Math.sin(zenith);
+        float sunX = horizonMag * (float) Math.sin(azimuth);
+        float sunZ = horizonMag * (float) Math.cos(azimuth);
+
+        return new Vec3(sunX, sunY, sunZ).normalize();
+    }
+
     // Util
+
+    public static boolean isExposedToSky(Level level, BlockPos pos)
+    {
+        return pos.getY() >= level.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
+    }
 
     public static Month getEffectiveMonthOfYear(Level level, BlockPos pos)
     {

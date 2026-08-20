@@ -19,7 +19,6 @@ import com.nyonyix.thermia.data.datamap.*;
 import com.nyonyix.thermia.data.manager.InteriorManager;
 import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -28,7 +27,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -101,7 +99,7 @@ public class ThermiaServer
 
         BuiltInRegistries.BLOCK.holders().forEach( block ->
         {
-            BlockPorosityDataMap dataMap = block.getData(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP);
+            BlockSealDataMap dataMap = block.getData(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP);
             if (dataMap == null) return;
 
             LOGGER.debug("Block: {}, statePorosity: {}, defaultPorosity: {}", block.value().getDescriptionId(), dataMap.statePorosity().toString(), dataMap.defaultPorosity());
@@ -123,7 +121,7 @@ public class ThermiaServer
         gen.addProvider(event.includeServer(), new EntityTemperatureDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new ItemInsulationDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new FluidTemperatureDataMapProvider(packOutput, lookupProvider));
-        gen.addProvider(event.includeServer(), new BlockPorosityDataMapProvider(packOutput, lookupProvider));
+        gen.addProvider(event.includeServer(), new BlockSealDataMapProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new ThermiaLootModifierProvider(packOutput, lookupProvider));
         gen.addProvider(event.includeServer(), new ThermiaRecipeProvider(packOutput, lookupProvider));
 

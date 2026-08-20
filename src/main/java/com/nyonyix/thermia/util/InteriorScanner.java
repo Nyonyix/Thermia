@@ -3,7 +3,7 @@ package com.nyonyix.thermia.util;
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.InteriorBlocks;
-import com.nyonyix.thermia.data.datamap.BlockPorosityDataMap;
+import com.nyonyix.thermia.data.datamap.BlockSealDataMap;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
@@ -22,7 +22,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
-import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class InteriorScanner
@@ -107,11 +106,12 @@ public class InteriorScanner
 
     private static boolean isSolid(Level level, BlockPos pos)
     {
-        BlockPorosityDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(level.getBlockState(pos).getBlock()).getData(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP);
+        BlockSealDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(level.getBlockState(pos).getBlock()).getData(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP);
+        BlockState state = level.getBlockState(pos);
 
-        if (level.getBlockState(pos).isSolidRender(level, pos) || dataMap != null) return true;
-
-        return false;
+        if (dataMap != null) return true;
+        if (state.isSolidRender(level, pos)) return true;
+        return state.isCollisionShapeFullBlock(level, pos);
     }
 
     private static boolean isHeatSource(Block block)
@@ -220,7 +220,7 @@ public class InteriorScanner
                     edgeBlocks.put(neighbour.asLong(), block);
                     visited.add(neighbourLong);
                 }
-                else if (level.canSeeSky(neighbour))
+                else if (EnvironmentHelpers.isExposedToSky(level, neighbour))
                 {
                     LOGGER.info("Interior scan failed, Reached sky at {}", neighbour);
                     return Interior.createDefault();

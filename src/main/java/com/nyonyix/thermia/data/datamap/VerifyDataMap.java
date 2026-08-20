@@ -41,7 +41,7 @@ public class VerifyDataMap
         if (dataMap.conductionProtection() < -1f || dataMap.radiationProtection() < -1f || dataMap.convectionProtection() < -1f || dataMap.rainProtection() < -1f) LOGGER.error("Item: {}, Item cannot have value(S) less than -1.0", item.getDescriptionId());
     }
 
-    public static void isValidBlockPorosity(BlockPorosityDataMap dataMap, Block block)
+    public static void isValidBlockPorosity(BlockSealDataMap dataMap, Block block)
     {
     }
 }

@@ -256,7 +256,7 @@ public class EntityTemperatureManager
 
         if (ThermiaInteriorAPI.isInInterior(level, pos.relative(Direction.UP)))
         {
-            Interior interior = ThermiaInteriorAPI.getInterior(level, pos.relative(Direction.UP));
+            Interior interior = ThermiaInteriorAPI.getInteriorByPos(level, pos.relative(Direction.UP));
 
             baseTemperature = interior.internalTemperature();
         }

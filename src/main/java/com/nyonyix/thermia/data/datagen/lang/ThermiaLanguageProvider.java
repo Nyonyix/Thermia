@@ -73,6 +73,8 @@ public class ThermiaLanguageProvider extends LanguageProvider
         add("thermia.configuration.maxInteriorVolume", "Maximum Interior Volume");
         add("thermia.configuration.maxOpeningDepth", "Maximum Interior Wall Depth");
         add("thermia.configuration.maxOpeningSize", "Maximum Opening Area");
+        add("thermia.configuration.interiorVentCurve", "Interior Vent Curve");
+        add("thermia.configuration.interiorWindFactor", "Interior Wind Factor");
 
         add("thermia.configuration.uiScale", "UI Scale");
         add("thermia.configuration.uiXOffset", "UI X Offset");
