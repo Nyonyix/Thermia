@@ -4,17 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Interior Debug stuffs">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Renamed BlockPorosity to BlockSeal as it's more intuitive&#10;Fixed interior temps not working with entities&#10;Reworked BlockSeal, Now uses wind&#10;Interiors now use solar radiation">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/ThermiaClimateModels.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/Rule.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ServerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ServerConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockPorosityDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockSealDataMapProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/InteriorBlocks.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/InteriorBlocks.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockSealDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockSealDataMapProvider.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/lang/ThermiaLanguageProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/lang/ThermiaLanguageProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockPorosityDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockSealDataMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/ThermiaDataMaps.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/ThermiaDataMaps.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/VerifyDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/VerifyDataMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockSealDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockSealDataMap.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/InteriorManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/InteriorManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/Interior.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/Interior.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/InteriorScanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/InteriorScanner.java" afterDir="false" />
     </list>
@@ -98,7 +100,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Gradle.Build Thermia.executor": "Run",
-    "Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor": "Run",
+    "Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor": "Debug",
     "Gradle.Thermia [assemble].executor": "Run",
     "Gradle.Thermia [runClient # Run client].executor": "Run",
     "Gradle.Thermia [runClient].executor": "Debug",
@@ -619,7 +621,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Thick clothing second pass" />
     <MESSAGE value="Thick clothing third pass (Thanks Hachi)" />
     <MESSAGE value="Thick clothing fourth pass (Thanks Hachi)" />
     <MESSAGE value="Reordered curio slots&#10;Lang datagen&#10;Recipes:&#10; - Pelts&#10; - Hats&#10; - Thick" />
@@ -644,6 +645,7 @@
     <MESSAGE value="Create compat, Contraption support halted" />
     <MESSAGE value="Minor InteriorScanner optimisation&#10;Start of interior debug interface" />
     <MESSAGE value="Interior Debug stuffs" />
-    <option name="LAST_COMMIT_MESSAGE" value="Interior Debug stuffs" />
+    <MESSAGE value="Renamed BlockPorosity to BlockSeal as it's more intuitive&#10;Fixed interior temps not working with entities&#10;Reworked BlockSeal, Now uses wind&#10;Interiors now use solar radiation" />
+    <option name="LAST_COMMIT_MESSAGE" value="Renamed BlockPorosity to BlockSeal as it's more intuitive&#10;Fixed interior temps not working with entities&#10;Reworked BlockSeal, Now uses wind&#10;Interiors now use solar radiation" />
   </component>
 </project>

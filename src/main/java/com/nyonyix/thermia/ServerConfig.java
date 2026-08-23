@@ -51,11 +51,9 @@ public class ServerConfig
     static {BUILDER.pop();}
     static {BUILDER.push("environment_temperature");}
 
-    public static final ModConfigSpec.DoubleValue MAX_SOLAR_HEATING = BUILDER.comment("Max heating applied by sun").defineInRange("maxSolarHeating", 32.0, 0.0, 48.0);
+    public static final ModConfigSpec.DoubleValue MAX_SOLAR_HEATING = BUILDER.comment("Max heating applied by sun").defineInRange("maxSolarHeating", 32.0, 0.0, 64.0);
 
     public static final ModConfigSpec.DoubleValue EVAP_COOLING_MULTI = BUILDER.comment("Evaporative cooling multiplier").defineInRange("evapCoolingMulti", 1.0, 0.0, 2.0);
-
-    public static final ModConfigSpec.DoubleValue SOLAR_RADIATION_MULTI = BUILDER.comment("Solar radiation multiplier").defineInRange("solarRadiationMulti", 1.0, 0.0, 2.0);
 
     public static final ModConfigSpec.DoubleValue DRYING_MULTI = BUILDER.comment("Drying multiplier").defineInRange("dryingMulti", 1.0, 0.0, 2.0);
 
@@ -64,6 +62,8 @@ public class ServerConfig
     public static final ModConfigSpec.DoubleValue INTERIOR_VENT_CURVE = BUILDER.comment("Interior ventilation curve, Higher and interiors are more ventilated, Lower is less ventilated.").defineInRange("interiorVentCurve", 8.0, 1.0, 16.0);
 
     public static final ModConfigSpec.DoubleValue INTERIOR_WIND_FACTOR = BUILDER.comment("Interior wind factor. Higher and wind matters more for interior leakiness, lower is less.").defineInRange("interiorWindFactor", 0.2, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue INTERIOR_SOLAR_MULTI = BUILDER.comment("Interior solar heating multiplier. Higher values mean more solar heating, lower is less.").defineInRange("interiorSolarMulti", 32.0, 0.0, 64.0);
 
     static {BUILDER.pop();}
     static {BUILDER.push("server_misc");}

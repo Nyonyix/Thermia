@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashBigSet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -31,8 +32,7 @@ public record Interior(
 )
 {
 
-    private static final Codec<LongOpenHashSet> INTERNAL_AIR_BLOCKS_CODEC = Codec.LONG.listOf().xmap(LongOpenHashSet::new,set -> new LongArrayList(set.toLongArray())
-    );
+    private static final Codec<LongOpenHashSet> INTERNAL_AIR_BLOCKS_CODEC = Codec.LONG.listOf().xmap(LongOpenHashSet::new,set -> new LongArrayList(set.toLongArray()));
 
     public static final Codec<AABB> AABB_CODEC = RecordCodecBuilder.create(i -> i.group(
             Vec3.CODEC.fieldOf("min").forGetter(AABB::getMinPosition),

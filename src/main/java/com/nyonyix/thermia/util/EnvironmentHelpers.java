@@ -20,6 +20,7 @@ import net.dries007.tfc.util.tracker.WeatherHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.OverworldBiomeBuilder;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -210,8 +211,7 @@ public class EnvironmentHelpers
     {
         if (!(Climate.get(level) instanceof OverworldClimateModel overworldClimateModel)) return 0.5f;
 
-        float multi = (float) ServerConfig.SOLAR_RADIATION_MULTI.getAsDouble();
-        float baseRadiation = getSolarRadiation(level, pos, shade) * multi;
+        float baseRadiation = getSolarRadiation(level, pos, shade);
 
         long calendarTick = Calendars.get(level).getTicks();
         float rainIntensity = overworldClimateModel.getRain(calendarTick);
@@ -241,10 +241,42 @@ public class EnvironmentHelpers
 
         float sunY = (float) Math.cos(zenith);
         float horizonMag = (float) Math.sin(zenith);
-        float sunX = horizonMag * (float) Math.sin(azimuth);
-        float sunZ = horizonMag * (float) Math.cos(azimuth);
+        float sunX = -horizonMag * (float) Math.sin(azimuth);
+        float sunZ = -horizonMag * (float) Math.cos(azimuth);
 
         return new Vec3(sunX, sunY, sunZ).normalize();
+    }
+
+    public static float getBeamRadiation(Level level, BlockPos pos, float shade)
+    {
+        float fractionDay = Calendars.get(level).getCalendarFractionOfDay();
+        float fractionYear = Calendars.get(level).getCalendarFractionOfYear();
+        float hemisphereScale = Climate.get(level).hemisphereScale();
+
+        SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemisphereScale, fractionYear, fractionDay);
+        float cosZenith = (float) Math.cos(sunPos.zenith());
+        if (cosZenith <= 0.0f) return 0.0f;
+
+        float airMass = 1.0f / Math.max(0.02f, cosZenith);
+        float atmosphereTransmission = (float) Math.pow(0.75, airMass - 1);
+
+        return Mth.clamp(atmosphereTransmission * shade, 0.0f, 1.0f);
+    }
+
+    public static float getBeamRadiationWeather(Level level, BlockPos pos, float shade)
+    {
+        if (!(Climate.get(level) instanceof OverworldClimateModel model)) return 0.5f;
+
+        float baseRadiation = getBeamRadiation(level, pos, shade);
+
+        long calendarTick = Calendars.get(level).getTicks();
+        float rainIntensity = model.getRain(calendarTick);
+        float rainfall = Climate.getAverageRainfall(level, pos);
+
+        if (WeatherHelpers.isPrecipitating(rainIntensity, rainfall)) baseRadiation *= 0.5f;
+        if (model.getThunder(calendarTick)) baseRadiation *= 0.3f;
+
+        return Mth.clamp(baseRadiation, 0.0f, 1.0f);
     }
 
     // Util
@@ -282,7 +314,7 @@ public class EnvironmentHelpers
         float tempComponent = Mth.clampedMap(temperature,-10f, 40f, 0.1f, 2.0f);
         float humidityComponent = 1.0f - humidity;
         float windComponent = (1.0f + (getWindSpeed(level, pos, windOcclusion)* 0.15f));
-        float solarComponent = (1.0f + (getSolarRadiationWeather(level, pos, shade) * 2.0f));
+        float solarComponent = (1.0f + (getSolarRadiationWeather(level, pos, shade))) * (float) ServerConfig.MAX_SOLAR_HEATING.getAsDouble();
 
         float multi = (float) ServerConfig.DRYING_MULTI.getAsDouble();
 

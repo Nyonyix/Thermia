@@ -150,6 +150,7 @@ public class InteriorScanner
     public static Interior scan(Level level, BlockPos startPos, int maxSize)
     {
         Long2ObjectOpenHashMap<Block> edgeBlocks = new Long2ObjectOpenHashMap<>(maxSize);
+        Long2ObjectOpenHashMap<InteriorBlocks.EdgeBlockData> edgeBlockData = new Long2ObjectOpenHashMap<>(maxSize);
         Long2ObjectOpenHashMap<Block> heatSourceBlocks = new Long2ObjectOpenHashMap<>(maxSize);
         Long2ObjectOpenHashMap<Fluid> heatSourceFluids = new Long2ObjectOpenHashMap<>(maxSize);
         Long2ObjectOpenHashMap<Block> heatSinkBlocks = new Long2ObjectOpenHashMap<>(maxSize);
@@ -157,6 +158,7 @@ public class InteriorScanner
         LongOpenHashSet internalAirBlocks = new LongOpenHashSet();
         BlockPos.MutableBlockPos current = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos neighbour = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos checkPos = new BlockPos.MutableBlockPos();
         LongOpenHashSet visited = new LongOpenHashSet();
         LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
         Long startPosLong = startPos.asLong();
@@ -232,6 +234,34 @@ public class InteriorScanner
             }
         }
 
+        for (long edgeLong : edgeBlocks.keySet())
+        {
+            checkPos.set(edgeLong);
+
+            Direction inwardFace = null;
+            boolean touchesOutside = false;
+
+            for (Direction dir : Direction.values())
+            {
+                BlockPos nPos = checkPos.relative(dir);
+                long nLong = nPos.asLong();
+
+                if (internalAirBlocks.contains(nLong))
+                {
+                    inwardFace = dir;
+                }
+                else if (!isSolid(level, nPos))
+                {
+                    touchesOutside = true;
+                }
+            }
+
+            if (inwardFace != null)
+            {
+                edgeBlockData.put(edgeLong, new InteriorBlocks.EdgeBlockData(inwardFace.getOpposite(), touchesOutside));
+            }
+        }
+
 //        float airRatio = edgeBlocks.isEmpty() ? 1f : (float) edgeAirCount / edgeBlocks.size();
 //        if (airRatio > MAX_PERCENTAGE_OPEN_ALLOWED)
 //        {
@@ -244,7 +274,7 @@ public class InteriorScanner
 
         AABB boundingBox = new AABB(startVec, endVec).inflate(2);
 
-        return new Interior(new InteriorBlocks(edgeBlocks, heatSourceBlocks, heatSourceFluids, heatSinkBlocks, heatSinkFluids), internalAirBlocks, startPos, boundingBox, true, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f);
+        return new Interior(new InteriorBlocks(edgeBlocks, edgeBlockData, heatSourceBlocks, heatSourceFluids, heatSinkBlocks, heatSinkFluids), internalAirBlocks, startPos, boundingBox, true, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f);
     }
 
     public static CompletableFuture<Interior> scanAsync(Level level, BlockPos startPos, int maxSize)

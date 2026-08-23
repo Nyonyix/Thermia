@@ -3,6 +3,7 @@ package com.nyonyix.thermia.data.manager;
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.api.ThermiaInteriorAPI;
+import com.nyonyix.thermia.data.InteriorBlocks;
 import com.nyonyix.thermia.data.attachment.SyncedInteriorAttachment;
 import com.nyonyix.thermia.data.attachment.SyncedInteriorTemperatureAttachment;
 import com.nyonyix.thermia.data.records.Interior;
@@ -45,7 +46,7 @@ import java.util.stream.Collectors;
 public class InteriorManager
 {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final float CONVERGENCE_RATE = 1.0f;
+    private static final float CONVERGENCE_RATE = 1f;
     private static final float MAX_STEP = 0.5f;
     private static final Map<BlockPos, CompletableFuture<Interior>> pendingInteriorScans = new HashMap<>();
     private static final Map<BlockPos, CompletableFuture<Interior>> pendingInteriorRescans = new HashMap<>();
@@ -123,7 +124,7 @@ public class InteriorManager
     private static float calcSourcePull(Level level, Interior interior, float internalTemperature)
     {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        float pull = 0f;
+        float pull = getSolarRadiation(level, interior);;
         float multi = (float) ServerConfig.INTERIOR_SOURCE_MULTI.getAsDouble();
 
         for (Map.Entry<Long, Block> entry : interior.interiorBlocks().heatSinkBlocks.long2ObjectEntrySet())
@@ -213,34 +214,20 @@ public class InteriorManager
             pos.set(entry.getKey());
             if (!level.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) continue;
 
+            InteriorBlocks.EdgeBlockData edgeData = interior.interiorBlocks().edgeBlockData.get(entry.getKey().longValue());
+            if (edgeData == null || !edgeData.isExterior()) continue;
+
             BlockSealDataMap dataMap = BuiltInRegistries.BLOCK.wrapAsHolder(entry.getValue()).getData(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP);
             if (dataMap == null) continue;
 
             BlockState state = level.getBlockState(pos);
-            Direction exposedFace = null;
-            int exposedCount = 0;
-
-            for (Direction dir : Direction.values())
-            {
-                neighbourPos.setWithOffset(pos, dir);
-
-                if (interior.internalAirBlocks().contains(neighbourPos.asLong()))
-                {
-                    exposedFace = dir;
-                    exposedCount++;
-                }
-            }
-
-            if (exposedCount != 1) continue;
-            if (state.isFaceSturdy(level, pos, exposedFace)) continue;
+            Direction inwardFace = edgeData.outwardFace().getOpposite();
+            if (state.isFaceSturdy(level, pos, inwardFace)) continue;
 
             float blockSeal = 1f - dataMap.resolveForState(state);
 
-            Direction outwardFace = exposedFace.getOpposite();
-            Vec2 outwardFaceNormal = new Vec2(outwardFace.getStepX(), outwardFace.getStepZ());
-
+            Vec2 outwardFaceNormal = new Vec2(edgeData.outwardFace().getStepX(), edgeData.outwardFace().getStepZ());
             float alignment = Math.abs(windDir.dot(outwardFaceNormal));
-
             float windBoost = 1.0f + alignment * windSPeedMS * (float) ServerConfig.INTERIOR_WIND_FACTOR.getAsDouble();
 
             totalOpenness += blockSeal * windBoost;
@@ -259,44 +246,32 @@ public class InteriorManager
         Vec3 sunDir = EnvironmentHelpers.getSunDirection(level, interior.homePos());
         if (sunDir == Vec3.ZERO) return 0.0f;
 
-        float baseRadiation = EnvironmentHelpers.getSolarRadiationWeather(level, interior.homePos(), 1.0f);
-        if (baseRadiation <= 0.0f) return 0.0f;
+        float baseRadiation = EnvironmentHelpers.getBeamRadiationWeather(level, interior.homePos(), 1.0f) * (float) ServerConfig.INTERIOR_SOLAR_MULTI.getAsDouble();
+        if (baseRadiation <= 0f) return 0.0f;
 
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        BlockPos.MutableBlockPos neighbourPos = new BlockPos.MutableBlockPos();
         float totalSolarRadiation = 0.0f;
         int transparentSurfaces = 0;
 
         for (Map.Entry<Long, Block> entry : interior.interiorBlocks().edgeBlocks.long2ObjectEntrySet())
         {
-            pos.set(entry.getKey());
+            long packedPos = entry.getKey();
+            pos.set(packedPos);
             if (!level.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) continue;
+
+            InteriorBlocks.EdgeBlockData edgeData = interior.interiorBlocks().edgeBlockData.get(packedPos);
+            if (edgeData == null || !edgeData.isExterior()) continue;
 
             BlockState state = level.getBlockState(pos);
             float opacity = state.getLightBlock(level, pos);
-            if (opacity >= 15) continue;
+            if (opacity >= 15f) continue;
 
             float transparency = 1.0f - (opacity / 15.0f);
 
-            Direction exposedFace = null;
-            int exposedCount = 0;
-            for (Direction dir : Direction.values())
-            {
-                neighbourPos.setWithOffset(pos, dir);
-
-                if (interior.internalAirBlocks().contains(neighbourPos.asLong()))
-                {
-                    exposedFace = dir;
-                    exposedCount++;
-                }
-            }
-            if (exposedCount != 1) continue;
-
-            Direction outwardFace = exposedFace.getOpposite();
+            Direction outwardFace = edgeData.outwardFace();
             Vec3 outwardFaceNormal = new Vec3(outwardFace.getStepX(), outwardFace.getStepY(), outwardFace.getStepZ());
 
             float alignment = (float) sunDir.dot(outwardFaceNormal);
-
             if (alignment > 0.0f)
             {
                 totalSolarRadiation += transparency * alignment;
@@ -307,7 +282,7 @@ public class InteriorManager
         if (transparentSurfaces == 0) return 0.0f;
 
         float averageRadiation = totalSolarRadiation / transparentSurfaces;
-        return averageRadiation * baseRadiation;
+        return totalSolarRadiation * baseRadiation;
     }
 
     public static void onCreateEvent(Level level, BlockPos startPos)
@@ -363,7 +338,7 @@ public class InteriorManager
 
                 float volume = interior.internalAirBlocks().size();
                 float sourcePull = calcSourcePull(level, interior, internalTemperature) / volume;
-                sourcePull += getSolarRadiation(level, interior);
+//                sourcePull +=
 
                 float leakiness = Math.max(getAveragedLeakiness(level, interior), 0.01f);
                 float externalPull = leakiness * (externalTemperature - internalTemperature);

@@ -1,8 +1,0 @@
-TODO:
-    Koppen Climates Humidity
-    Get player depth
-    Calc wet bulb
-    Mob Damage AI
-    Advanced block data map
-    Player inventory
-    insulation data map - DONE
