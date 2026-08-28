@@ -4,30 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Finished most interior rework, Now uses wind and sun.">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/climate/ThermiaClimateModel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/climate/ThermiaClimateModels.java" afterDir="false" />
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Fixed cloth recipes&#10;Interior TFC temperature integration&#10;Reworked interior clinet sync&#10;First work on interior modify stasis system">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AGENTS.md" beforeDir="false" afterPath="$PROJECT_DIR$/AGENTS.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/Thermia.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/Thermia.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/api/ThermiaInteriorAPI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/api/ThermiaInteriorAPI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/client/ThermiaClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/SyncedInteriorTemperatureAttachment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/ClientInteriorAttachment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/ThermiaAttachments.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/attachment/ThermiaAttachments.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ServerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ServerConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/recipe/ThermiaRecipeProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/recipe/ThermiaRecipeProvider.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/InteriorManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/InteriorManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/Interior.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/Interior.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/SyncedInteriorData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/ClientInterior.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/cloth/ThermiaClothWearableMaterial.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/item/cloth/ThermiaClothWearableMaterial.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/server/ThermiaServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/cloth/woolen_hat.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/cloth/wool_hat.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/cloth/woolen_pants.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/cloth/wool_pants.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/cloth/woolen_shirt.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/cloth/wool_shirt.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/cloth/woolen_shoes.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/item/cloth/wool_shoes.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/cloth/woolen_layer1.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/cloth/wool_layer1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/cloth/woolen_layer2.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/models/cloth/wool_layer2.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -631,7 +612,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Thick clothing fourth pass (Thanks Hachi)" />
     <MESSAGE value="Reordered curio slots&#10;Lang datagen&#10;Recipes:&#10; - Pelts&#10; - Hats&#10; - Thick" />
     <MESSAGE value="Reorganised files&#10;Hat now works" />
     <MESSAGE value="Cloth items&#10;Fixed torso rendering" />
@@ -656,6 +636,7 @@
     <MESSAGE value="Interior Debug stuffs" />
     <MESSAGE value="Renamed BlockPorosity to BlockSeal as it's more intuitive&#10;Fixed interior temps not working with entities&#10;Reworked BlockSeal, Now uses wind&#10;Interiors now use solar radiation" />
     <MESSAGE value="Finished most interior rework, Now uses wind and sun." />
-    <option name="LAST_COMMIT_MESSAGE" value="Finished most interior rework, Now uses wind and sun." />
+    <MESSAGE value="Fixed cloth recipes&#10;Interior TFC temperature integration&#10;Reworked interior clinet sync&#10;First work on interior modify stasis system" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed cloth recipes&#10;Interior TFC temperature integration&#10;Reworked interior clinet sync&#10;First work on interior modify stasis system" />
   </component>
 </project>

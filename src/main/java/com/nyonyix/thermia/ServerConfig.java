@@ -59,6 +59,8 @@ public class ServerConfig
 
     public static final ModConfigSpec.DoubleValue INTERIOR_SOURCE_MULTI = BUILDER.comment("Interior source pull multiplier").defineInRange("interiorSourceMulti", 1, 0.5, 10);
 
+    public static final ModConfigSpec.IntValue INTERIOR_SECONDS_TO_KEEP = BUILDER.comment("Interior seconds to keep, How long should teh server keep an interior in limbo before invalidating").defineInRange("interiorSecondsToKeep", 60, 0, 300);
+
     public static final ModConfigSpec.DoubleValue INTERIOR_VENT_CURVE = BUILDER.comment("Interior ventilation curve, Higher and interiors are more ventilated, Lower is less ventilated.").defineInRange("interiorVentCurve", 8.0, 1.0, 16.0);
 
     public static final ModConfigSpec.DoubleValue INTERIOR_WIND_FACTOR = BUILDER.comment("Interior wind factor. Higher and wind matters more for interior leakiness, lower is less.").defineInRange("interiorWindFactor", 0.2, 0.0, 1.0);

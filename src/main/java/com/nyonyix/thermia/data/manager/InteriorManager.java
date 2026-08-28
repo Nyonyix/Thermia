@@ -26,7 +26,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -48,12 +47,8 @@ public class InteriorManager
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final float CONVERGENCE_RATE = 1f;
     private static final float MAX_STEP = 0.5f;
-    private static final int SECONDS_TO_KEEP = 60;
     private static final Map<BlockPos, CompletableFuture<Interior>> pendingInteriorScans = new HashMap<>();
     private static final Map<BlockPos, CompletableFuture<Interior>> pendingInteriorRescans = new HashMap<>();
-    private static final Map<ResourceKey<Level>, Map<BlockPos, StasisEntry>> interiorStasis = new HashMap<>();
-
-    public record StasisEntry(Long startTick, Interior interior) {}
 
     private static void interiorRescan(Level level, BlockPos startPos)
     {
@@ -325,7 +320,12 @@ public class InteriorManager
         {
             if (!entry.getValue().isValid())
             {
-                interiorStasis.put(entry.getValue().homePos(), level.getServer().getTickCount());
+                toRemove.add(entry.getKey());
+                for (Player player : getPLayersInBox(level, entry.getValue().boundingBox()))
+                {
+                    player.displayClientMessage(Component.translatable("thermia.interior.chatRemove").withStyle(ChatFormatting.DARK_RED), true);
+                }
+                continue;
             }
 
             long interiorId = entry.getKey().asLong();
@@ -342,6 +342,7 @@ public class InteriorManager
 
                 float volume = interior.internalAirBlocks().size();
                 float sourcePull = calcSourcePull(level, interior, internalTemperature) / volume;
+//                sourcePull +=
 
                 float leakiness = Math.max(getAveragedLeakiness(level, interior), 0.01f);
                 float externalPull = leakiness * (externalTemperature - internalTemperature);
@@ -359,20 +360,8 @@ public class InteriorManager
             }
         }
 
-        if (!interiorStasis.isEmpty())
-        {
-            for (Map.Entry<BlockPos, Integer> entry : interiorStasis.entrySet())
-            {
-                int serverTicks = level.getServer().getTickCount();
-                int interiorTicks = serverTicks + (entry.getValue()) + (SECONDS_TO_KEEP * 20);
-
-                if (interiorTicks == serverTicks)
-                {
-                    interiors.remove(entry.getKey());
-                }
-            }
-            updateSyncedInterior(level, interiors);
-        }
+        toRemove.forEach(interiors::remove);
+        if (!toRemove.isEmpty()) updateSyncedInterior(level, interiors);
 
         level.setData(ThermiaAttachments.INTERIOR_ATTACHMENT, new InteriorAttachment(interiors));
 

@@ -190,7 +190,7 @@ public class ThermiaRecipeProvider implements DataProvider
         );
 
         List<List<String>> shoesPattern = List.of(
-                List.of("C", "B", "B"),
+                List.of("C", "B", "C"),
                 List.of("C", "S", "C")
         );
 
