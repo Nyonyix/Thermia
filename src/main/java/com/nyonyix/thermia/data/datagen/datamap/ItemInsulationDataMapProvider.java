@@ -152,7 +152,7 @@ public class ItemInsulationDataMapProvider extends DataMapProvider
                 {
                     builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.1f, 0.1f, 0.05f, -0.1f), false);
                 }
-                case WOOLEN ->
+                case WOOL ->
                 {
                     builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.4f, 0.4f, 0.3f, 0.2f), false);
                 }
@@ -178,7 +178,7 @@ public class ItemInsulationDataMapProvider extends DataMapProvider
                 {
                     builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.1f, 0.1f, 0.05f, -0.1f), false);
                 }
-                case WOOLEN ->
+                case WOOL ->
                 {
                     builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.4f, 0.4f, 0.3f, 0.2f), false);
                 }
@@ -204,7 +204,7 @@ public class ItemInsulationDataMapProvider extends DataMapProvider
                 {
                     builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.1f, 0.1f, 0.05f, -0.1f), false);
                 }
-                case WOOLEN ->
+                case WOOL ->
                 {
                     builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.4f, 0.4f, 0.3f, 0.2f), false);
                 }
@@ -230,7 +230,7 @@ public class ItemInsulationDataMapProvider extends DataMapProvider
                 {
                     builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.1f, 0.1f, 0.05f, -0.1f), false);
                 }
-                case WOOLEN ->
+                case WOOL ->
                 {
                     builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.4f, 0.4f, 0.3f, 0.2f), false);
                 }

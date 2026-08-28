@@ -3,6 +3,7 @@ package com.nyonyix.thermia.server;
 import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.ThermiaCommands;
+import com.nyonyix.thermia.data.climate.ThermiaClimateModel;
 import com.nyonyix.thermia.data.datagen.lang.ThermiaLanguageProvider;
 import com.nyonyix.thermia.data.ThermiaTags;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
@@ -19,6 +20,8 @@ import com.nyonyix.thermia.data.datamap.*;
 import com.nyonyix.thermia.data.manager.InteriorManager;
 import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
+import net.dries007.tfc.util.events.SelectClimateModelEvent;
+import net.dries007.tfc.world.ChunkGeneratorExtension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -287,5 +290,16 @@ public class ThermiaServer
         if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
 
         InteriorManager.invalidateAndRescan(serverLevel, event.getPos());
+    }
+
+    @SubscribeEvent
+    public static void onSelectClimateModel(SelectClimateModelEvent event)
+    {
+        ServerLevel level = event.level();
+
+        if (level.dimension() == Level.OVERWORLD && level.getChunkSource().getGenerator() instanceof ChunkGeneratorExtension g)
+        {
+            event.setModel(new ThermiaClimateModel(level, g));
+        }
     }
 }

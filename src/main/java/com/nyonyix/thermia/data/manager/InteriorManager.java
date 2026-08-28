@@ -4,8 +4,9 @@ import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
 import com.nyonyix.thermia.api.ThermiaInteriorAPI;
 import com.nyonyix.thermia.data.InteriorBlocks;
-import com.nyonyix.thermia.data.attachment.SyncedInteriorAttachment;
-import com.nyonyix.thermia.data.attachment.SyncedInteriorTemperatureAttachment;
+import com.nyonyix.thermia.data.attachment.ClientInteriorAttachment;
+import com.nyonyix.thermia.data.climate.ThermiaClimateModel;
+import com.nyonyix.thermia.data.records.ClientInterior;
 import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
@@ -13,8 +14,6 @@ import com.nyonyix.thermia.data.datamap.BlockSealDataMap;
 import com.nyonyix.thermia.data.datamap.BlockTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
-import com.nyonyix.thermia.data.records.SyncedInterior;
-import com.nyonyix.thermia.data.records.SyncedInteriorData;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
 import com.nyonyix.thermia.util.InteriorScanner;
 import net.dries007.tfc.util.calendar.Calendar;
@@ -27,6 +26,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -48,8 +48,12 @@ public class InteriorManager
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final float CONVERGENCE_RATE = 1f;
     private static final float MAX_STEP = 0.5f;
+    private static final int SECONDS_TO_KEEP = 60;
     private static final Map<BlockPos, CompletableFuture<Interior>> pendingInteriorScans = new HashMap<>();
     private static final Map<BlockPos, CompletableFuture<Interior>> pendingInteriorRescans = new HashMap<>();
+    private static final Map<ResourceKey<Level>, Map<BlockPos, StasisEntry>> interiorStasis = new HashMap<>();
+
+    public record StasisEntry(Long startTick, Interior interior) {}
 
     private static void interiorRescan(Level level, BlockPos startPos)
     {
@@ -109,7 +113,7 @@ public class InteriorManager
         }
 
         toRemove.forEach(pendingMap::remove);
-        if (!toRemove.isEmpty() && ServerConfig.ENABLE_DEBUG.get()) updateSyncedInterior(level, interiors);
+        if (!toRemove.isEmpty()) updateSyncedInterior(level, interiors);
 
         return interiors;
     }
@@ -117,6 +121,11 @@ public class InteriorManager
     private static float getTemperatureSample(Level level, Interior interior)
     {
         ClimateModel model = Climate.get(level);
+
+        if (model instanceof ThermiaClimateModel thermiaModel)
+        {
+            return thermiaModel.getRawInstantTemperature(level, interior.homePos());
+        }
 
         return model.getInstantTemperature(level, interior.homePos());
     }
@@ -192,10 +201,10 @@ public class InteriorManager
 
     private static void updateSyncedInterior(Level level, Map<BlockPos, Interior> interiors)
     {
-        Map<BlockPos, SyncedInterior> synced = new HashMap<>();
+        Map<BlockPos, ClientInterior> synced = new HashMap<>();
 
-        interiors.forEach((pos, interior) -> synced.put(pos, SyncedInterior.from(interior)));
-        level.setData(ThermiaAttachments.SYNCED_INTERIOR_ATTACHMENT, new SyncedInteriorAttachment(synced));
+        interiors.forEach((pos, i) -> synced.put(pos, ClientInterior.from(i)));
+        level.setData(ThermiaAttachments.CLIENT_INTERIOR_ATTACHMENT, new ClientInteriorAttachment(synced));
     }
 
     private static float getAveragedLeakiness(Level level, Interior interior)
@@ -316,12 +325,7 @@ public class InteriorManager
         {
             if (!entry.getValue().isValid())
             {
-                toRemove.add(entry.getKey());
-                for (Player player : getPLayersInBox(level, entry.getValue().boundingBox()))
-                {
-                    player.displayClientMessage(Component.translatable("thermia.interior.chatRemove").withStyle(ChatFormatting.DARK_RED), true);
-                }
-                continue;
+                interiorStasis.put(entry.getValue().homePos(), level.getServer().getTickCount());
             }
 
             long interiorId = entry.getKey().asLong();
@@ -338,7 +342,6 @@ public class InteriorManager
 
                 float volume = interior.internalAirBlocks().size();
                 float sourcePull = calcSourcePull(level, interior, internalTemperature) / volume;
-//                sourcePull +=
 
                 float leakiness = Math.max(getAveragedLeakiness(level, interior), 0.01f);
                 float externalPull = leakiness * (externalTemperature - internalTemperature);
@@ -356,17 +359,35 @@ public class InteriorManager
             }
         }
 
-        toRemove.forEach(interiors::remove);
-        if (!toRemove.isEmpty() && ServerConfig.ENABLE_DEBUG.get()) updateSyncedInterior(level, interiors);
+        if (!interiorStasis.isEmpty())
+        {
+            for (Map.Entry<BlockPos, Integer> entry : interiorStasis.entrySet())
+            {
+                int serverTicks = level.getServer().getTickCount();
+                int interiorTicks = serverTicks + (entry.getValue()) + (SECONDS_TO_KEEP * 20);
+
+                if (interiorTicks == serverTicks)
+                {
+                    interiors.remove(entry.getKey());
+                }
+            }
+            updateSyncedInterior(level, interiors);
+        }
 
         level.setData(ThermiaAttachments.INTERIOR_ATTACHMENT, new InteriorAttachment(interiors));
 
-        if (tempUpdated && ServerConfig.ENABLE_DEBUG.get())
+        if (tempUpdated)
         {
-            Map<BlockPos, SyncedInteriorData> temps = new HashMap<>();
+            Map<BlockPos, ClientInterior> clientsInteriors = new HashMap<>();
+            Map<BlockPos, ClientInterior> oldClientsInteriors = level.getData(ThermiaAttachments.CLIENT_INTERIOR_ATTACHMENT).activeClientInteriors();
 
-            interiors.forEach((pos, i) -> temps.put(pos, new SyncedInteriorData(i.internalHumidity(), i.externalHumidity(), i.internalTemperature(), i.externalTemperature(), i.porosity(), i.externalPull(), i.sourcePull(), i.volume())));
-            level.setData(ThermiaAttachments.SYNCED_INTERIOR_TEMPERATURE_ATTACHMENT, new SyncedInteriorTemperatureAttachment(temps));
+            for (Interior i : interiors.values())
+            {
+                ClientInterior old = oldClientsInteriors.get(i.homePos());
+                clientsInteriors.put(i.homePos(), old != null ? new ClientInterior(old.homePos(), old.boundingBox(), old.isValid(), old.origin(), old.sizeX(), old.sizeY(), old.sizeZ(), old.membership(), i.internalHumidity(), i.externalHumidity(), i.internalTemperature(), i.externalTemperature(), i.porosity(), i.externalPull(), i.sourcePull(), ClientInterior.InteriorCounts.from(i)) : ClientInterior.from(i));
+            }
+
+            level.setData(ThermiaAttachments.CLIENT_INTERIOR_ATTACHMENT, new ClientInteriorAttachment(clientsInteriors));
         }
     }
 

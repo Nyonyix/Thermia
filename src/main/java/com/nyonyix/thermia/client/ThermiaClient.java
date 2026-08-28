@@ -15,16 +15,14 @@ import com.nyonyix.thermia.client.renderer.thick.ThermiaThickBootsRenderer;
 import com.nyonyix.thermia.client.renderer.thick.ThermiaThickHeadRenderer;
 import com.nyonyix.thermia.client.renderer.thick.ThermiaThickLegsRenderer;
 import com.nyonyix.thermia.client.renderer.thick.ThermiaThickTorsoRenderer;
-import com.nyonyix.thermia.data.attachment.SyncedInteriorAttachment;
-import com.nyonyix.thermia.data.attachment.SyncedInteriorTemperatureAttachment;
+import com.nyonyix.thermia.data.attachment.ClientInteriorAttachment;
 import com.nyonyix.thermia.data.manager.ItemInventoryManager;
 import com.nyonyix.thermia.data.records.KoppenClimateHumidity;
 import com.nyonyix.thermia.data.attachment.EntityTemperature;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
 import com.nyonyix.thermia.data.datamap.ItemInsulationDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
-import com.nyonyix.thermia.data.records.SyncedInterior;
-import com.nyonyix.thermia.data.records.SyncedInteriorData;
+import com.nyonyix.thermia.data.records.ClientInterior;
 import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
 import com.nyonyix.thermia.item.ThermiaItems;
 import com.nyonyix.thermia.item.cloth.ThermiaClothWearableMaterial;
@@ -32,7 +30,6 @@ import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
 import com.nyonyix.thermia.item.wideBrimHat.ThermiaWideBrimHatMaterial;
 import com.nyonyix.thermia.models.*;
 import com.nyonyix.thermia.util.EnvironmentHelpers;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.dries007.tfc.client.ClimateRenderCache;
 import net.dries007.tfc.client.overworld.SolarCalculator;
 import net.dries007.tfc.util.climate.KoppenClimateClassification;
@@ -52,9 +49,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -72,6 +66,7 @@ import org.slf4j.Logger;
 import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
 
 import java.util.List;
+import java.util.Map;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = Thermia.MODID, dist = Dist.CLIENT)
@@ -308,26 +303,21 @@ public class ThermiaClient {
                 text.add(String.format("Wet Bulb: %.2f, Globe: %.2f, WetBulbGlobe(WBGT): %.2f", EnvironmentHelpers.calcWetBulbTemperature(climate.getInstantTemperature(), playerData.environmentHumidity()), EnvironmentHelpers.calcGlobeTemperature(climate.getInstantTemperature(), solarRadiation), EnvironmentHelpers.calcWetBulbGlobeTemperature(level, pos, climate.getInstantTemperature(), playerData.environmentHumidity(), solarRadiation)));
                 text.add(String.format("Cold: %.2f, Mild: %.2f, Effective: %.2f", EnvironmentHelpers.calcForCold(climate.getInstantTemperature(), windSpeedWithProtection, solarRadiationWithProtection, playerData.environmentHumidity()),  EnvironmentHelpers.calcForMild(climate.getInstantTemperature(), windSpeedWithProtection, solarRadiationWithProtection, playerData.environmentHumidity()), effectiveTemp));
 
-                SyncedInteriorAttachment interiorAttachment = level.getData(ThermiaAttachments.SYNCED_INTERIOR_ATTACHMENT);
-                SyncedInterior interior = interiorAttachment.activeInteriors().values().stream().filter(i -> i.isValid() && i.boundingBox().contains(clientPlayer.position())).findFirst().orElse(null);
-                if (interior == null) return;
-
-                SyncedInteriorTemperatureAttachment interiorTemps = level.getData(ThermiaAttachments.SYNCED_INTERIOR_TEMPERATURE_ATTACHMENT);
-                if (interiorTemps.activeInteriorTemperatures().isEmpty()) return;
-
-                SyncedInteriorData interiorTempData = interiorTemps.activeInteriorTemperatures().get(interior.homePos());
+                ClientInteriorAttachment clientInteriorAttachment = level.getData(ThermiaAttachments.CLIENT_INTERIOR_ATTACHMENT);
+                ClientInterior clientInterior = clientInteriorAttachment.activeClientInteriors().values().stream().filter(i -> i.isValid() && i.boundingBox().contains(clientPlayer.position())).findFirst().orElse(null);
+                if (clientInterior == null) return;
 
                 text.add(colourGreen + "Interior: ");
-                if (interiorTempData != null)
+                if (clientInterior != null)
                 {
-                    text.add("Home Pos: " + interior.homePos().toShortString());
-                    text.add(String.format("Temperature: Internal: %.2f, External: %.2f", interiorTempData.internalTemperature(), interiorTempData.externalTemperature()));
-                    text.add(String.format("Leakiness: %.10f", interiorTempData.porosity()));
-                    text.add(String.format("Pull: External: %.2f, Source: %.2f", interiorTempData.externalPull(), interiorTempData.sourcePull()));
-                    text.add(String.format("Volume: %.2f", interiorTempData.volume()));
-                    text.add(String.format("Edge Blocks: %d", interior.interiorBlocks().edgeBlocks.size()));
-                    text.add(String.format("Sources: Blocks: %d, Fluids: %d", interior.interiorBlocks().heatSourceBlocks.size(), interior.interiorBlocks().heatSourceFluids.size()));
-                    text.add(String.format("Sinks: Blocks: %d, Fluids: %d", interior.interiorBlocks().heatSinkBlocks.size(), interior.interiorBlocks().heatSinkFluids.size()));
+                    text.add("Home Pos: " + clientInterior.homePos().toShortString());
+                    text.add(String.format("Temperature: Internal: %.2f, External: %.2f", clientInterior.internalTemperature(), clientInterior.externalTemperature()));
+                    text.add(String.format("Leakiness: %.10f", clientInterior.porosity()));
+                    text.add(String.format("Pull: External: %.2f, Source: %.2f", clientInterior.externalPull(), clientInterior.sourcePull()));
+                    text.add(String.format("Volume: %d", clientInterior.counts().volume()));
+                    text.add(String.format("Area (Edge Blocks): %d", clientInterior.counts().area()));
+                    text.add(String.format("Sources: Blocks: %d, Fluids: %d", clientInterior.counts().sourceBlocks(), clientInterior.counts().sourceFluids()));
+                    text.add(String.format("Sinks: Blocks: %d, Fluids: %d", clientInterior.counts().sinkBlocks(), clientInterior.counts().sinkFluids()));
                 }
             }
         }
@@ -361,47 +351,27 @@ public class ThermiaClient {
             if (!sunOcclusionPos.equals(BlockPos.ZERO)) renderDebugOcclusionLine(poseStack, bufferSource, cameraPos, entityPos, Vec3.atCenterOf(sunOcclusionPos), "sun");
         }
 
-        renderDebugInterior(poseStack, bufferSource, cameraPos);
+        renderInteriorBB(poseStack, bufferSource, cameraPos);
 
         bufferSource.endBatch();
     }
 
-    private static void renderDebugInterior(PoseStack poseStack, MultiBufferSource bufferSource, Vec3 cameraPos)
+    private static void renderInteriorBB(PoseStack poseStack, MultiBufferSource bufferSource, Vec3  camera)
     {
         Level level = Minecraft.getInstance().level;
         if (level == null) return;
 
-        SyncedInteriorAttachment data = level.getData(ThermiaAttachments.SYNCED_INTERIOR_ATTACHMENT);
-        if (data.activeInteriors().isEmpty()) return;
+        Map<BlockPos, ClientInterior> activeInteriors= level.getData(ThermiaAttachments.CLIENT_INTERIOR_ATTACHMENT).activeClientInteriors();
+        if (activeInteriors.isEmpty()) return;
 
         poseStack.pushPose();
-        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+        poseStack.translate(-camera.x, -camera.y, -camera.z);
 
         VertexConsumer buffer = bufferSource.getBuffer(RenderType.LINES);
 
-        for (SyncedInterior interior : data.activeInteriors().values())
+        for (ClientInterior interior : activeInteriors.values())
         {
-            if (!interior.isValid()) continue;
-
             LevelRenderer.renderLineBox(poseStack, buffer, interior.boundingBox(), 0.4f, 0.8f, 1.0f, 0.8f);
-
-            for (Long2ObjectMap.Entry<Block> entry : interior.interiorBlocks().edgeBlocks.long2ObjectEntrySet())
-            {
-                BlockPos pos = BlockPos.of(entry.getLongKey());
-                LevelRenderer.renderLineBox(poseStack, buffer, new AABB(pos), 0.9f, 0.9f, 0.2f, 0.15f);
-            }
-
-            for (Long2ObjectMap.Entry<Block> entry : interior.interiorBlocks().heatSourceBlocks.long2ObjectEntrySet())
-            {
-                BlockPos pos = BlockPos.of(entry.getLongKey());
-                LevelRenderer.renderLineBox(poseStack, buffer, new AABB(pos), 1f, 0f, 0f, 0.75f);
-            }
-
-            for (Long2ObjectMap.Entry<Fluid> entry : interior.interiorBlocks().heatSourceFluids.long2ObjectEntrySet())
-            {
-                BlockPos pos = BlockPos.of(entry.getLongKey());
-                LevelRenderer.renderLineBox(poseStack, buffer, new AABB(pos), 1f, 0f, 0f, 0.75f);
-            }
         }
 
         poseStack.popPose();

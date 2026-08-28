@@ -12,28 +12,42 @@ and temperature-seeking AI behaviours for TFC animals.
 ```
 com.nyonyix.thermia/
   Thermia.java                  Main mod class
-  ai/                           Mob brain behaviours (seek comfort, stay at comfort)
+  ThermiaCommands.java          Engine-registered commands
+  ServerConfig.java             Server-side config
+  ClientConfig.java             Client-side config
+  ai/behaviours/                Mob brain behaviours (seek comfort, stay at comfort)
+  ai/memories/                  Brain memory modules
+  ai/sensors/                   Sensory brain sensors (temperature, comfort decision)
   api/                          Public API for other mods
-  client/                       HUD widgets, F3 debug overlay, effects
+  client/                       Client setup, HUD widgets (ThermiaGui), F3 debug overlay
+  client/renderer/              Cloth/thick/cape/wide-brim-hat entity renderers
   compat/jade/                  Jade/Hwyla entity temperature tooltip
-  data/                         Records, attachments, data maps, damage types
-  data/datagen/                 Data generation providers
+  compat/create/                Create contraption integration
+  compat/powergrid/             PowerGrid compat
+  data/                         Damage types, tags, pelt loot modifier
+  data/attachment/              Attachments (temperature, interior, humidity, thermometer)
+  data/climate/                 Climate model records (ThermiaClimateModels)
+  data/datagen/                 Data generation providers (damage/datamap/lang/loot/model/recipe/tags)
   data/datamap/                 Block/entity/fluid/item data map definitions
-  data/manager/                 Core logic — temperature, interiors, inventory
+  data/manager/                 Core logic — temperature, interiors, inventory, humidity
+  data/records/                 Records (Interior, BlockSearchResult, SolarShadeResult, etc.)
   effect/                       Mob effects (hyperthermia, hypothermia)
+  item/                         Pelt and cloth/thick/cape/wide-brim-hat items & materials
   mixin/                        Mixins into TFC classes
+  models/                       Entity models for cloth/thick/hat wearables
   server/                       Server-side event handler
   util/                         Block search, interior scanner, environment helpers
 ```
 
 ## Agent Behaviour
 
-**NEVER modify code.** The user writes all code themselves. The agent's role is:
+**NEVER modify code.** The user writes and builds all code themselves. The agent's role is:
 
-- **Sanity check** — review code for bugs, logic errors, edge cases
+- **Research** — browse TFC/NeoForge source, javadoc, and API surfaces to answer questions or confirm what a method actually does
 - **Bounce ideas** — discuss design tradeoffs, suggest approaches, weigh options
-- **Verify** — trace through logic, check math, confirm things work as intended
+- **Verify hunches** — check whether a proposed approach fits the existing code / Java quirks before the user commits to writing it
 - **Explain** — clarify how existing systems work when asked
+- **Sanity check** — when the user hands it code, review for bugs, logic errors, edge cases
 
 Treat this like a collaborative code review, not a pair-programming session.
 The user drives; the agent navigates.

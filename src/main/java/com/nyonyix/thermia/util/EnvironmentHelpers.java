@@ -135,37 +135,28 @@ public class EnvironmentHelpers
 
     public static Thermometer getThermometer(Level level, BlockPos pos)
     {
-        if (ThermiaInteriorAPI.isInInterior(level, pos))
-        {
-            Interior interior = ThermiaInteriorAPI.getInterior(level, pos);
+        ClimateModel model = Climate.get(level);
+        ICalendar calendar = Calendars.get(level);
 
-            return new Thermometer(interior.internalTemperature(), interior.externalHumidity());
-        }
-        else
-        {
-            ClimateModel model = Climate.get(level);
-            ICalendar calendar = Calendars.get(level);
+        float baseTemp = model.getInstantTemperature(level, pos);
+        float humidity = newEnvironmentHumidity(level, pos);
 
-            float baseTemp = model.getInstantTemperature(level, pos);
-            float humidity = newEnvironmentHumidity(level, pos);
+        float fracYear = calendar.getCalendarFractionOfYear();
+        float fracDay = calendar.getCalendarFractionOfDay();
+        float hemiScale = model.hemisphereScale();
 
-            float fracYear = calendar.getCalendarFractionOfYear();
-            float fracDay = calendar.getCalendarFractionOfDay();
-            float hemiScale = model.hemisphereScale();
+        boolean isRaining = WeatherHelpers.isPrecipitating(model.getRain(calendar.getCalendarTicks()), model.getInstantRainfall(level, pos)) && baseTemp > 0f;
+        boolean canSeeSky = level.canSeeSky(pos);
 
-            boolean isRaining = WeatherHelpers.isPrecipitating(model.getRain(calendar.getCalendarTicks()), model.getInstantRainfall(level, pos)) && baseTemp > 0f;
-            boolean canSeeSky = level.canSeeSky(pos);
+        float wetness = isRaining && canSeeSky ? 1.0f : 0f;
 
-            float wetness = isRaining && canSeeSky ? 1.0f : 0f;
+        SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemiScale, fracYear, fracDay);
+        SolarShadeResult shade = BlockSearch.getSolarShade(level, pos, sunPos.zenith(), sunPos.azimuth());
+        WindOcclusionResult windOcclusion = BlockSearch.getWindOcclusion(level, pos);
 
-            SkyPos sunPos = SolarCalculator.getSunPosition(pos.getZ(), hemiScale, fracYear, fracDay);
-            SolarShadeResult shade = BlockSearch.getSolarShade(level, pos, sunPos.zenith(), sunPos.azimuth());
-            WindOcclusionResult windOcclusion = BlockSearch.getWindOcclusion(level, pos);
+        float effTemp = calcEffectiveTemperature(level, pos, baseTemp, humidity, shade.shade(), wetness, windOcclusion.occlusionMultiplier(), 0f, 0f);
 
-            float effTemp = calcEffectiveTemperature(level, pos, baseTemp, humidity, shade.shade(), wetness, windOcclusion.occlusionMultiplier(), 0f, 0f);
-
-            return new Thermometer(effTemp, humidity);
-        }
+        return new Thermometer(effTemp, humidity);
     }
 
     // Wind

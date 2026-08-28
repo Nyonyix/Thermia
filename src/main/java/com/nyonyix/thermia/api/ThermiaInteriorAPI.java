@@ -1,5 +1,6 @@
 package com.nyonyix.thermia.api;
 
+import com.nyonyix.thermia.data.records.ClientInterior;
 import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.attachment.InteriorAttachment;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
@@ -44,6 +45,23 @@ public class ThermiaInteriorAPI
         return Interior.createDefault();
     }
 
+    public static ClientInterior getClientInteriorByPos(Level level, BlockPos pos)
+    {
+        if (!level.hasData(ThermiaAttachments.CLIENT_INTERIOR_ATTACHMENT)) return ClientInterior.createDefault();
+
+        for (ClientInterior interior : level.getData(ThermiaAttachments.CLIENT_INTERIOR_ATTACHMENT).activeClientInteriors().values())
+        {
+            if (!interior.isValid()) continue;
+
+            if (interior.boundingBox().contains(Vec3.atCenterOf(pos)))
+            {
+                if (interior.contains(pos)) return interior;
+            }
+        }
+
+        return ClientInterior.createDefault();
+    }
+
     public static Interior getInterior(Level level, BlockPos homePos)
     {
         if (!level.hasData(ThermiaAttachments.INTERIOR_ATTACHMENT)) return Interior.createDefault();
@@ -80,5 +98,17 @@ public class ThermiaInteriorAPI
         interiors.put(homePos, interior);
 
         level.setData(ThermiaAttachments.INTERIOR_ATTACHMENT, new InteriorAttachment(interiors));
+    }
+
+    public static float getInteriorTemperature(Level level, BlockPos pos)
+    {
+        if (level.isClientSide())
+        {
+            ClientInterior interior = getClientInteriorByPos(level, pos);
+            return interior.isValid() ? interior.internalTemperature() : Float.NaN;
+        }
+
+        Interior interior = getInteriorByPos(level, pos);
+        return interior.isValid() ? interior.internalTemperature() : Float.NaN;
     }
 }

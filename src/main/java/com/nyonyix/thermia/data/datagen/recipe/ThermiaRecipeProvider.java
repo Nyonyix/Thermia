@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.item.cape.ThermiaCapeAnimal;
+import com.nyonyix.thermia.item.cloth.ThermiaClothWearableMaterial;
 import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
 import net.dries007.tfc.TerraFirmaCraft;
 import net.minecraft.core.HolderLookup;
@@ -166,6 +167,55 @@ public class ThermiaRecipeProvider implements DataProvider
             JsonObject recipe = buildAdvanced(pattern, itemKey, damageCraftingRemainder(), "thermia:" + name + "_pelt_cape", 1, 0, 0);
 
             output.accept(name + "_cape", recipe);
+        }
+    }
+
+    private void clothRecipes(BiConsumer<String, JsonObject> output)
+    {
+        List<List<String>> hatPattern = List.of(
+                List.of("C", "S", "C"),
+                List.of("C", "B", "C")
+        );
+
+        List<List<String>> shirtPattern = List.of(
+                List.of("C", "B", "C"),
+                List.of("S", "C", "S"),
+                List.of("C", "C", "C")
+        );
+
+        List<List<String>> pantsPattern = List.of(
+                List.of("C", "C", "C"),
+                List.of("S", "B", "S"),
+                List.of("C", " ", "C")
+        );
+
+        List<List<String>> shoesPattern = List.of(
+                List.of("C", "B", "B"),
+                List.of("C", "S", "C")
+        );
+
+        buildClothRecipe(output, "hat", hatPattern, 1, 1);
+        buildClothRecipe(output, "shirt", shirtPattern, 0, 1);
+        buildClothRecipe(output, "pants", pantsPattern, 1, 1);
+        buildClothRecipe(output, "shoes", shoesPattern, 0, 1);
+    }
+
+    private void buildClothRecipe(BiConsumer<String, JsonObject> output, String item, List<List<String>> pattern, int row, int col)
+    {
+        Map<String, String> baseKey = new HashMap<>();
+        baseKey.put("S", "#c:strings");
+        baseKey.put("B", "tfc:bone_needle");
+
+        for (ThermiaClothWearableMaterial material : ThermiaClothWearableMaterial.values())
+        {
+            String name = material.name().toLowerCase();
+            Map<String, String> itemKey = new HashMap<>(baseKey);
+
+            itemKey.put("C", "tfc:" + name + "_cloth");
+
+            JsonObject recipe = buildAdvanced(pattern, itemKey, damageCraftingRemainder(), "thermia:" + name + "_" + item, 1, row, col);
+
+            output.accept(name + "_cloth_" + item, recipe);
         }
     }
 
@@ -360,6 +410,7 @@ public class ThermiaRecipeProvider implements DataProvider
             buildThickRecipes((name, json) -> futures.add(saveRecipe(output, "crafting", name, json)));
             buildWideHatRecipes((name, json) -> futures.add(saveRecipe(output, "crafting", name, json)));
             buildPeltRecipes((name, json) -> futures.add(saveRecipe(output, "crafting", name, json)));
+            clothRecipes((name, json) -> futures.add(saveRecipe(output, "crafting", name, json)));
 
             return CompletableFuture.allOf((futures.toArray(CompletableFuture[]::new)));
         });

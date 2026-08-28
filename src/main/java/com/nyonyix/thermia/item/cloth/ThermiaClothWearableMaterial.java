@@ -3,7 +3,7 @@ package com.nyonyix.thermia.item.cloth;
 public enum ThermiaClothWearableMaterial
 {
     BURLAP(0, false),
-    WOOLEN(0xFFFFFFFF, true),
+    WOOL(0xFFFFFFFF, true),
     SILK(0xFFF8EA65, true);
 
     private final int defaultColour;
