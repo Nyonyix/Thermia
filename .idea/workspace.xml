@@ -4,13 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Shelved interior stasis system&#10;Fixed shoes recipe">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Added block seal to greenhouse blocks&#10;Replaced various Level.canSeeSky calls with EnvironmentHelpers.isExposedToSky">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockSealDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockSealDataMapProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/manager/EntityTemperatureManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/AiHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/AiHelpers.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/BlockSearch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/BlockSearch.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/util/EnvironmentHelpers.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ServerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/ServerConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockTemperatureDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockTemperatureDataMapProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/EntityTemperatureDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/EntityTemperatureDataMapProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockSealDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockSealDataMap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockTemperatureDataMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datamap/BlockTemperatureDataMap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/Rule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/records/Rule.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,7 +93,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Gradle.Build Thermia.executor": "Run",
-    "Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor": "Run",
+    "Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor": "Debug",
     "Gradle.Thermia [assemble].executor": "Run",
     "Gradle.Thermia [runClient # Run client].executor": "Run",
     "Gradle.Thermia [runClient].executor": "Debug",
@@ -614,7 +615,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Reorganised files&#10;Hat now works" />
     <MESSAGE value="Cloth items&#10;Fixed torso rendering" />
     <MESSAGE value="Cloth items&#10;Fixed torso rendering&#10;I'm dying on dyeables" />
     <MESSAGE value="Fixed item render" />
@@ -639,6 +639,7 @@
     <MESSAGE value="Finished most interior rework, Now uses wind and sun." />
     <MESSAGE value="Fixed cloth recipes&#10;Interior TFC temperature integration&#10;Reworked interior clinet sync&#10;First work on interior modify stasis system" />
     <MESSAGE value="Shelved interior stasis system&#10;Fixed shoes recipe" />
-    <option name="LAST_COMMIT_MESSAGE" value="Shelved interior stasis system&#10;Fixed shoes recipe" />
+    <MESSAGE value="Added block seal to greenhouse blocks&#10;Replaced various Level.canSeeSky calls with EnvironmentHelpers.isExposedToSky" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added block seal to greenhouse blocks&#10;Replaced various Level.canSeeSky calls with EnvironmentHelpers.isExposedToSky" />
   </component>
 </project>

@@ -1,7 +1,6 @@
 package com.nyonyix.thermia.data.datamap;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.nyonyix.thermia.data.records.Rule;
 import io.netty.buffer.ByteBuf;
@@ -11,7 +10,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 
 import java.util.*;
-import java.util.concurrent.locks.Condition;
 
 public record BlockSealDataMap(List<Rule> statePorosity, float defaultPorosity)
 {
@@ -52,7 +50,7 @@ public record BlockSealDataMap(List<Rule> statePorosity, float defaultPorosity)
 
         for (Rule rule : this.statePorosity)
         {
-            float entryPorosity = rule.blockSeal();
+            float entryPorosity = rule.value();
             List<String> conditions = rule.when();
 
             if (!conditions.isEmpty() && stateKeys.containsAll(conditions))
