@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Retrofit BlockTemperatureDataMap with Rule&#10;Updated firmalife oven support">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Changed player temp limits">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/EntityTemperatureDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/EntityTemperatureDataMapProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/clothing.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/clothing.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -610,7 +611,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cloth items&#10;Fixed torso rendering&#10;I'm dying on dyeables" />
     <MESSAGE value="Fixed item render" />
     <MESSAGE value="Cloth mostly done" />
     <MESSAGE value="Fix wool shirt item texture" />
@@ -635,6 +635,7 @@
     <MESSAGE value="Shelved interior stasis system&#10;Fixed shoes recipe" />
     <MESSAGE value="Added block seal to greenhouse blocks&#10;Replaced various Level.canSeeSky calls with EnvironmentHelpers.isExposedToSky" />
     <MESSAGE value="Retrofit BlockTemperatureDataMap with Rule&#10;Updated firmalife oven support" />
-    <option name="LAST_COMMIT_MESSAGE" value="Retrofit BlockTemperatureDataMap with Rule&#10;Updated firmalife oven support" />
+    <MESSAGE value="Changed player temp limits" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed player temp limits" />
   </component>
 </project>

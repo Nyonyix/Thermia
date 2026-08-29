@@ -24,7 +24,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "$(l:tfc:thermia/mechanics#wind)$(l)Find Wind$()$()$(br)Wind enhances evaporative cooling dramatically. Exposed hilltops and open areas have stronger winds.$(br2)$(l)Avoid Heat Sources$()$(br)Stay away from forges, fires, and lava. Even proximity radiates significant heat. If you must work with heat, do so quickly or palce sources behind walls."
+            "text": "$(l:tfc:thermia/mechanics#wind)$(l)Find Wind$()$()$(br)Wind enhances evaporative cooling dramatically. Exposed hilltops and open areas have stronger winds.$(br2)$(l)Avoid Heat Sources$()$(br)Stay away from forges, fires, and lava. Even proximity radiates significant heat. If you must work with heat, do so quickly or place sources behind walls."
         },
         {
             "type": "patchouli:text",

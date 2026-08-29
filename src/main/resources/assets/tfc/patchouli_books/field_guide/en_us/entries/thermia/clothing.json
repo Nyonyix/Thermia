@@ -18,7 +18,7 @@
     {
       "type": "patchouli:text",
       "anchor": "clothing_attributes",
-      "text": "$(li)Conduction - Conduction does double duty, First and foremost it help protect against contact sources like cold blocks. It also helps dampen the pull of environmental temperature. See: $(l:tfc:thermia/mechanics#homeostasis)Homeostasis$()$(li)Rain - Rain protection is fairly simple, It's a simple limit to how wet you can get while in the rain.",
+      "text": "$(li)Conduction - Conduction is special, It helps dampen the pull of environmental temperature. See: $(l:tfc:thermia/mechanics#homeostasis)Homeostasis$()$(li)Rain - Rain protection is fairly simple, It's a simple limit to how wet you can get while in the rain.",
       "title": "The Attributes"
     },
     {
@@ -29,13 +29,13 @@
     {
       "type": "patchouli:text",
       "anchor": "clothing_conduction",
-      "text": "Conduction has no weight system and is special. Handles 2 systems and is used within the inventory. Instead os weights, Conduction is averaged against the 4 armour slots of the player or 36 slots of the inventory to determine the insulation the entity receives. If you stack insulating items in an inventory, The number of stacks is used not the number within the stack.",
+      "text": "Conduction has no weight system. Handles 2 systems and is used within the inventory. Instead of weights, Conduction is averaged against the 4 armour slots of the player or 36 slots of the inventory to determine the insulation the entity receives. If you stack insulating items in an inventory, The number of stacks is used not the number within the stack.",
       "title": "Conduction"
     },
     {
       "type": "patchouli:text",
       "anchor": "clothing_weights",
-      "text": "$(li)Radiation$(br)Head: 35% | Body: 50% | Legs: 10% | Feet: 5%$(li)Convection$(br)Head: 15% | Body: 50% | Legs: 25% | Feet: 10%$(li)Convection$(br)Head: 40% | Body: 40% | Legs: 15% | Feet: 5%$(br2)Capes do not have weight",
+      "text": "$(li)Radiation$(br)Head: 35% | Body: 50% | Legs: 10% | Feet: 5%$(li)Convection$(br)Head: 15% | Body: 50% | Legs: 25% | Feet: 10%$(li)Rain$(br)Head: 40% | Body: 40% | Legs: 15% | Feet: 5%$(br2)Capes do not have weight",
       "title": "Weights"
     }
   ],

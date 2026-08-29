@@ -9,7 +9,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Configured entites have a $(l)natural temperature range$(). Step outside this range, and you'll begin experiencing the debilitating effects of $(l:tfc:thermia/heat)hyperthermia (overheating)$() or $(l:tfc:thermia/cold)hypothermia (freezing)$().$(br2)Your environment constantly influences your body temperature through factors like $(l:tfc:thermia/mechanics#solar_radiation)solar radiation$(), $(l:tfc:thermia/mechanics#wind)wind$(), $(l:tfc:thermia/mechanics#humidity)humidity$(), $(l:tfc:thermia/mechanics#wetness)wetness$(), nearby blocks, $(l:tfc:thermia/clothing)and even your inventory$()."
+            "text": "Configured entities have a $(l)natural temperature range$(). Step outside this range, and you'll begin experiencing the debilitating effects of $(l:tfc:thermia/heat)hyperthermia (overheating)$() or $(l:tfc:thermia/cold)hypothermia (freezing)$().$(br2)Your environment constantly influences your body temperature through factors like $(l:tfc:thermia/mechanics#solar_radiation)solar radiation$(), $(l:tfc:thermia/mechanics#wind)wind$(), $(l:tfc:thermia/mechanics#humidity)humidity$(), $(l:tfc:thermia/mechanics#wetness)wetness$(), nearby blocks, $(l:tfc:thermia/clothing)and even your inventory$()."
         },
         {
             "type": "patchouli:text",
