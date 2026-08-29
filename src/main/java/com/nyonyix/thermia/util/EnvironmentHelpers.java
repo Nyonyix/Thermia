@@ -146,7 +146,7 @@ public class EnvironmentHelpers
         float hemiScale = model.hemisphereScale();
 
         boolean isRaining = WeatherHelpers.isPrecipitating(model.getRain(calendar.getCalendarTicks()), model.getInstantRainfall(level, pos)) && baseTemp > 0f;
-        boolean canSeeSky = level.canSeeSky(pos);
+        boolean canSeeSky = isExposedToSky(level, pos);
 
         float wetness = isRaining && canSeeSky ? 1.0f : 0f;
 

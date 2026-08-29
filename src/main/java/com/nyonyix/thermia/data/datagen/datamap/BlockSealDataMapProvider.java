@@ -1,5 +1,6 @@
 package com.nyonyix.thermia.data.datagen.datamap;
 
+import com.eerussianguy.firmalife.common.FLTags;
 import com.eerussianguy.firmalife.common.blocks.FLBlocks;
 import com.nyonyix.thermia.data.datamap.BlockSealDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
@@ -39,41 +40,47 @@ public class BlockSealDataMapProvider extends DataMapProvider
 
         if (ModList.get().isLoaded("firmalife"))
         {
+            ModLoadedCondition firmaCondition = new ModLoadedCondition("firmalife");
+
             for (TFCBlocks.Id<Block> ID : FLBlocks.CURED_OVEN_BOTTOM.values())
             {
                 Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(ID.get());
-                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),0.80f), false, new ModLoadedCondition("firmalife"));
+                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),0.80f), false, firmaCondition);
             }
 
             for (TFCBlocks.Id<Block> ID : FLBlocks.INSULATED_OVEN_BOTTOM.values())
             {
                 Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(ID.get());
-                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),1.0f), false, new ModLoadedCondition("firmalife"));
+                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),1.0f), false, firmaCondition);
             }
 
             for (TFCBlocks.Id<Block> ID : FLBlocks.CURED_OVEN_TOP.values())
             {
                 Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(ID.get());
-                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),0.80f), false, new ModLoadedCondition("firmalife"));
+                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),0.80f), false, firmaCondition);
             }
 
             for (TFCBlocks.Id<Block> ID : FLBlocks.INSULATED_OVEN_TOP.values())
             {
                 Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(ID.get());
-                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),1.0f), false, new ModLoadedCondition("firmalife"));
+                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),1.0f), false, firmaCondition);
             }
 
             for (TFCBlocks.Id<Block> ID : FLBlocks.CURED_OVEN_CHIMNEY.values())
             {
                 Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(ID.get());
-                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),1.0f), false, new ModLoadedCondition("firmalife"));
+                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),1.0f), false, firmaCondition);
             }
 
             for (TFCBlocks.Id<Block> ID : FLBlocks.CURED_OVEN_HOPPER.values())
             {
                 Holder<Block> blockHolder = BuiltInRegistries.BLOCK.wrapAsHolder(ID.get());
-                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),1.0f), false, new ModLoadedCondition("firmalife"));
+                builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP).add(blockHolder, new BlockSealDataMap(List.of(),1.0f), false, firmaCondition);
             }
+
+            builder(ThermiaDataMaps.BLOCK_POROSITY_DATA_MAP)
+                    .add(FLTags.Blocks.GREENHOUSE_PANEL_ROOFS, new BlockSealDataMap(List.of(), 1.0f), false, firmaCondition)
+                    .add(FLTags.Blocks.GREENHOUSE_PANEL_WALLS, new BlockSealDataMap(List.of(), 1.0f), false, firmaCondition);
         }
     }
 

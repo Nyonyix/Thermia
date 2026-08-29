@@ -68,7 +68,7 @@ public class AiHelpers
             if (!isWalkable(mob, pos)) continue;
 
             float windOcclusion = BlockSearch.getWindOcclusion(level, pos).occlusionMultiplier();
-            boolean canSeeSky = level.canSeeSky(pos);
+            boolean canSeeSky = EnvironmentHelpers.isExposedToSky(level, pos);
 
             if  (isWarm)
             {

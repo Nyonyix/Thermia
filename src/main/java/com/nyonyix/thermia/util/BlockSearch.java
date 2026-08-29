@@ -315,7 +315,7 @@ public class BlockSearch
         float directionX = -(float) Math.cos(direction);
         float directionZ = -(float) Math.sin(direction);
 
-        double distance = level.canSeeSky(pos) ? 6.0 : 12.0;
+        double distance = EnvironmentHelpers.isExposedToSky(level, pos) ? 6.0 : 12.0;
 
         Vec3 startVec = Vec3.atCenterOf(pos.above());
         Vec3 endVec = startVec.add(directionX * distance, 0, directionZ * distance);

@@ -134,7 +134,7 @@ public class EntityTemperatureManager
     private static EntityTemperature handleWetness(Level level, BlockPos pos, ClimateModel levelModel, ICalendar levelCalender, EntityTemperature entityData, float shade, float rainProtection)
     {
         boolean isRaining = WeatherHelpers.isPrecipitating(levelModel.getRain(levelCalender.getCalendarTicks()), levelModel.getInstantRainfall(level, pos));
-        if (isRaining && level.canSeeSky(pos) && entityData.wetness() <= 0.9)
+        if (isRaining && EnvironmentHelpers.isExposedToSky(level, pos) && entityData.wetness() <= 0.9)
         {
             if (levelModel.getInstantTemperature(level, pos) > 0.0f) entityData = entityData.withWetness((Math.min(0.5f, entityData.wetness() + 0.1f)) * (1f - Math.clamp(rainProtection, 0f, 1f)));
             else if (levelModel.getInstantTemperature(level, pos) > -5) entityData = entityData.withWetness((Math.min(0.5f, entityData.wetness() + 0.05f)) * (1f - Math.clamp(rainProtection, 0f, 1f)));
@@ -267,7 +267,7 @@ public class EntityTemperatureManager
 
         if (dataMap.isMob())
         {
-            ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), level.canSeeSky(pos) ? 1.0f: shade, entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier(), convectionProtection, radiationProtection);
+            ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), EnvironmentHelpers.isExposedToSky(level, pos) ? 1.0f: shade, entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier(), convectionProtection, radiationProtection);
         }
         else
         {
