@@ -8,6 +8,12 @@
           "text": "This entry will cover the different mechanics and minutia in thermia."
       },
       {
+        "type": "patchouli:text",
+        "anchor": "mob_ai",
+        "text": "Tamed animals keep a memory of the coldest and warmest spots they encounter that decays after 7 days keeping an active track. When the animal is too warm or cold it will start to seek out these locations in an attempt to keep warm/cool.",
+        "title": "Mob AI"
+      },
+      {
           "type": "patchouli:text",
           "anchor": "shade",
           "text": "The shade system is thermia is more complex than a simple 'is under block'. Thermia calculates the sun position and checks for obstruction, This check is only block accurate but extends up to 200 blocks away. As such, in thermia hiding under a block may not work for shade and you will have to actually hide from the sun.$(br)$(l)NOTE:$() Entities with 'isMob' only check if block is above.",

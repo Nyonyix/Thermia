@@ -28,14 +28,26 @@
       {
         "type": "patchouli:text",
         "anchor": "porosity",
-        "text": "The porosity metric can be somewhat complex and is a measure of how open or leaky a block is, For instance a half slab side on has a porosity of 0.5. It also supports block states allowing for multiple porosity values based on state such as trapdoors open or closed. All blocks that have a porosity value in the external walls are averaged and used in the overall leakiness value in the interior math.",
-        "title": "Porosity"
+        "text": "The block seal metric is a measure of how sealed or leaky a block is, For instance a half slab side on has a block seal of 0.5. It also supports block states allowing for multiple block seal values based on state such as trapdoors open or closed. This value along side wind is used to calculate how much pull the external environment has.",
+        "title": "Block Seal"
       },
       {
           "type": "patchouli:text",
           "anchor": "tfc_temps",
           "text": "Interiors will feed their temperature back into TFC, This will allow TFC and other mods to use the interior temperature for things like crops.",
           "title": "Terrafirmacraft Temperature"
+      },
+      {
+          "type": "patchouli:text",
+          "anchor": "heat_sources",
+          "text": "Just like entity heat sources, They are blocks/fluids with temperature above 0. Interiors have a realistic thermodynamics and can take a while to fully warm requiring vast energy, Remember this when building your base. The sun can also heat your interior through transparent blocks, So if you build is cold try adding large windows.",
+          "title": "Heat Sources"
+      },
+      {
+          "type": "patchouli:text",
+          "anchor": "heat_sinks",
+          "text": "Heat sinks are blocks/fluids with a temperature below 0. While a heat source pulls an interior temperature up, Sinks polls them down.",
+          "title": "Heat Sinks"
       }
   ],
   "read_by_default": true,

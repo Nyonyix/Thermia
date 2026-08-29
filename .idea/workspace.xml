@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Changed player temp limits">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Added tfc temp to interior patchouli&#10;Fixed various typos in patchouli">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/clothing.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/clothing.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -611,7 +611,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed item render" />
     <MESSAGE value="Cloth mostly done" />
     <MESSAGE value="Fix wool shirt item texture" />
     <MESSAGE value="Start of insulation rework" />
@@ -636,6 +635,7 @@
     <MESSAGE value="Added block seal to greenhouse blocks&#10;Replaced various Level.canSeeSky calls with EnvironmentHelpers.isExposedToSky" />
     <MESSAGE value="Retrofit BlockTemperatureDataMap with Rule&#10;Updated firmalife oven support" />
     <MESSAGE value="Changed player temp limits" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed player temp limits" />
+    <MESSAGE value="Added tfc temp to interior patchouli&#10;Fixed various typos in patchouli" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added tfc temp to interior patchouli&#10;Fixed various typos in patchouli" />
   </component>
 </project>
