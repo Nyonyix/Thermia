@@ -146,15 +146,15 @@ public class ItemInsulationDataMapProvider extends DataMapProvider
             {
                 case SILK ->
                 {
-                    builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.2f, 0.3f, -0.1f, 0.0f), false);
+                    builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.1f, 0.3f, -0.2f, -0.3f), false);
                 }
                 case BURLAP ->
                 {
-                    builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.1f, 0.1f, 0.05f, -0.1f), false);
+                    builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.1f, 0.2f, 0.1f, -0.3f), false);
                 }
                 case WOOL ->
                 {
-                    builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.4f, 0.4f, 0.3f, 0.2f), false);
+                    builder(ThermiaDataMaps.ITEM_INSULATION_DATA_MAP).add(entry.getValue().getKey(), new ItemInsulationDataMap(0.4f, 0.2f, 0.3f, 0.0f), false);
                 }
                 case null, default ->
                 {

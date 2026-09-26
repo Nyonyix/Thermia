@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="Added tfc temp to interior patchouli&#10;Fixed various typos in patchouli">
+    <list default="true" id="26560d2c-f1a4-4f53-a975-0a3d2ffe4983" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/interior.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assets/tfc/patchouli_books/field_guide/en_us/entries/thermia/mechanics.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockSealDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/BlockSealDataMapProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nyonyix/thermia/data/datagen/datamap/ItemInsulationDataMapProvider.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,33 +87,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.Build Thermia.executor": "Run",
-    "Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor": "Debug",
-    "Gradle.Thermia [assemble].executor": "Run",
-    "Gradle.Thermia [runClient # Run client].executor": "Run",
-    "Gradle.Thermia [runClient].executor": "Debug",
-    "Gradle.Thermia [runServer].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "1.21.1",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/nyon/Coding/Minecraft/Java/Lithic-Core",
-    "project.structure.last.edited": "Libraries",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.lookFeel"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.Build Thermia.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [:net.neoforged.devlaunch.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [runClient # Run client].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Thermia [runClient].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Thermia [runServer].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;1.21.1&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/nyon/Coding/Minecraft/Java/Lithic-Core&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Libraries&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   },
-  "keyToStringList": {
-    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
-      "TEXT"
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;TEXT&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/resources/assets/thermia/textures/gui/book" />
@@ -611,7 +612,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cloth mostly done" />
     <MESSAGE value="Fix wool shirt item texture" />
     <MESSAGE value="Start of insulation rework" />
     <MESSAGE value="Insulation Rework" />
@@ -636,6 +636,7 @@
     <MESSAGE value="Retrofit BlockTemperatureDataMap with Rule&#10;Updated firmalife oven support" />
     <MESSAGE value="Changed player temp limits" />
     <MESSAGE value="Added tfc temp to interior patchouli&#10;Fixed various typos in patchouli" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added tfc temp to interior patchouli&#10;Fixed various typos in patchouli" />
+    <MESSAGE value="Added a mob AI entry in mechanics.json&#10;Reworded porosity and added new entries to interior.json" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added a mob AI entry in mechanics.json&#10;Reworded porosity and added new entries to interior.json" />
   </component>
 </project>
