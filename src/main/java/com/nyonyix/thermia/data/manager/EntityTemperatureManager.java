@@ -2,7 +2,10 @@ package com.nyonyix.thermia.data.manager;
 
 import com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.ServerConfig;
+import com.nyonyix.thermia.api.sources.SourceContext;
+import com.nyonyix.thermia.api.sources.SourcePhase;
 import com.nyonyix.thermia.api.ThermiaInteriorAPI;
+import com.nyonyix.thermia.api.sources.ThermiaSources;
 import com.nyonyix.thermia.data.records.BlockSearchResult;
 import com.nyonyix.thermia.data.records.Interior;
 import com.nyonyix.thermia.data.records.SolarShadeResult;
@@ -247,12 +250,13 @@ public class EntityTemperatureManager
         float inventoryHeat = ItemInventoryManager.getInventoryTemperature(entity);
         float radiationProtection =  ItemInventoryManager.getInventoryRadiationProtection(entity);
         float convectionProtection = ItemInventoryManager.getInventoryConvectionProtection(entity);
+        float conductionProtection = ItemInventoryManager.getInventoryConductionProtection(entity);
 
-        float rawRadiant = entityData.blockSearchResult().getRadiance(level, entity);
-        float rawContact = entityData.blockSearchResult().getContact(level, entity, dataMap.isMob());
+//        float rawRadiant = entityData.blockSearchResult().getRadiance(level, entity);
+//        float rawContact = entityData.blockSearchResult().getContact(level, entity, dataMap.isMob());
 
-        float radiant = rawRadiant * (1f - radiationProtection);
-        float immersive = entityData.blockSearchResult().getImmersion(level, entity);
+//        float radiant = rawRadiant * (1f - radiationProtection);
+//        float immersive = entityData.blockSearchResult().getImmersion(level, entity);
 
         if (ThermiaInteriorAPI.isInInterior(level, pos.relative(Direction.UP)))
         {
@@ -278,11 +282,14 @@ public class EntityTemperatureManager
             ambientTemperature = EnvironmentHelpers.calcEffectiveTemperature(level, pos.above(), baseTemperature, entityData.environmentHumidity(), shadeResult.shade(), entityData.wetness(), entityData.windOcclusionResult().occlusionMultiplier(), convectionProtection, radiationProtection);
         }
 
-        float felt = ambientTemperature + radiant + rawContact + immersive + inventoryHeat;
+        SourceContext feltCtx = new SourceContext(entity, level, pos, entityData, dataMap, radiationProtection, convectionProtection, conductionProtection);
+        ThermiaSources.Totals feltTotals = ThermiaSources.resolve(feltCtx, SourcePhase.FELT, ServerConfig.ENABLE_DEBUG.getAsBoolean());
+
+        float felt = ambientTemperature + feltTotals.applied();
         float oldEnv = entityData.environmentTemperature();
         float newEnv = (oldEnv + felt) / 2f;
 
-        float raw = ambientTemperature + rawRadiant + rawContact + immersive + inventoryHeat;
+        float raw = ambientTemperature + feltTotals.raw();
 
         entityData = entityData.withEnvironmentTemperature(newEnv);
         entityData = entityData.withRawEnvironmentTemperature(raw);

@@ -21,6 +21,6 @@ public final class PowerGridCompat
         ThermalBehaviour thermal = BlockEntityBehaviour.get(level, pos, ThermalBehaviour.TYPE);
         if (thermal == null) return null;
 
-        return Math.max(thermal.getTemperature() - ThermalBehaviour.BASE_TEMPERATURE, 0.0f);
+        return Math.max(thermal.getTemperature() - ThermalBehaviour.STANDARD_TEMPERATURE, 0.0f);
     }
 }

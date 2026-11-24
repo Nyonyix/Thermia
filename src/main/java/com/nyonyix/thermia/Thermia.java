@@ -3,11 +3,16 @@ package com.nyonyix.thermia;
 import com.nyonyix.thermia.ai.behaviours.ThermiaActivities;
 import com.nyonyix.thermia.ai.memories.ThermiaMemoryModules;
 import com.nyonyix.thermia.ai.sensors.ThermiaSensorTypes;
+import com.nyonyix.thermia.compat.CapabilityBlockTemperatures;
+import com.nyonyix.thermia.compat.create.CreateHeatCompat;
+import com.nyonyix.thermia.compat.firmalife.FirmalifeHeatCompat;
 import com.nyonyix.thermia.data.ThermiaLoot;
 import com.nyonyix.thermia.data.attachment.ThermiaAttachments;
-import com.nyonyix.thermia.data.climate.ThermiaClimateModel;
 import com.nyonyix.thermia.data.climate.ThermiaClimateModels;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
+import com.nyonyix.thermia.registry.ThermiaRegistry;
+import com.nyonyix.thermia.registry.builtins.BlockTemperatureBuiltins;
+import com.nyonyix.thermia.registry.builtins.ThermiaSourceBuiltins;
 import com.nyonyix.thermia.effect.ThermiaEffects;
 import com.nyonyix.thermia.item.ThermiaItems;
 import com.nyonyix.thermia.item.thick.ThermiaThickMaterial;
@@ -62,5 +67,7 @@ public class Thermia {
 
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SERVER_CONFIG);
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CLIENT_CONFIG);
+
+        ThermiaRegistry.register();
     }
 }

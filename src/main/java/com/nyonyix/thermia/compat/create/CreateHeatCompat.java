@@ -1,5 +1,6 @@
 package com.nyonyix.thermia.compat.create;
 
+import com.nyonyix.thermia.api.sources.BlockTemperatures;
 import com.nyonyix.thermia.data.datamap.FluidTemperatureDataMap;
 import com.nyonyix.thermia.data.datamap.ThermiaDataMaps;
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
@@ -14,21 +15,24 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.fluids.FluidStack;
 
-import javax.annotation.Nullable;
-
 public class CreateHeatCompat
 {
     public static final String MOD_ID = "create";
     private static final boolean IS_LOADED = ModList.get().isLoaded(MOD_ID);
     private static final float MAX_BOILER_TEMPERATURE = 1500f;
 
-    @Nullable
-    public static Float resolvePipeTemperature(Level level, BlockPos pos)
+    private static float resolveBoilerTempOrNan(Level level, BlockPos pos)
     {
-        if (!IS_LOADED) return null;
+        float temp = resolveBoilerTemperature(level, pos);
+        return temp;
+    }
+
+    public static float resolvePipeTemperature(Level level, BlockPos pos)
+    {
+        if (!IS_LOADED) return Float.NaN;
 
         FluidTransportBehaviour transportBehaviour = BlockEntityBehaviour.get(level, pos, FluidTransportBehaviour.TYPE);
-        if (transportBehaviour == null) return null;
+        if (transportBehaviour == null) return Float.NaN;
 
         for (PipeConnection connection : transportBehaviour.interfaces.values())
         {
@@ -36,16 +40,15 @@ public class CreateHeatCompat
             if (stack.isEmpty()) continue;
 
             FluidTemperatureDataMap datamap = BuiltInRegistries.FLUID.wrapAsHolder(stack.getFluid()).getData(ThermiaDataMaps.FLUID_TEMPERATURE_DATA_MAP);
-            return  datamap != null ? datamap.temperature() : null;
+            return  datamap != null ? datamap.temperature() : Float.NaN;
         }
 
-        return null;
+        return Float.NaN;
     }
 
-    @Nullable
-    public static Float resolveBoilerTemperature(Level level, BlockPos pos)
+    public static float resolveBoilerTemperature(Level level, BlockPos pos)
     {
-        if (!IS_LOADED) return null;
+        if (!IS_LOADED) return Float.NaN;
 
         FluidTankBlockEntity tank = null;
         BlockEntity blockEntity = level.getBlockEntity(pos);
@@ -53,11 +56,19 @@ public class CreateHeatCompat
         if (blockEntity instanceof FluidTankBlockEntity fluidTank) tank = fluidTank;
         else if (blockEntity instanceof SteamEngineBlockEntity engine) tank = engine.getTank();
 
-        if (tank == null) return null;
+        if (tank == null) return Float.NaN;
         if (!tank.isController()) tank = tank.getControllerBE();
-        if (tank == null) return null;
-        if (tank.boiler.activeHeat <= 0) return null;
+        if (tank == null) return Float.NaN;
+        if (tank.boiler.activeHeat <= 0) return Float.NaN;
 
         return tank.boiler.activeHeat / 18f * MAX_BOILER_TEMPERATURE;
+    }
+
+    public static void register()
+    {
+        if (!IS_LOADED) return;
+
+        BlockTemperatures.register(FluidTankBlockEntity.class, (level, pos, blockEntity, dataMap) -> resolveBoilerTemperature(level, pos));
+        BlockTemperatures.register(SteamEngineBlockEntity.class, (level, pos, blockEntity, dataMap) -> resolveBoilerTemperature(level, pos));
     }
 }

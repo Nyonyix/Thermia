@@ -1,15 +1,9 @@
 package com.nyonyix.thermia.data.datamap;
 
-import com.eerussianguy.firmalife.common.blockentities.OvenLike;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.nyonyix.thermia.compat.BlockEntityFluidCompat;
-import com.nyonyix.thermia.compat.create.CreateHeatCompat;
-import com.nyonyix.thermia.compat.powergrid.PowerGridCompat;
+import com.nyonyix.thermia.api.sources.BlockTemperatures;
 import com.nyonyix.thermia.data.records.Rule;
-import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
-import net.dries007.tfc.common.blockentities.IHeatable;
-import net.dries007.tfc.common.blockentities.PitKilnBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -61,33 +55,17 @@ public record BlockTemperatureDataMap(
 
     public float resolveForState(Level level, BlockPos pos)
     {
+        BlockState state = level.getBlockState(pos);
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+
+        float registered = BlockTemperatures.resolve(level, pos, state, blockEntity, this);
+        if (!Float.isNaN(registered)) return registered;
+
         float temperature = this.temperature;
-        var blockEntity = level.getBlockEntity(pos);
-
-        if (blockEntity instanceof IHeatable heatable) return heatable.getTemperature();
-        if (blockEntity instanceof CharcoalForgeBlockEntity charcoalForge) return charcoalForge.getTemperature();
-        if (blockEntity instanceof PitKilnBlockEntity pitKiln) return pitKiln.isLit() ? this.temperature() : 0.0f;
-        if (blockEntity instanceof OvenLike oven) return oven.getTemperature();
-
-        if (blockEntity != null)
-        {
-            Float pgTemp = PowerGridCompat.resolveTemeprature(level, pos);
-            if (pgTemp != null) return pgTemp;
-
-            Float boilerTemp = CreateHeatCompat.resolveBoilerTemperature(level, pos);
-            if (boilerTemp != null) return boilerTemp;
-
-            Float pipeTemp = CreateHeatCompat.resolvePipeTemperature(level, pos);
-            if (pipeTemp != null) return pipeTemp;
-
-            Float tankTemp = BlockEntityFluidCompat.resolveTemperature(level, pos);
-            if (tankTemp != null) return tankTemp;
-        }
-
-        int matchCount = 0;
         float multiplier = 0.1f;
+        int matchCount = 0;
 
-        Set<String> stateKeys = getStateKeys(level.getBlockState(pos));
+        Set<String> stateKeys = getStateKeys(state);
 
         for (Rule rule : this.stateTemps)
         {
@@ -108,4 +86,54 @@ public record BlockTemperatureDataMap(
 
         return temperature;
     }
+
+//    public float resolveForState(Level level, BlockPos pos)
+//    {
+//        float temperature = this.temperature;
+//        var blockEntity = level.getBlockEntity(pos);
+//
+//        if (blockEntity instanceof IHeatable heatable) return heatable.getTemperature();
+//        if (blockEntity instanceof CharcoalForgeBlockEntity charcoalForge) return charcoalForge.getTemperature();
+//        if (blockEntity instanceof PitKilnBlockEntity pitKiln) return pitKiln.isLit() ? this.temperature() : 0.0f;
+//        if (blockEntity instanceof OvenLike oven) return oven.getTemperature();
+//
+//        if (blockEntity != null)
+//        {
+//            Float pgTemp = PowerGridCompat.resolveTemeprature(level, pos);
+//            if (pgTemp != null) return pgTemp;
+//
+//            Float boilerTemp = CreateHeatCompat.resolveBoilerTemperature(level, pos);
+//            if (boilerTemp != null) return boilerTemp;
+//
+//            Float pipeTemp = CreateHeatCompat.resolvePipeTemperature(level, pos);
+//            if (pipeTemp != null) return pipeTemp;
+//
+//            Float tankTemp = BlockEntityFluidCompat.resolveTemperature(level, pos);
+//            if (tankTemp != null) return tankTemp;
+//        }
+//
+//        int matchCount = 0;
+//        float multiplier = 0.1f;
+//
+//        Set<String> stateKeys = getStateKeys(level.getBlockState(pos));
+//
+//        for (Rule rule : this.stateTemps)
+//        {
+//            float ruleTemperature = rule.value();
+//            List<String> conditions = rule.when();
+//
+//            if (!conditions.isEmpty() && stateKeys.containsAll(conditions))
+//            {
+//                temperature = Math.max(temperature, ruleTemperature);
+//                matchCount++;
+//            }
+//        }
+//
+//        if (matchCount > 1)
+//        {
+//            temperature *= 1.0f + (matchCount - 1) * multiplier;
+//        }
+//
+//        return temperature;
+//    }
 }

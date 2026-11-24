@@ -3,6 +3,8 @@ package com.nyonyix.thermia.server;
 import  com.mojang.logging.LogUtils;
 import com.nyonyix.thermia.Thermia;
 import com.nyonyix.thermia.ThermiaCommands;
+import com.nyonyix.thermia.api.sources.ThermiaSources;
+import com.nyonyix.thermia.api.sources.BlockTemperatures;
 import com.nyonyix.thermia.data.climate.ThermiaClimateModel;
 import com.nyonyix.thermia.data.datagen.lang.ThermiaLanguageProvider;
 import com.nyonyix.thermia.data.ThermiaTags;
@@ -18,6 +20,7 @@ import com.nyonyix.thermia.data.manager.ChunkHumidityManager;
 import com.nyonyix.thermia.data.manager.EntityTemperatureManager;
 import com.nyonyix.thermia.data.datamap.*;
 import com.nyonyix.thermia.data.manager.InteriorManager;
+import com.nyonyix.thermia.registry.ThermiaRegistry;
 import net.dries007.tfc.util.calendar.Calendar;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.events.SelectClimateModelEvent;
@@ -136,7 +139,12 @@ public class ThermiaServer
     public static void onReload(AddReloadListenerEvent event) {event.addListener(((preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor) -> preparationBarrier.wait(null).thenRunAsync(ThermiaServer::initDataMap)));}
 
     @SubscribeEvent
-    public static void onServerStarted(ServerStartedEvent event) {initDataMap();}
+    public static void onServerStarted(ServerStartedEvent event)
+    {
+        initDataMap();
+
+        ThermiaRegistry.freeze();
+    }
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {ThermiaCommands.register(event.getDispatcher());}

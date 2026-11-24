@@ -142,6 +142,7 @@ dependencies {
     runtimeOnly "maven.modrinth:create:${create_version_id}"
 
     runtimeOnly "maven.modrinth:jei:${jei_version_id}"
+    runtimeOnly "maven.modrinth:mezzconfig:${mezz_config_version_id}"
     runtimeOnly "maven.modrinth:spark:${spark_version_id}"
     runtimeOnly "maven.modrinth:architectury-api:${architectury_version_id}"
 
